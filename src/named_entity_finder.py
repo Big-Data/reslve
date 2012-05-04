@@ -23,7 +23,7 @@ import pprint
 
 DBPEDIA_SPOTLIGHT_URI = "http://spotlight.dbpedia.org/rest/candidates?text="
 
-
+# DBPEDIA_SPOTLIGHT_URI = "http://samos.mminf.univie.ac.at:2222/rest/candidates?text="
 
 def find_named_entities(text):
     """Finds named entities in a given text and returns a dictionary of
