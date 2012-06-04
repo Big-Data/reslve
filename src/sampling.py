@@ -2,7 +2,7 @@
 Finds a sample of users that are both wikipedia editors and twitter 
 users. Writes their edited articles and tweets to file.
 '''
-from good import matching
+import matching
 import pickle
 import twitter_util
 import wiki_fetch_util
