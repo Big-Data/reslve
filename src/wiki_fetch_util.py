@@ -5,6 +5,9 @@ pieces of information and for parsing results
 import urllib2
 import xml.dom.minidom
 
+# number of most recently made edits to fetch for particular user:
+num_useredits_tofetch = 50
+
 # Queries wikipedia to retrieve 
 # various data in xml format
 hosturl = 'http://en.wikipedia.org/'
@@ -25,6 +28,55 @@ def parse_wiki_xml(wiki_xml, tag_name, attribute) :
         if not attr in attr_list:
             attr_list.append(attr)
     return attr_list
+
+''' Fetch the given number of wikipedia editors who are 
+active, ie have made a threshold number of non trivial edits. 
+Returns a mapping from editor username->edited articles.'''
+def fetch_n_active_editors(n):
+    
+    editors = {}
+    
+    # fetch the most recently edited pages on wikipedia
+    # until encounter n unique users who made those edits
+    ''' TODO this will not currently actually return n users?'''
+    recent_editors = query_n_most_recent_editors(n)
+    print str(len(recent_editors))+" recent editors fetched"
+    
+    for username in recent_editors:
+            
+        # only consider editors that have edited at least a min number of pages
+        try:
+            if not is_active_user(username, num_useredits_tofetch):
+                continue
+        except:
+            continue
+    
+        # only consider editors who have made non trivial edits
+        ucshow = '&ucshow=!minor' # ignore minor edits
+        # and for now, only include pages in default namespace 
+        # to filter out edits like file uploads or user talk
+        # see http://wiki.case.edu/api.php?action=query&meta=siteinfo&siprop=general|namespaces
+        ucnamespace = '&ucnamespace=0'
+        # ignore revert edits to fix vandalism, typo correction
+        # uctag = ! 'rv' 
+        '''TODO (rv flag in comment)??'''
+    
+        # Get editor's last j edited articles.
+        # Note this is different than last j edits because we consider
+        # multiple edits of the same article as a single contribution, 
+        # so the latter number could be bigger than the former. 
+        edits_query = 'list=usercontribs&ucuser='+username+'&uclimit='+str(num_useredits_tofetch)+ucnamespace+ucshow+'&format=xml'
+        user_edits_xml = query_wiki(edits_query)
+        edited_pages = parse_wiki_xml(user_edits_xml, 'item', 'pageid')
+        editors[username] = edited_pages
+        
+        curr_len = len(editors)
+        if curr_len%50==0:
+            print str(curr_len)+" editors fetched so far.."
+        
+    print editors
+    return editors
+    
 
 ''' Fetch the most recently edited pages on wikipedia until 
 encounter the given num of unique users who made those edits '''
