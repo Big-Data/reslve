@@ -2,7 +2,7 @@
 Finds a sample of users that are both wikipedia editors and twitter 
 users. Writes their edited articles and tweets to file.
 '''
-import matching
+import account_matching
 import pickle
 import twitter_util
 import wiki_fetch_util
@@ -26,7 +26,7 @@ def fetch_matching_tweeters():
     
     # find twitter accounts belonging to the same users
     usernames = editors.keys()
-    twitter_accounts = matching.find_twitter_matches(usernames, 1)
+    twitter_accounts = account_matching.find_twitter_matches(usernames, 1)
     print "Found "+str(len(twitter_accounts))+" matching twitter accounts"
     
     # write to file
@@ -41,4 +41,4 @@ def fetch_matching_tweeters():
 #fetch_matching_tweeters()
 
 # fetch the tweets of those twitter accounts
-twitter_util.fetch_tweets()
+# twitter_util.fetch_tweets()
