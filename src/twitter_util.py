@@ -7,6 +7,7 @@ consumer key: Bn62IlcOcgxKGYBTn17SGQ
 consumer secret: H6TwsebK36zImYUTNbUc0QHzMmHd9NbaooVMgdiw
 
 '''
+import json
 import pickle
 import simplejson
 import tweepy
@@ -59,7 +60,7 @@ def batch_userlookup(all_screennames):
         lookup_query = 'https://api.twitter.com/1/users/lookup.json?screen_name='+onehundred_list
         try :
             response = urllib2.urlopen(lookup_query).read()
-            userlookups.append(response)
+            userlookups.extend(json.loads(response))
         except Exception as e:
             print "Unexpected exception while looking up user information. "
             print e
