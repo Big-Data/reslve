@@ -26,7 +26,8 @@ DBPEDIA_SPOTLIGHT_URI = "http://spotlight.dbpedia.org/rest/candidates?text="
 # DBPEDIA_SPOTLIGHT_URI = "http://samos.mminf.univie.ac.at:2222/rest/candidates?text="
 
 WIKIPEDIA_MINER_URI = \
-    "http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/wikify?"
+    "http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/search?"
+    #"http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/wikify?"
 
 
 def find_named_entities_dbpedia(text):
@@ -59,10 +60,16 @@ def find_named_entities_dbpedia(text):
 def find_named_entities_wikipedia_miner(text):
     """Finds named entities in a given text using Wikipedia Miner"""
     
+    request_uri = WIKIPEDIA_MINER_URI + "query=" + urllib.quote(text)
+    request_uri += "&complex=true"
+    request_uri += "&responseFormat=json"
+    
+    '''
     request_uri = WIKIPEDIA_MINER_URI + "source=" + urllib.quote(text)
     request_uri += "&sourceMode=auto"
     request_uri += "&responseFormat=json"
     request_uri += "&disambiguationPolicy=loose"
+    '''
     
     request = Request(request_uri)
     
@@ -77,6 +84,21 @@ def find_named_entities_wikipedia_miner(text):
         
     result = json.loads(response.read())
     
+    named_entities = {}
+    for topic in result['labels']:
+        text = topic['text']
+        candidates = []
+        for sense in topic['senses']:
+            article_id = sense['id']
+            title = sense['title']
+            weight = sense['weight']
+            dbpedia_uri = "http://dbpedia.org/resource/" + title.replace(" ", "_")
+            candidate = {'article_id': article_id, 'title': title, 'weight': weight,
+                        'dbpedia_uri': dbpedia_uri}
+            candidates.append(candidate)
+        named_entities[text] = candidates    
+    
+    '''
     named_entities = []
     
     for topic in result['detectedTopics']:
@@ -87,6 +109,7 @@ def find_named_entities_wikipedia_miner(text):
         entity = {'article_id': article_id, 'title': title, 'weight': weight,
                         'dbpedia_uri': dbpedia_uri}
         named_entities.append(entity)
+    '''
     
     return named_entities
     
