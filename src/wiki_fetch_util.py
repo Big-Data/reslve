@@ -38,8 +38,12 @@ Returns a mapping from editor username->edited articles.'''
 def fetch_n_active_editors(n):
     
     editors = {}
+    
+    # want at least num unique editors, so will have to keep
+    # requesting earlier changes until encounter that many editors
     start = datetime.datetime.now()
     end = start - datetime.timedelta(days=2)
+    
     # fetch the most recently edited pages on wikipedia
     # until encounter n unique users who made those edits
     while len(editors) < n:
