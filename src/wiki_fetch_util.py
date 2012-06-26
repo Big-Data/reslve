@@ -158,7 +158,7 @@ def fetch_categories_of_id(res_id):
     return categories
 
 # Returns the wikipedia categories of a wikipedia page given its page title
-def fetch_categories__of_title(page_title):
+def fetch_categories_of_title(page_title):
     categories_query = 'titles='+page_title+'&prop=categories&format=xml'
     categories_xml = query_wiki(categories_query)
     categories = parse_wiki_xml(categories_xml, 'cl', 'title')
