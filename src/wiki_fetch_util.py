@@ -2,11 +2,13 @@
 Functions for querying wikipedia to get various 
 pieces of information and for parsing results
 '''
+import datetime
 import urllib2
 import xml.dom.minidom
 
 # number of most recently made edits to fetch for particular user:
 num_useredits_tofetch = 50
+min_editcount = 10
 
 # Queries wikipedia to retrieve 
 # various data in xml format
@@ -32,55 +34,66 @@ def parse_wiki_xml(wiki_xml, tag_name, attribute) :
 ''' Fetch the given number of wikipedia editors who are 
 active, ie have made a threshold number of non trivial edits. 
 Returns a mapping from editor username->edited articles.'''
+''' TODO this will not currently actually return n users?'''
 def fetch_n_active_editors(n):
     
     editors = {}
-    
+    start = datetime.datetime.now()
+    end = start - datetime.timedelta(days=2)
     # fetch the most recently edited pages on wikipedia
     # until encounter n unique users who made those edits
-    ''' TODO this will not currently actually return n users?'''
-    recent_editors = query_n_most_recent_editors(n)
-    print str(len(recent_editors))+" recent editors fetched"
-    
-    for username in recent_editors:
-            
-        # only consider editors that have edited at least a min number of pages
-        try:
-            if not is_active_user(username, num_useredits_tofetch):
-                continue
-        except:
-            continue
-    
-        # only consider editors who have made non trivial edits
-        ucshow = '&ucshow=!minor' # ignore minor edits
-        # and for now, only include pages in default namespace 
-        # to filter out edits like file uploads or user talk
-        # see http://wiki.case.edu/api.php?action=query&meta=siteinfo&siprop=general|namespaces
-        ucnamespace = '&ucnamespace=0'
-        # ignore revert edits to fix vandalism, typo correction
-        # uctag = ! 'rv' 
-        '''TODO (rv flag in comment)??'''
-    
-        # Get editor's last j edited articles.
-        # Note this is different than last j edits because we consider
-        # multiple edits of the same article as a single contribution, 
-        # so the latter number could be bigger than the former. 
-        edits_query = 'list=usercontribs&ucuser='+username+'&uclimit='+str(num_useredits_tofetch)+ucnamespace+ucshow+'&format=xml'
-        user_edits_xml = query_wiki(edits_query)
-        edited_pages = parse_wiki_xml(user_edits_xml, 'item', 'pageid')
-        editors[username] = edited_pages
+    while len(editors) < n:
         
-        curr_len = len(editors)
-        if curr_len%50==0:
-            print str(curr_len)+" editors fetched so far.."
+        recent_editors = query_recent_editors(start, end)
+        print str(len(recent_editors))+" recent editors fetched"
+        
+        for username in recent_editors:
+                
+            # only consider editors that have edited at least a min number of pages
+            try:
+                if not is_active_user(username, num_useredits_tofetch):
+                    continue
+            except:
+                continue
+        
+            # only consider editors who have made non trivial edits
+            ucshow = '&ucshow=!minor' # ignore minor edits
+            # and for now, only include pages in default namespace 
+            # to filter out edits like file uploads or user talk
+            # see http://wiki.case.edu/api.php?action=query&meta=siteinfo&siprop=general|namespaces
+            ucnamespace = '&ucnamespace=0'
+            # ignore revert edits to fix vandalism, typo correction
+            # uctag = ! 'rv' 
+            '''TODO (rv flag in comment)??'''
+        
+            # Get editor's last j edited articles.
+            # Note this is different than last j edits because we consider
+            # multiple edits of the same article as a single contribution, 
+            # so the latter number could be bigger than the former. 
+            ''' TODO should we do num_useredits_tofetch or just get them all?? --> extant research on interest drift?? '''
+            edits_query = 'list=usercontribs&ucuser='+username+'&uclimit='+str(num_useredits_tofetch)+ucnamespace+ucshow+'&format=xml'
+            user_edits_xml = query_wiki(edits_query)
+            edited_pages = parse_wiki_xml(user_edits_xml, 'item', 'pageid')
+            if len(edited_pages > min_editcount):
+                editors[username] = edited_pages
+            
+            curr_len = len(editors)
+            if curr_len%50==0:
+                print str(curr_len)+" editors fetched so far.."
+                
+            ''' TODO '''
+            start = start - datetime.timedelta(days=2)
+            end = end - datetime.timedelta(days=2)
         
     print editors
     return editors
     
 
-''' Fetch the most recently edited pages on wikipedia until 
-encounter the given num of unique users who made those edits '''
-def query_n_most_recent_editors(num):
+''' Fetch the most recently edited pages on wikipedia between 
+the given start and end dates and fetch the users who made those edits '''
+def query_recent_editors(start_date, end_date):
+    
+    rclimit = '&rclimit=5000'
     
     # only list certain types of changes
     rctype = ('&rctype='
@@ -105,8 +118,8 @@ def query_n_most_recent_editors(num):
     rcdir = ('&rcdir=older')
     
     # query wiki for recent edits
-    params = str(num)+rctype+rcshow+rcprop+rcdir
-    query = 'list=recentchanges&rclimit='+params+'&format=xml'
+    params = rclimit+rctype+rcshow+rcprop+rcdir
+    query = 'list=recentchanges'+params+'&format=xml'
     recent_edits = query_wiki(query)
     
     # get the users who made these edits
@@ -132,3 +145,17 @@ def get_random_active_user(users, min_editcount):
         if edit_count >= 50: 
             return user
 '''
+
+# Returns the wikipedia categories of a wikipedia resource given its id
+def fetch_categories_id(res_id):
+    categories_query = 'pageids='+res_id+'&prop=categories&format=xml'
+    categories_xml = query_wiki(categories_query)
+    categories = parse_wiki_xml(categories_xml, 'cl', 'title')
+    return categories
+
+# Returns the wikipedia categories of a wikipedia page given its page title
+def fetch_categories_title(page_title):
+    categories_query = 'titles='+page_title+'&prop=categories&format=xml'
+    categories_xml = query_wiki(categories_query)
+    categories = parse_wiki_xml(categories_xml, 'cl', 'title')
+    return categories
