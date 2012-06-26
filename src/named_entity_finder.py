@@ -90,7 +90,7 @@ def __find_named_entities_wikipedia_miner__(text, ambiguous_only=False):
     
     named_entities = {}
     for topic in result['labels']:
-        text = topic['text']
+        orig_text = topic['text']
         candidates = []
         for sense in topic['senses']:
             article_id = sense['id']
@@ -103,7 +103,7 @@ def __find_named_entities_wikipedia_miner__(text, ambiguous_only=False):
             
         # might only care about ambiguous entities (those with more than a single candidate)
         if ambiguous_only and len(candidates) > 1:
-            named_entities[text] = candidates    
+            named_entities[orig_text] = candidates    
     
     '''
     named_entities = []
