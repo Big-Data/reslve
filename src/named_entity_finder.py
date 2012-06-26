@@ -57,7 +57,11 @@ def find_named_entities_dbpedia(text):
     
     return named_entities
 
-def find_named_entities_wikipedia_miner(text):
+
+def find_ambiguous_named_entities_wikipedia_miner(text):
+    return __find_named_entities_wikipedia_miner__(text, True)
+
+def __find_named_entities_wikipedia_miner__(text, ambiguous_only=False):
     """Finds named entities in a given text using Wikipedia Miner"""
     
     request_uri = WIKIPEDIA_MINER_URI + "query=" + urllib.quote(text)
@@ -96,7 +100,10 @@ def find_named_entities_wikipedia_miner(text):
             candidate = {'article_id': article_id, 'title': title, 'weight': weight,
                         'dbpedia_uri': dbpedia_uri}
             candidates.append(candidate)
-        named_entities[text] = candidates    
+            
+        # might only care about ambiguous entities (those with more than a single candidate)
+        if ambiguous_only and len(candidates) > 1:
+            named_entities[text] = candidates    
     
     '''
     named_entities = []
@@ -116,7 +123,7 @@ def find_named_entities_wikipedia_miner(text):
 
 if __name__ == '__main__':
     #ne = find_named_entities("President Obama is the president of the USA")
-    ne = find_named_entities_wikipedia_miner("Barack Obama is the president of the United States")
+    ne = __find_named_entities_wikipedia_miner__("Barack Obama is the president of the United States")
     pprint.pprint(ne)
-    ne = find_named_entities_wikipedia_miner("Cornell is a university in Ithaca")
+    ne = __find_named_entities_wikipedia_miner__("Cornell is a university in Ithaca")
     pprint.pprint(ne)
