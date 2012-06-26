@@ -51,7 +51,7 @@ def fetch_tweet_named_entities():
         for tweet in user_tweets:
             print "tweet! "+tweet
             try:
-                named_entities = named_entity_finder.find_named_entities(tweet)
+                named_entities = named_entity_finder.find_named_entities_wikipedia_miner(tweet)
                 pprint.pprint(named_entities)
                 surface_forms = named_entities['annotation']['surfaceForm']
                 tweet_candidates[tweet] = surface_forms
