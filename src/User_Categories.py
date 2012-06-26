@@ -1,17 +1,18 @@
 ''' 
-Simple interest model for a wikipedia user.
-Stores user's id and a mapping from category -> n, where n is
-the number of edits the user made to pages in that wikipedia category
+Stores a user's username and a mapping from category -> n, where
+each category is a wikipedia category the user edited at least 
+one article from and where n is the actual number of edits the 
+user made to articles with that category.
 '''
 import re
 class User_Interests:
     
-    def __init__(self, user_id):
-        self.__user_id__ = user_id
+    def __init__(self, username):
+        self.__username__ = username
         self.__category_map__ = {}
         
-    def get_userid(self):
-        return self.__user_id__
+    def get_username(self):
+        return self.__username__
     
     def get_categories(self):
         return self.__category_map__
