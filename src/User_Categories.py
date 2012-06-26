@@ -5,7 +5,7 @@ one article from and where n is the actual number of edits the
 user made to articles with that category.
 '''
 import re
-class User_Interests:
+class User_Categories:
     
     def __init__(self, username):
         self.__username__ = username
