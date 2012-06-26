@@ -25,7 +25,11 @@ DBPEDIA_SPOTLIGHT_URI = "http://spotlight.dbpedia.org/rest/candidates?text="
 
 # DBPEDIA_SPOTLIGHT_URI = "http://samos.mminf.univie.ac.at:2222/rest/candidates?text="
 
-def find_named_entities(text):
+WIKIPEDIA_MINER_URI = \
+    "http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/wikify?"
+
+
+def find_named_entities_dbpedia(text):
     """Finds named entities in a given text and returns a dictionary of
     possible DBPedia entities for each possible match; an empty dict is
     returned if no entities were found.
@@ -51,8 +55,45 @@ def find_named_entities(text):
     named_entities = json.loads(result)
     
     return named_entities
+
+def find_named_entities_wikipedia_miner(text):
+    """Finds named entities in a given text using Wikipedia Miner"""
+    
+    request_uri = WIKIPEDIA_MINER_URI + "source=" + urllib.quote(text)
+    request_uri += "&sourceMode=auto"
+    request_uri += "&responseFormat=json"
+    request_uri += "&disambiguationPolicy=loose"
+    
+    request = Request(request_uri)
+    
+    try:
+        response = urlopen(request)
+    except HTTPError, e:
+        print 'The server couldn\'t fulfill the request.'
+        print 'Error code: ', e.code
+    except URLError, e:
+        print 'We failed to reach a server.'
+        print 'Reason: ', e.reason
+        
+    result = json.loads(response.read())
+    
+    named_entities = []
+    
+    for topic in result['detectedTopics']:
+        article_id = topic['id']
+        title = topic['title']
+        weight = topic['weight']
+        dbpedia_uri = "http://dbpedia.org/resource/" + title.replace(" ", "_")
+        entity = {'article_id': article_id, 'title': title, 'weight': weight,
+                        'dbpedia_uri': dbpedia_uri}
+        named_entities.append(entity)
+    
+    return named_entities
     
 
 if __name__ == '__main__':
-    ne = find_named_entities("President Obama is the president of the USA")
+    #ne = find_named_entities("President Obama is the president of the USA")
+    ne = find_named_entities_wikipedia_miner("Barack Obama is the president of the United States")
+    pprint.pprint(ne)
+    ne = find_named_entities_wikipedia_miner("Cornell is a university in Ithaca")
     pprint.pprint(ne)
