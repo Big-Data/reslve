@@ -103,8 +103,10 @@ def __find_named_entities_wikipedia_miner__(text, ambiguous_only=False):
             candidates.append(candidate)
             
         # might only care about ambiguous entities (those with more than a single candidate)
-        if ambiguous_only and len(candidates) > 1:
-            named_entities[orig_text] = candidates    
+        if ambiguous_only and len(candidates) <= 1:
+            continue
+            
+        named_entities[orig_text] = candidates    
     
     '''
     named_entities = []
