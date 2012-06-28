@@ -27,6 +27,9 @@ DBPEDIA_SPOTLIGHT_URI = "http://spotlight.dbpedia.org/rest/candidates?text="
 
 WIKIPEDIA_MINER_URI = \
     "http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/wikify?"
+    
+WIKIPEDIA_MINER_SEARCH_SERVICE_URI = \
+    "http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/search?"
 
 
 def find_named_entities_dbpedia(text):
@@ -89,7 +92,48 @@ def find_named_entities_wikipedia_miner(text):
         named_entities.append(entity)
     
     return named_entities
+
+def find_candidates_wikipedia_miner(text):   
+    """Finds all named entities in the given text and returns a mapping 
+    of each named entity's surface form -> candidate resources"""
     
+    request_uri = WIKIPEDIA_MINER_SEARCH_SERVICE_URI + "query=" + urllib.quote(text)
+    request_uri += "&complex=true"
+    request_uri += "&responseFormat=json"
+    
+    request = Request(request_uri)
+    
+    try:
+        response = urlopen(request)
+    except HTTPError, e:
+        print 'The server couldn\'t fulfill the request.'
+        print 'Error code: ', e.code
+    except URLError, e:
+        print 'We failed to reach a server.'
+        print 'Reason: ', e.reason
+        
+    result = json.loads(response.read())
+    
+    surface_forms_to_candidates = {}
+    for topic in result['labels']: # for each named entity..
+        orig_text = topic['text']
+        candidates = []
+        # get its candidate resources..
+        for sense in topic['senses']:
+            article_id = sense['id']
+            title = sense['title']
+            weight = sense['weight']
+            dbpedia_uri = "http://dbpedia.org/resource/" + title.replace(" ", "_")
+            candidate = {'article_id': article_id, 'title': title, 'weight': weight,
+                        'dbpedia_uri': dbpedia_uri}
+            candidates.append(candidate)
+            
+        # might only care about ambiguous entities (those with more than a single candidate)
+        # if ambiguous_only and len(candidates) <= 1:
+        #    continue
+            
+        surface_forms_to_candidates[orig_text] = candidates
+    return surface_forms_to_candidates 
 
 if __name__ == '__main__':
     #ne = find_named_entities("President Obama is the president of the USA")
