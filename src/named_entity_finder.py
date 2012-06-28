@@ -25,9 +25,10 @@ DBPEDIA_SPOTLIGHT_URI = "http://spotlight.dbpedia.org/rest/candidates?text="
 
 # DBPEDIA_SPOTLIGHT_URI = "http://samos.mminf.univie.ac.at:2222/rest/candidates?text="
 
-WIKIPEDIA_MINER_URI = \
+WIKIPEDIA_MINER_SEARCH_SERVICE_URI = \
     "http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/search?"
-    #"http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/wikify?"
+WIKIPEDIA_MINER_WIKIFY_SERVICE_URI = \
+    "http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/wikify?"
 
 
 def find_named_entities_dbpedia(text):
@@ -64,12 +65,12 @@ def find_ambiguous_named_entities_wikipedia_miner(text):
 def __find_named_entities_wikipedia_miner__(text, ambiguous_only=False):
     """Finds named entities in a given text using Wikipedia Miner"""
     
-    request_uri = WIKIPEDIA_MINER_URI + "query=" + urllib.quote(text)
+    request_uri = WIKIPEDIA_MINER_SEARCH_SERVICE_URI + "query=" + urllib.quote(text)
     request_uri += "&complex=true"
     request_uri += "&responseFormat=json"
     
     '''
-    request_uri = WIKIPEDIA_MINER_URI + "source=" + urllib.quote(text)
+    request_uri = WIKIPEDIA_MINER_WIKIFY_SERVICE_URI + "source=" + urllib.quote(text)
     request_uri += "&sourceMode=auto"
     request_uri += "&responseFormat=json"
     request_uri += "&disambiguationPolicy=loose"
