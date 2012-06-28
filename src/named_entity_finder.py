@@ -25,9 +25,7 @@ DBPEDIA_SPOTLIGHT_URI = "http://spotlight.dbpedia.org/rest/candidates?text="
 
 # DBPEDIA_SPOTLIGHT_URI = "http://samos.mminf.univie.ac.at:2222/rest/candidates?text="
 
-WIKIPEDIA_MINER_SEARCH_SERVICE_URI = \
-    "http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/search?"
-WIKIPEDIA_MINER_WIKIFY_SERVICE_URI = \
+WIKIPEDIA_MINER_URI = \
     "http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/wikify?"
 
 
@@ -58,23 +56,13 @@ def find_named_entities_dbpedia(text):
     
     return named_entities
 
-
-def find_ambiguous_named_entities_wikipedia_miner(text):
-    return __find_named_entities_wikipedia_miner__(text, True)
-
-def __find_named_entities_wikipedia_miner__(text, ambiguous_only=False):
+def find_named_entities_wikipedia_miner(text):
     """Finds named entities in a given text using Wikipedia Miner"""
     
-    request_uri = WIKIPEDIA_MINER_SEARCH_SERVICE_URI + "query=" + urllib.quote(text)
-    request_uri += "&complex=true"
-    request_uri += "&responseFormat=json"
-    
-    '''
-    request_uri = WIKIPEDIA_MINER_WIKIFY_SERVICE_URI + "source=" + urllib.quote(text)
+    request_uri = WIKIPEDIA_MINER_URI + "source=" + urllib.quote(text)
     request_uri += "&sourceMode=auto"
     request_uri += "&responseFormat=json"
     request_uri += "&disambiguationPolicy=loose"
-    '''
     
     request = Request(request_uri)
     
@@ -89,26 +77,6 @@ def __find_named_entities_wikipedia_miner__(text, ambiguous_only=False):
         
     result = json.loads(response.read())
     
-    named_entities = {}
-    for topic in result['labels']:
-        orig_text = topic['text']
-        candidates = []
-        for sense in topic['senses']:
-            article_id = sense['id']
-            title = sense['title']
-            weight = sense['weight']
-            dbpedia_uri = "http://dbpedia.org/resource/" + title.replace(" ", "_")
-            candidate = {'article_id': article_id, 'title': title, 'weight': weight,
-                        'dbpedia_uri': dbpedia_uri}
-            candidates.append(candidate)
-            
-        # might only care about ambiguous entities (those with more than a single candidate)
-        if ambiguous_only and len(candidates) <= 1:
-            continue
-            
-        named_entities[orig_text] = candidates    
-    
-    '''
     named_entities = []
     
     for topic in result['detectedTopics']:
@@ -119,14 +87,13 @@ def __find_named_entities_wikipedia_miner__(text, ambiguous_only=False):
         entity = {'article_id': article_id, 'title': title, 'weight': weight,
                         'dbpedia_uri': dbpedia_uri}
         named_entities.append(entity)
-    '''
     
     return named_entities
     
 
 if __name__ == '__main__':
     #ne = find_named_entities("President Obama is the president of the USA")
-    ne = __find_named_entities_wikipedia_miner__("Barack Obama is the president of the United States")
+    ne = find_named_entities_wikipedia_miner("Barack Obama is the president of the United States")
     pprint.pprint(ne)
-    ne = __find_named_entities_wikipedia_miner__("Cornell is a university in Ithaca")
+    ne = find_named_entities_wikipedia_miner("Cornell is a university in Ithaca")
     pprint.pprint(ne)
