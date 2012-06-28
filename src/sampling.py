@@ -43,28 +43,26 @@ def fetch_tweet_named_entities():
     tweets_file = open('sample_dump/tweets.pkl', 'rb')
     tweets = pickle.load(tweets_file)
     tweet_candidates = {}
-    #count = 0
     for user in tweets:
-        #if count > 10: 
-        #    break
+        count = 0
         user_tweets = tweets[user]
-        for tweet in user_tweets:
-            print "tweet! "+tweet
+        for raw_tweet in user_tweets:
+            if count > 10: # just get 10 tweets per user for initial testing..
+                break
+            tweet = raw_tweet #process(raw_tweet)
             try:
-                named_entities = named_entity_finder.find_named_entities_wikipedia_miner(tweet)
-                pprint.pprint(named_entities)
-                surface_forms = named_entities['annotation']['surfaceForm']
-                tweet_candidates[tweet] = surface_forms
+                named_entities = named_entity_finder.find_ambiguous_named_entities_wikipedia_miner(tweet)
+                #pprint.pprint(named_entities)
+                tweet_candidates[tweet] = named_entities
             except:
                 continue
-        #count = count + 1
+            count = count + 1
         
     # write to file
     tweet_candidates_file = open('sample_dump/tweet_candidates.pkl', 'wb')
     pickle.dump(tweet_candidates, tweet_candidates_file)
     tweet_candidates_file.close()
     
-
 def get_user_mapping(filename):
     userfile = open(filename, 'rb')
     mapping = pickle.load(userfile)
