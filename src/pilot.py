@@ -86,7 +86,7 @@ if tweets.has_key(username):
 
 # tweet -> detect entities -> for ambiguous entities, get candidates -> score candidate categories against user categories
 tweet = raw_input("Enter tweet: ")
-entities_map = named_entity_finder.find_ambiguous_named_entities_wikipedia_miner(tweet)
+entities_map = named_entity_finder.find_candidates_wikipedia_miner(tweet)
 for surface_form in entities_map.keys():
     print "Ambiguous term: "+surface_form
     try:
