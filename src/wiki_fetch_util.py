@@ -152,7 +152,7 @@ def get_random_active_user(users, min_editcount):
 
 # Returns the wikipedia categories of a wikipedia resource given its id
 def fetch_categories_of_id(res_id):
-    categories_query = 'pageids='+res_id+'&prop=categories&format=xml'
+    categories_query = 'pageids='+str(res_id)+'&prop=categories&format=xml'
     categories_xml = query_wiki(categories_query)
     categories = parse_wiki_xml(categories_xml, 'cl', 'title')
     return categories
