@@ -4,7 +4,6 @@ each category is a wikipedia category the user edited at least
 one article from and where n is the actual number of edits the 
 user made to articles with that category.
 '''
-import re
 class User_Categories:
     
     def __init__(self, username):
@@ -23,9 +22,6 @@ class User_Categories:
         
     def add_category(self, category):
         
-        # format category name
-        category = self.__format_category__(category)
-        
         if ''==category:
             return
         
@@ -34,18 +30,3 @@ class User_Categories:
         else:
             value = 0
         self.__category_map__[category] = value+1
-        
-    ''' Formats the category string:
-    - a. remove "Category:" namespace
-    - b. make lowercase
-    - c. remove non-words like punctuation and numbers
-    - d. remove leading and trailing white space
-    '''
-    def __format_category__(self, category):
-        category = category.replace("Category:", "") #a
-        category = category.lower() #b
-        category = ''.join([c for c in category if re.match("[a-z\-\' \n\t]", c)]) #c
-        category = category.strip() #d
-        return category
-        
-        

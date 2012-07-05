@@ -51,7 +51,7 @@ def fetch_tweet_named_entities():
                 break
             tweet = raw_tweet #process(raw_tweet)
             try:
-                named_entities = named_entity_finder.find_ambiguous_named_entities_wikipedia_miner(tweet)
+                named_entities = named_entity_finder.find_candidates_wikipedia_miner(tweet)
                 #pprint.pprint(named_entities)
                 tweet_candidates[tweet] = named_entities
             except:
@@ -86,7 +86,7 @@ def build_user_models():
         edited_pages = editors[username]
         user_interests = User_Categories.User_Categories(username)
         for edited_page_id in edited_pages:
-            categories = wiki_fetch_util.fetch_categories_of_id(edited_page_id)
+            categories = wiki_fetch_util.fetch_categories(edited_page_id)
             user_interests.add_categories(categories)
         user_models[username] = user_interests
         

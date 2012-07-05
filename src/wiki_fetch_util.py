@@ -151,15 +151,22 @@ def get_random_active_user(users, min_editcount):
 '''
 
 # Returns the wikipedia categories of a wikipedia resource given its id
-def fetch_categories_of_id(res_id):
-    categories_query = 'pageids='+str(res_id)+'&prop=categories&format=xml'
+def fetch_categories(res_id):
+    categories_query = 'pageids='+str(res_id)+'&prop=categories&clshow=!hidden&format=xml'
     categories_xml = query_wiki(categories_query)
     categories = parse_wiki_xml(categories_xml, 'cl', 'title')
-    return categories
+    formatted_categories = []
+    for cat in categories:
+        formatted_categories.append(__format_category__(cat))
+    return formatted_categories
 
-# Returns the wikipedia categories of a wikipedia page given its page title
-def fetch_categories_of_title(page_title):
-    categories_query = 'titles='+page_title+'&prop=categories&format=xml'
-    categories_xml = query_wiki(categories_query)
-    categories = parse_wiki_xml(categories_xml, 'cl', 'title')
-    return categories
+''' Formats the category string:
+- a. remove "Category:" namespace
+- b. make lowercase
+- c. remove leading and trailing white space
+'''
+def __format_category__(category):
+    category = category.replace("Category:", "") #a
+    category = category.lower() #b
+    category = category.strip() #c
+    return category
