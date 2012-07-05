@@ -66,6 +66,7 @@ def find_named_entities_wikipedia_miner(text):
     request_uri += "&sourceMode=auto"
     request_uri += "&responseFormat=json"
     request_uri += "&disambiguationPolicy=loose"
+    request_uri += "&minProbability=0"
     
     request = Request(request_uri)
     
