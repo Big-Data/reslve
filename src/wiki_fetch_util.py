@@ -66,25 +66,9 @@ def fetch_n_active_editors(n):
                     continue
             except:
                 continue
-        
-            # only consider editors who have made non trivial edits
-            ucshow = '&ucshow=!minor' # ignore minor edits
-            # and for now, only include pages in default namespace 
-            # to filter out edits like file uploads or user talk
-            # see http://wiki.case.edu/api.php?action=query&meta=siteinfo&siprop=general|namespaces
-            ucnamespace = '&ucnamespace=0'
-            # ignore revert edits to fix vandalism, typo correction
-            # uctag = ! 'rv' 
-            '''TODO (rv flag in comment)??'''
-        
-            # Get editor's last j edited articles.
-            # Note this is different than last j edits because we consider
-            # multiple edits of the same article as a single contribution, 
-            # so the latter number could be bigger than the former. 
-            ''' TODO should we do num_useredits_tofetch or just get them all?? --> extant research on interest drift?? '''
-            edits_query = 'list=usercontribs&ucuser='+username+'&uclimit='+str(num_useredits_tofetch)+ucnamespace+ucshow+'&format=xml'
-            user_edits_xml = query_wiki(edits_query)
-            edited_pages = parse_wiki_xml(user_edits_xml, 'item', 'pageid')
+
+            # Get all of user's edits
+            edited_pages =  query_user_edits(username)
             if len(edited_pages > min_editcount):
                 editors[username] = edited_pages
             
@@ -103,9 +87,19 @@ def fetch_n_active_editors(n):
 def query_user_edits(username):
     page_to_numedits = {}
     
+    # only consider editors who have made non trivial edits
+    ucshow = '&ucshow=!minor' # ignore minor edits
+    # and for now, only include pages in default namespace 
+    # to filter out edits like file uploads or user talk
+    # see http://wiki.case.edu/api.php?action=query&meta=siteinfo&siprop=general|namespaces
+    ucnamespace = '&ucnamespace=0'
+    # ignore revert edits to fix vandalism, typo correction
+    # uctag = ! 'rv' 
+    '''TODO (rv flag in comment)??'''
+    
     ucstart = ''
     while True:
-        edits_query = 'list=usercontribs&ucuser='+username+'&uclimit=500&ucnamespace=0&ucshow=!minor&format=xml'+ucstart
+        edits_query = 'list=usercontribs&ucuser='+username+'&uclimit=500'+ucnamespace+ucshow+'&format=xml'+ucstart
         user_edits_xml = query_wiki(edits_query)
         edited_pages = parse_wiki_xml(user_edits_xml, 'item', 'pageid')
         for page in edited_pages:
