@@ -26,10 +26,17 @@ def parse_wiki_xml(wiki_xml, tag_name, attribute) :
 
     attr_list = []
     for page in pages : 
+        if not page.hasAttribute(attribute):
+            continue
         attr = page.getAttribute(attribute)
         if not attr in attr_list:
             attr_list.append(attr)
     return attr_list
+
+def wiki_xml_has_tag(wiki_xml, tag_name):
+    dom = xml.dom.minidom.parseString(wiki_xml)
+    pages = dom.getElementsByTagName(tag_name)
+    return len(pages) > 0
 
 ''' Fetch the given number of wikipedia editors who are 
 active, ie have made a threshold number of non trivial edits. 
@@ -91,6 +98,32 @@ def fetch_n_active_editors(n):
         
     print editors
     return editors
+
+# Returns a mapping from page id -> number of times given user has edited that page
+def query_user_edits(username):
+    page_to_numedits = {}
+    
+    ucstart = ''
+    while True:
+        edits_query = 'list=usercontribs&ucuser='+username+'&uclimit=500&ucnamespace=0&ucshow=!minor&format=xml'+ucstart
+        print edits_query
+        user_edits_xml = query_wiki(edits_query)
+        edited_pages = parse_wiki_xml(user_edits_xml, 'item', 'pageid')
+        print str(len(edited_pages)) + ' pages'
+        for page in edited_pages:
+            if page in page_to_numedits.keys():
+                numedits = page_to_numedits[page]
+            else:
+                numedits = 0
+            page_to_numedits[page] = numedits+1
+        
+        query_continue = wiki_xml_has_tag(user_edits_xml, 'query-continue')  
+        if not query_continue:
+            break
+        next_contribs = parse_wiki_xml(user_edits_xml, 'usercontribs', 'ucstart')
+        ucstart = '&ucstart='+next_contribs[0]
+    
+    return page_to_numedits
     
 
 ''' Fetch the most recently edited pages on wikipedia between 
