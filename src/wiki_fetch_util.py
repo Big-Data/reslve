@@ -106,10 +106,8 @@ def query_user_edits(username):
     ucstart = ''
     while True:
         edits_query = 'list=usercontribs&ucuser='+username+'&uclimit=500&ucnamespace=0&ucshow=!minor&format=xml'+ucstart
-        print edits_query
         user_edits_xml = query_wiki(edits_query)
         edited_pages = parse_wiki_xml(user_edits_xml, 'item', 'pageid')
-        print str(len(edited_pages)) + ' pages'
         for page in edited_pages:
             if page in page_to_numedits.keys():
                 numedits = page_to_numedits[page]
