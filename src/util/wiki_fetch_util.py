@@ -25,11 +25,14 @@ def query_user_edits(username):
         user_edits_xml = __query_wiki__(edits_query)
         edited_pages = __parse_wiki_xml__(user_edits_xml, 'item', 'pageid')
         for page in edited_pages:
-            if page in page_to_numedits.keys():
-                numedits = page_to_numedits[page]
-            else:
-                numedits = 0
-            page_to_numedits[page] = numedits+1
+            try:
+                if page in page_to_numedits.keys():
+                    numedits = page_to_numedits[page]
+                else:
+                    numedits = 0
+                page_to_numedits[page] = numedits+1
+            except:
+                continue
         
         query_continue = __wiki_xml_has_tag__(user_edits_xml, 'query-continue')  
         if not query_continue:
