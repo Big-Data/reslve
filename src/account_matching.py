@@ -17,7 +17,7 @@ def find_twitter_matches(usernames, min_tweets):
         try:
             num_tweets = account['statuses_count']
             if num_tweets >= min_tweets:
-                matches.append(account)
+                matches.append(account['screen_name'])
         except:
             continue
     return matches
