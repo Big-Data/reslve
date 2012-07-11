@@ -5,8 +5,8 @@ pieces of information and to parse results
 import urllib2
 import xml.dom.minidom
 
-# Returns a mapping from page id -> number of times given user has edited that page
 def query_user_edits(username):
+    '''Returns a mapping from page id -> number of times given user has edited that page'''
     page_to_numedits = {}
     
     # only consider editors who have made non trivial edits
@@ -42,17 +42,17 @@ def query_user_edits(username):
     
     return page_to_numedits
 
-# Return true if the given user has made at least 
-# the given number of edits, false otherwise       
 def is_active_user(user, min_editcount):
+    ''' Return true if the given user has made at least 
+    the given number of edits, false otherwise  '''
     editcount_query = 'list=users&ususers='+user+'&usprop=editcount'+'&format=xml'
     editcount_xml = __query_wiki__(editcount_query)
     edit_count = __parse_wiki_xml__(editcount_xml, 'user', 'editcount')
     return (edit_count >= min_editcount)
 
-''' Fetch the most recently edited pages on 
-wikipedia and the users who made those edits '''
 def query_recent_editors():
+    ''' Fetch the most recently edited pages on 
+    wikipedia and the users who made those edits '''
     
     rclimit = '&rclimit=5000'
     
@@ -87,9 +87,9 @@ def query_recent_editors():
     editors = __parse_wiki_xml__(recent_edits, 'rc', 'user')
     return editors
 
-# From the given set of users, return a random user
-# who has made at least the given number of edits
 def get_random_active_user(users, min_editcount):
+    ''' From the given set of users, return a random user 
+    who has made at least the given number of edits '''
     for user in users:
         editcount_query = 'list=users&ususers='+user+'&usprop=editcount'+'&format=xml'
         editcount_xml = __query_wiki__(editcount_query)
@@ -97,8 +97,8 @@ def get_random_active_user(users, min_editcount):
         if edit_count >= min_editcount: 
             return user
 
-# Returns the wikipedia categories of a wikipedia resource given its id
 def query_categories(res_id):
+    ''' Returns the wikipedia categories of a wikipedia resource given its id '''
     categories_query = 'pageids='+str(res_id)+'&prop=categories&clshow=!hidden&format=xml'
     categories_xml = __query_wiki__(categories_query)
     categories = __parse_wiki_xml__(categories_xml, 'cl', 'title')
@@ -107,17 +107,16 @@ def query_categories(res_id):
         formatted_categories.append(__format_category__(cat))
     return formatted_categories
 
-# Queries wikipedia to retrieve 
-# various data in xml format
-hosturl = 'http://en.wikipedia.org/'
-queryaction = 'w/api.php?action=query&'
 def __query_wiki__(query) : 
+    ''' Queries wikipedia to retrieve various data in xml format '''
+    hosturl = 'http://en.wikipedia.org/'
+    queryaction = 'w/api.php?action=query&'
     result = urllib2.urlopen(hosturl+queryaction+query).read()
     return result
 
-# Parses xml fetched from wikipedia to retrieve the 
-# value of the given attribute within the given tag. 
 def __parse_wiki_xml__(wiki_xml, tag_name, attribute) : 
+    ''' Parses xml fetched from wikipedia to retrieve the 
+    value of the given attribute within the given tag. '''
     dom = xml.dom.minidom.parseString(wiki_xml)
     pages = dom.getElementsByTagName(tag_name)
 
@@ -135,9 +134,9 @@ def __wiki_xml_has_tag__(wiki_xml, tag_name):
     pages = dom.getElementsByTagName(tag_name)
     return len(pages) > 0
 
-''' Formats the category string in the following ways:
-    1. remove leading and trailing white space
-'''
 def __format_category__(category):
+    ''' Formats the category string in the following ways:
+    1. remove leading and trailing white space 
+    '''
     category = category.strip()
     return category

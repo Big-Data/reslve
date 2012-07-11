@@ -15,9 +15,9 @@ import urllib
 import urllib2
 import webbrowser
 
-# Given a list of usernames, performs batch lookups
-# to Twitter API to fetch userinfo for those accounts
 def batch_userlookup(all_screennames):
+    ''' Given a list of usernames, performs batch lookups 
+    to Twitter API to fetch userinfo for those accounts '''
     print "Batch user lookup..."
     print all_screennames
     userlookups = []
@@ -42,8 +42,8 @@ def batch_userlookup(all_screennames):
         
     return userlookups
 
-# Returns true if given user has a bio, false otherwise
 def has_bio(user_info):
+    ''' Returns true if given user has a bio, false otherwise '''
     try:
         description = user_info['description']
         if description!=None and description.strip()!='':
@@ -55,9 +55,9 @@ def has_bio(user_info):
         print e
         return False
 
-# Returns true if given user has made at least the
-# given number of tweets, false otherwise
 def has_enough_tweets(user_info, min_tweetcount):
+    ''' Returns true if given user has made at least  
+    the given number of tweets, false otherwise '''
     try:
         tweet_count = user_info['statuses_count']
         if tweet_count!=None and tweet_count>min_tweetcount:
@@ -67,10 +67,10 @@ def has_enough_tweets(user_info, min_tweetcount):
     except:
         return False
     
-# Uses the stream api to fetch tweets of the  
-# twitter user accounts we have written to file
-# http://api.twitter.com/1/statuses/user_timeline.json?screen_name=noradio&count=5
 def fetch_tweets():
+    ''' 'Uses the stream api to fetch tweets of the 
+    twitter user accounts we have written to file 
+    http://api.twitter.com/1/statuses/user_timeline.json?screen_name=noradio&count=5 '''
 
     print "Fetching tweets..."
     try:
@@ -114,9 +114,9 @@ def fetch_tweets():
     print "Done fetching tweets."
     print "Current size of tweet store: "+str(len(tweets))
 
-# Searches twitter using the given query and 
-# returns an array of the resulting tweets
 def search_for_tweets(query):
+    ''' Searches twitter using the given query and 
+    returns an array of the resulting tweets '''
     search_host = 'http://search.twitter.com/'
     json_query_action = 'search.json?lang=en&rpp=100&q='
     xml_query_action = 'search.atom?lang=en&rpp=100&q='
@@ -128,8 +128,8 @@ def search_for_tweets(query):
     search_results = response['results']
     return search_results 
     
-# Provides authorizes access to the Twitter API
 def __get_api__():
+    ''' Provides authorizes access to the Twitter API '''
     consumer_key = 'Bn62IlcOcgxKGYBTn17SGQ'
     consumer_secret = 'H6TwsebK36zImYUTNbUc0QHzMmHd9NbaooVMgdiw'
     
