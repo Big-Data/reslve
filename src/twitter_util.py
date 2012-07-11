@@ -15,34 +15,6 @@ import urllib
 import urllib2
 import webbrowser
 
-# Provides authorizes access to the Twitter API
-def get_api():
-    consumer_key = 'Bn62IlcOcgxKGYBTn17SGQ'
-    consumer_secret = 'H6TwsebK36zImYUTNbUc0QHzMmHd9NbaooVMgdiw'
-    
-    '''
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    
-    # Open authorization URL in browser
-    webbrowser.open(auth.get_authorization_url())
-
-    # Ask user for verifier pin
-    pin = raw_input('Verification pin number from twitter.com: ').strip()
-
-    # Get access token
-    token = auth.get_access_token(verifier=pin)
-
-    # Give user the access token
-    print 'Access token:'
-    print '  Key: %s' % token.key
-    print '  Secret: %s' % token.secret
-    '''
-    
-    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
-    auth.set_access_token('555518563-4go92i8OBMTNI4uh4F4njF1GTQecY91GArJIhi9U', 'BypinoJNQEzNVK464rgsV2MwKaYhxYPuUdpo9nS3IV8')
-    api = tweepy.API(auth)
-    return api
-
 # Given a list of usernames, performs batch lookups
 # to Twitter API to fetch userinfo for those accounts
 def batch_userlookup(all_screennames):
@@ -95,20 +67,7 @@ def has_enough_tweets(user_info, min_tweetcount):
     except:
         return False
     
-# Searches twitter using the given query and 
-# returns an array of the resulting tweets
-search_host = 'http://search.twitter.com/'
-json_query_action = 'search.json?lang=en&rpp=100&q='
-xml_query_action = 'search.atom?lang=en&rpp=100&q='
-search_url = search_host+json_query_action
-def query_for_tweets(query):
-    query = urllib.quote(query)
-    response = urllib2.urlopen(search_url+query).read()
-    response = simplejson.loads(response.decode('utf-8'))
-    search_results = response['results']
-    return search_results 
-
-# Use the stream api to fetch tweets of the  
+# Uses the stream api to fetch tweets of the  
 # twitter user accounts we have written to file
 # http://api.twitter.com/1/statuses/user_timeline.json?screen_name=noradio&count=5
 def fetch_tweets():
@@ -120,7 +79,7 @@ def fetch_tweets():
     except:
         tweets = {}
     
-    api = get_api()
+    api = __get_api__()
     
     twitter_users_file = open('twitter_accounts.pkl', 'rb')
     twitter_users = pickle.load(twitter_users_file)
@@ -154,3 +113,45 @@ def fetch_tweets():
 
     print "Done fetching tweets."
     print "Current size of tweet store: "+str(len(tweets))
+
+# Searches twitter using the given query and 
+# returns an array of the resulting tweets
+def search_for_tweets(query):
+    search_host = 'http://search.twitter.com/'
+    json_query_action = 'search.json?lang=en&rpp=100&q='
+    xml_query_action = 'search.atom?lang=en&rpp=100&q='
+    search_url = search_host+json_query_action
+    
+    query = urllib.quote(query)
+    response = urllib2.urlopen(search_url+query).read()
+    response = simplejson.loads(response.decode('utf-8'))
+    search_results = response['results']
+    return search_results 
+    
+# Provides authorizes access to the Twitter API
+def __get_api__():
+    consumer_key = 'Bn62IlcOcgxKGYBTn17SGQ'
+    consumer_secret = 'H6TwsebK36zImYUTNbUc0QHzMmHd9NbaooVMgdiw'
+    
+    '''
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    
+    # Open authorization URL in browser
+    webbrowser.open(auth.get_authorization_url())
+
+    # Ask user for verifier pin
+    pin = raw_input('Verification pin number from twitter.com: ').strip()
+
+    # Get access token
+    token = auth.get_access_token(verifier=pin)
+
+    # Give user the access token
+    print 'Access token:'
+    print '  Key: %s' % token.key
+    print '  Secret: %s' % token.secret
+    '''
+    
+    auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
+    auth.set_access_token('555518563-4go92i8OBMTNI4uh4F4njF1GTQecY91GArJIhi9U', 'BypinoJNQEzNVK464rgsV2MwKaYhxYPuUdpo9nS3IV8')
+    api = tweepy.API(auth)
+    return api
