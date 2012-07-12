@@ -28,24 +28,6 @@ class User:
     def get_category_hierarchies(self):
         return self.__hierarchy_edits__
         
-    def get_categories_to_num_edits_OLD(self):
-        ''' Returns a mapping from category -> n, where each category is 
-        a wikipedia category the user edited at least one article from and 
-        where n is the total number of edits the user made to article(s) 
-        within that category. '''
-        category_to_num_edits = {}
-        for hierarchy in self.__hierarchy_edits__:
-            edits_on_hierarchy = self.__hierarchy_edits__[hierarchy]
-            categories = hierarchy.get_category_to_distance().keys()
-            for category in categories:
-                if category in category_to_num_edits:
-                    num_edits = category_to_num_edits[category]
-                else:
-                    num_edits = 0
-                num_edits = num_edits + edits_on_hierarchy
-                category_to_num_edits[category] = num_edits
-        return category_to_num_edits
-    
     def get_shortest_path(self, category):
         ''' Returns the lowest number of edges that must be traversed to reach 
         the given category in any of the user's category hierarchy graphs. '''
