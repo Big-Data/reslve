@@ -41,4 +41,8 @@ class User:
             except:
                 continue
         return min_distance
+    
+    def get_category_list(self):
+        ''' Returns a list category IDs of all the categories in this query's hierarchies ''' 
+        return self.__category_edits__.keys()
             
