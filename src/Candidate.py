@@ -23,5 +23,10 @@ class Candidate:
         return self.__candidate_ID__
 
     def get_category_hierarchy(self):
+        ''' Returns the Category_Hierarchy that originates from the candidate's associated article '''
         return self.__category_hierarchy__
+    
+    def get_category_list(self):
+        ''' Returns a list category IDs of all the categories in this candidate's hierarchy ''' 
+        return self.__category_hierarchy__.get_category_to_distance().keys()
     
