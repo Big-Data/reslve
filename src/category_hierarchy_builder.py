@@ -9,7 +9,9 @@ from util import wiki_util
 import Category_Hierarchy
 
 def build_hierarchy_graph(source_article):
-    ''' Returns a hierarchy graph of categories originating from the given article. 
+    ''' Returns a Category_Hierarchy object that represents the 
+    hierarchy graph of categories originating from the given article. 
+    
     TODO: Currently, only the direct parent categories of the article (ie those categories
     at distance = 1) are included in the hierarchy, so need to recurse out through higher
     levels at further distances to build the complete hierarchy graph. '''
@@ -17,5 +19,5 @@ def build_hierarchy_graph(source_article):
     direct_categories = wiki_util.query_categories(source_article)
     for category in direct_categories:
         category_to_distance[category] = 1
-    hierarchy_graph = Category_Hierarchy(source_article, category_to_distance)
+    hierarchy_graph = Category_Hierarchy.Category_Hierarchy(source_article, category_to_distance)
     return hierarchy_graph
