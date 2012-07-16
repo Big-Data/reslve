@@ -36,7 +36,7 @@ class User:
             category_to_distance = category_hierarchy.get_category_to_distance()
             try:
                 dist = category_to_distance[category]
-                if dist < min_distance:
+                if min_distance==-1 or dist < min_distance:
                     min_distance = dist
             except:
                 continue
