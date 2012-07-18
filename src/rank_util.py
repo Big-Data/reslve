@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from numpy.lib.scimath import sqrt
 from spreadsheet_labels import USERNAME_COLUMN, PAGEID_COLUMN, CATEGORIES_COLUMN, \
     NUMEDITS_COLUMN
@@ -9,6 +10,7 @@ import User_Vector
 import category_hierarchy_builder
 import csv
 import math
+import operator
 import pickle
 import pprint
 
@@ -34,18 +36,41 @@ def rank_candidates(user_obj, candidate_objs):
     
     # construct candidate vectors and compute similarity between each and user vector
     candidate_scores = {}
+    jacc_scores = {}
+    cossim_scores = {}
     for candidate_obj in candidate_objs:
         candidate_vector = construct_candidate_vector(candidate_obj, category_dictionary)
         
         # compute similarity score between q and this document
         score = sim(candidate_vector, user_vector)
         candidate_scores[candidate_obj.get_candidateID()] = score
+        
+        jaccard_sim = jaccard_similarity_weighted_vectors(candidate_vector, user_vector)
+        jacc_scores[candidate_obj.get_candidateID()] = jaccard_sim
+        
+        cossim = cosine_similarity(candidate_vector.get_weighted_vector().values(), user_vector.get_weighted_vector().values())
+        cossim_scores[candidate_obj.get_candidateID()] = cossim
     
     # sort by decreasing score
-    sorted_candidate_scores = {}
-    sorted_candidates = sorted(candidate_scores, key=candidate_scores.get, reverse=True)
+    sorted_candidate_scores = sort_candidates(candidate_scores)
+    sorted_jacc_scores = sort_candidates(jacc_scores)
+    sorted_cossim_scores = sort_candidates(cossim_scores)
+    
+    print "sorted by ours:"
+    pprint.pprint(sorted_candidate_scores)
+    print sorted_candidate_scores.keys()
+    print "sorted by jacc:"
+    pprint.pprint(sorted_jacc_scores)
+    print "sorted by cossim:"
+    pprint.pprint(sorted_cossim_scores)
+
+    return sorted_candidate_scores
+
+def sort_candidates(scored_candidates_dict):
+    sorted_candidate_scores = OrderedDict()
+    sorted_candidates = sorted(scored_candidates_dict, key=scored_candidates_dict.get, reverse=True)
     for sc in sorted_candidates:
-        sorted_candidate_scores[sc] = candidate_scores[sc]
+        sorted_candidate_scores[sc] = scored_candidates_dict[sc]
     return sorted_candidate_scores
 
 def construct_user_obj(username):
@@ -56,7 +81,6 @@ def construct_user_obj(username):
     edits_file = open('pickles/edits.pkl', 'rb')
     edits = pickle.load(edits_file)
     user_edits = edits[username]
-    print user_edits
     for articleID_entry in user_edits.keys():
         num_edits_entry = user_edits[articleID_entry]
   
@@ -223,6 +247,15 @@ def construct_user_vector(q, category_dictionary, category_edit_idfs, all_candid
     ''' w_c,q = (tf-idf)c,q * (tf-idf)c,e,q
               = (tf_c,q * idf_c) * (tf_c,e,q * idf_c,e) '''
     
+    # Compute Euclidean length of query q
+    squares_sum = 0
+    for user_category in q.get_category_list():
+        squared = q.get_shortest_path(user_category) ** 2
+        squares_sum = squares_sum + squared
+    eucl_length_d = sqrt(squares_sum)
+    if eucl_length_d==0:
+        eucl_length_d = 1
+    
     # get mapping from each category in the user's category hierarchies to 
     # the number of times that user edited article(s) within that category
     category_to_num_edits = q.get_categories_to_num_edits()
@@ -260,7 +293,7 @@ def construct_user_vector(q, category_dictionary, category_edit_idfs, all_candid
         # idf_ec = reflects how commonly the category's associated articles are edited
         idf_ec = category_edit_idfs[category]
         
-        w_cq = (tf_cq * idf_c) * (tf_ceq * idf_ec)
+        w_cq = ((tf_cq * idf_c) * (tf_ceq * idf_ec)) / eucl_length_d
         weighted_vector[category] = w_cq
         
     username = q.get_username()
@@ -330,16 +363,6 @@ def sim(d_j, q):
         w_ij = candidate_weighted_vector[category] 
         w_iq = user_weighted_vector[category]
         cosine_sim = cosine_sim + (w_ij * w_iq)
-    print "cosine_sim:"+str(cosine_sim)
-    
-    print "comparing to jaccard"
-    jaccard_sim = jaccard_similarity_weighted_vectors(d_j, q)
-    print jaccard_sim
-        
-    print "comparing to cosine function"
-    cossim = cosine_similarity(d_j.get_weighted_vector().values(), q.get_weighted_vector().values())
-    print cossim
-    
     return cosine_sim
 
 def jaccard_similarity_weighted_vectors(d_j, q):

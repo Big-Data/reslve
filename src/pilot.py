@@ -53,7 +53,15 @@ for surface_form in entities_map.keys():
     '''
 surface_form = entities_map.keys()[0]
 entity_candidates = entities_map[surface_form]
-pprint.pprint(entity_candidates)
+print entity_candidates
+weight_only = {}
+for entity_cand in entity_candidates:
+    cand_id = entity_cand['article_id']
+    weight_only[cand_id] = entity_cand['weight']
+sorted_by_weight = rank_util.sort_candidates(weight_only)
+print "sorted by wikiminer:"
+pprint.pprint(sorted_by_weight)
+print sorted_by_weight.keys()
 
 candidate_objs = []
 for e_c in entity_candidates:
