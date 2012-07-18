@@ -20,11 +20,11 @@ def rank_candidates(user_obj, candidate_objs):
     # get the total number of edits ever made by any user on the categories in 
     # the dictionary so that we can compute the category edits idfs up front
     try:
-        ae = open('all_edits.pkl', 'rb')
+        ae = open('pickles/all_edits.pkl', 'rb')
         cat_to_total_edits = pickle.load(ae)
     except:
         cat_to_total_edits = map_category_to_total_edits(user_obj, candidate_objs)
-        ae = open('all_edits.pkl', 'wb')
+        ae = open('pickles/all_edits.pkl', 'wb')
         pickle.dump(cat_to_total_edits, ae)
         ae.close()
     category_edit_idfs = compute_category_edits_idf(category_dictionary, cat_to_total_edits)

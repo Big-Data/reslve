@@ -14,11 +14,11 @@ print u
 username = 'ArchonMagnus'#'jmj713'
 
 try:
-    uof = open('user_objs.pkl', 'rb')
+    uof = open('pickles/user_objs.pkl', 'rb')
     user_obj = pickle.load(uof)
 except:
     user_obj = rank_util.construct_user_obj(username)
-    user_objs_file = open('user_objs.pkl', 'wb')
+    user_objs_file = open('pickles/user_objs.pkl', 'wb')
     pickle.dump(user_obj, user_objs_file)
     user_objs_file.close()
     
