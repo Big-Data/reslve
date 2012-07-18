@@ -1,118 +1,68 @@
-import User_Categories
 import named_entity_finder
 import pickle
-import score_util
-import wiki_fetch_util
+import pprint
+import rank_util
 
-'''
-# look for some usernames that have tweets we can disambiguate..
-usernames_file = open('sample_dump/twitter_accounts.pkl', 'rb')
-usernames = pickle.load(usernames_file)
-print usernames
-for u in usernames:
-    print u['screen_name']
-    print u['statuses_count']
-'''
 '''    
-jmj713
-**  Roth sold out, five days after publication. Back to press for a second
+    Roth sold out, five days after publication. Back to press for a second
     King gives new history lessons
-    Do we really need another Holmes?
-    Burgess archive reveals vast body of previously unseen work
-    In Winter Classic, Rangers Nip Flyers, Al Fresco
-    Ward awarded a goal. Meh. How about joining the rush and scoring?
-    Bush is the least popular living president - apparently absence does not make the heart
-LisaMLane
-    I love the Queen too, @edwebb forgive me - I know royalty are wasteful and non-democratic. I confess I like Charles too.
-Torchiest 
-    Perry talks like he's downloading his words through a bad wifi connection.
-    How does the future of the Tea Party intersect with the future of libertarianism? Can they make a new third party?
-hamish59
-jasonwells1982
-godofredo29
-Nicokroeker    
-dmacks
-bpositive
-christofhe
-Bjahnke
-jbraith
-cgiese
-katmaan
-sss28
-buaidh
-TheLeftorium
-ghosttownaz
-Leisurist
-AgentSniff
-barbthebuilder
-SnowmanRadio
-DJLN
-mimich
-arjann
-JohnArmagh
-Ricjac
-musdan77
-DrKiernan
-barbaracarder
-JoeSperrazza
-oceanflynn
-DMcQ
-illazilla
 '''
+uf = open('pickles/usernames.pkl', 'rb')
+u = pickle.load(uf)
+print u
+# set([u'Donvin55', u'MastaBaba', u'nicole1083', u'ellenbwright', u'rubiromero', u'BrentJamesMusic', u'ankurpshah', u'Ningauble', u'cadat', u'Jersey_Devil', u'RobertGreer', u'JustinCHodges', u'tratteggio', u'purinkle', u'LaurenTonge', u'Schlock', u'strikehold', u'melanie_may', u'emijrp', u'discovery103', u'EtienneCharland', u'AndrewShephard', u'blitzergrayson', u'ArchonMagnus', u'NoMercyFC', u'Kirkman', u'kelllseyy', u'mechellMLR', u'bradenz', u'uuade', u'Fried_Gold', u'Christiant', u'ultratone85', u'earl_andrew', u'impavidus', u'andredidier', u'calebrw', u'UnionAdam', u'mocha_mocha', u'xxxplizit', u'unstructured', u'ChessieChaney', u'cyan', u'Arcangel', u'artoronto', u'craftyran', u'JWSchmidt', u'confusador', u'itstimm', u'dimitrii', u'SteffyxD', u'Rursus', u'ruud_koot', u'teraspawn', u'samrolken', u'TheSubRosas', u'ninjaparade', u'legoktm', u'dragonecc', u'DonTello', u'Footwarrior', u'daisydream', u'elgafy', u'JEMIKALF', u'spartakan', u'roadapathy', u'Dev920', u'deu', u'Naijafinder', u'colorflow', u'peter_gallagher', u'KatieBNL', u'LaughlinJames', u'nudimmud', u'gatechjon', u'mattmac14', u'gudmundur', u'cibcomms', u'skeet_shooter', u'mpaley', u'willactivate', u'dergrauewolf', u'mrprada', u'safirahsyai', u'kjkolb', u'tarun2k', u'Snyke', u'colinsweet', u'joepeach', u'trivuz', u'floydian', u'rosiemacphee', u'Trepalium', u'dord', u'Justagrimeyone', u'annefernando', u'AlrightOk', u'shaunpress', u'Manhim', u'JRWoodwardMSW', u'ddbruce', u'strawbeard', u'bjeanh1', u'jacobrothschild', u'steelwool', u'ReemBeadles', u'binarymn', u'DLWhitehouse', u'Reedy_bot', u'rdf', u'bambus', u'shootinshark', u'hakubi', u'davidds', u'lantrix', u'ne2', u'Scarian', u'Sunkissedguy', u'Volbeatfan', u'kirkbroadhurst', u'wjcook', u'nescio', u'Nike', u'IvoShandor', u'Geeka2', u'tOmMyanG', u'jakebathman', u'brg', u'sammyrenee', u'Fred', u'salimgates', u'dice1976', u'theJC', u'Benignuman', u'megamav', u'sameboat', u'CowboyWisdom', u'Femto', u'jr105', u'danbarnesdavies', u'deon', u'cassowary', u'PiousRenegade', u'beta_m', u'sandpappy', u'FlyingToaster', u'demian42', u'jasonlimon', u'conflictedband', u'disavian', u'RSSewell', u'tweebee', u'lohanj', u'ook', u'peter_mora', u'hardcastle', u'mlkmnsgrl', u'kry', u'AchyuthB', u'DanPollock', u'markijbema', u'Dashiellx', u'Junior_Rookie', u'sixxtysixx', u'grapelli', u'FataL', u'Debloper', u'delphij', u'mrgeek', u'mh', u'illkagobius', u'GarthJones', u'blue_frederick', u'connorcreighton', u'UKFilmDesigner', u'illegalyouth', u'DeLandTree', u'brianduff', u'example', u'pammalamma', u'andrew_nutter', u'baybay337', u'SnowmanRadio', u'contron', u'Tabletcorry', u'GregHarry', u'Politico100', u'kusaga', u'pete4999', u'czj', u'Syberspace', u'mathbot', u'gsr7', u'omtay38', u'iMnement', u'Northernfire', u'weepingbritney', u'stuartcarter', u'Nixeagle', u'LF', u'Keakealani', u'madams57', u'cpsoper', u'ctunks', u'ImBoredALot', u'TimeMaps', u'tryzub', u'brian', u'mlzg4', u'JHarris', u'tyw7', u'Gualtherus', u'RLandmann', u'jokestress', u'Cyberhub', u'DougWoodMusic', u'desijattt', u'proace', u'TheUSMarshall', u'junior_estrella', u'dittes', u'saevarom', u'areiamus', u'JustIntonation', u'PAS007', u'deanlikespie', u'kaffro', u'tiagoguitar', u'george_wilson', u'Sophie', u'Colmenero', u'mikebertino', u'dubaduba', u'markkawika', u'alibrauda', u'danny', u'frikshun', u'give_it_up', u'rsskga', u'joeldebo', u'rickyrazz', u'KylePIB', u'davidbrooks', u'Octane', u'nancy', u'alekxia', u'AlAmmar', u'radinomiharjo', u'jasonbrennan', u'northerndreams', u'rrothberg', u'trumpetsizzle', u'but_no', u'Richard', u'vars', u'MDebets', u'Rediscoverer', u'teaparty1', u'chancebliss', u'entity', u'kkplease', u'phalacee', u'tim_osborne', u'CeC', u'ocaoca', u'Siebrand', u'mikeportes', u'handsomedan', u'ZenDoodles', u'panther3751', u'john_carter', u'ConjurusRex', u'daveespionage', u'TerriO', u'fcassia', u'LoganLopez', u'andrew_duffell', u'Syndicate', u'mrmojorisin', u'chunkeroni', u'gargoylebot', u'blackdaniel', u'politicsislife', u'Nepomuk', u'MarkCTest', u'Lympathy', u'shawphy', u'wilson_ang81', u'Sedward', u'xpoisonfreex', u'Goldman60', u'bahaish', u'Sengkang', u'respiro', u'Instantis', u'rsjeyakumar', u'Mike_Young', u'dukeare1', u'cuthead', u'ralphie81', u'AjaylaM', u'marukusu', u'silverwzw', u'kagato', u'tracef', u'Crazywolf', u'Mrd9', u'Redstonesoldier', u'Rich_Gould', u'pantalimon', u'infowest', u'ICEGURU', u'Phr3d', u'rosspatterson', u'rcat35', u'Fitoschido', u'btilm', u'catchiso', u'GabbielSan', u'Jesse_Richards', u'GreatBigBore', u'Chris_Roy', u'extreme_ironing', u'Jetstreamer', u'cmadler', u'mde', u'NeddySeagoon', u'KarthikTantri', u'CheezNapkin', u'bigmonachus', u'london1112', u'vcs', u'Fromanteel', u'zozart', u'moayadcom', u'BradPlummer', u'openbysource', u'TeeRebel', u'Victuallers', u'BabyCreech', u'bagusbagus', u'born2flie', u'nemishman', u'xenocidic', u'bigtreecountry', u'GabeReal', u'jeanpol', u'Spitfire19', u'hypersonicboom', u'xojycyjox', u'yogiontour', u'eliezer', u'Severson', u'StarMiner', u'Zadkiel', u'frgonzalez', u'krishnavedala', u'johndbuell', u'jakew', u'Boston', u'Sadartha', u'SindaAran', u'gkerridge', u'Pourkayvan', u'TNGEO', u'DevilK9', u'MahoneyRed', u'maonao', u'Feco', u'mugabuga', u'Windows_Me', u'sidewinder', u'ydlaz30', u'Chaython', u'SteveMcCluskey', u'poovannan', u'CSTUDVILL', u'adrianseeley', u'jordon1991', u'dominoesfall', u'markpesci', u'paulgarner', u'itskristine', u'bloodarowman', u'gormos', u'hardindr', u'sasukekun22', u'DavidZennie', u'millsdavid', u'TheSquare', u'nouvelleauteur', u'satROHraj', u'GoneAFK', u'cquan', u'ctsinclair', u'jacoblake', u'sly_si', u'cuzza', u'JonDel', u'EjBanks', u'Popcornlung', u'chaser', u'john', u'Haschel47', u'Tarfah', u'dcmacnut', u'kevinbrogers', u'thechooster', u'omegatron', u'PaulKnoxxx', u'Suraj_Sharma', u'krisblade', u'stephanwehner', u'jaredhendler', u'waynema', u'jakeyboy1989', u'MDGX', u'nathos', u'_the', u'Wolfdog', u'STEMNET', u'tkalsang', u'Krator', u'Too_Much_To_Ask', u'vrsoze', u'FuR', u'mu301', u'DrKull', u'dextrose', u'harkain', u'Carlys', u'sinceretarot', u'corezion', u'turbo74', u'ACDCbag', u'Sedulus', u'pamparam', u'aucaman', u'abyssal', u'aestetix', u'terrapin', u'fetchcomms', u'henrytdsimmons', u'millionaireman', u'JackTrades', u'Ruby2010', u'Angelica_Brown', u'amithchandhran', u'thecoolguy4ever', u'rident', u'ChrisKennedy', u'zutano', u'patrickneil', u'thecitizen', u'blakeallred', u'AndrewBarbisan', u'timnelson', u'david_5000', u'canonlaw', u'afrodriguezg', u'jeshaka', u'Oceana', u'jtbelliott', u'MedeaMelana', u'gjon', u'Schifanoia', u'89ak', u'colchester', u'Bombom', u'kuja', u'aminamilin', u'imdeng', u'Rick_bot', u'farain', u'Brandon_Thomas6', u'cherylsweb20', u'ashley_y', u'alexj', u'ocbaker', u'fcn', u'louisbourque', u'Bear_Driver', u'markreidyhp', u'ganeshglits', u'kf', u'hfleming', u'dvyjones', u'ke4roh', u'ryanlindstedt', u'Nihiltres', u'tsandler', u'pengo', u'blumster', u'Wavelength', u'ginkgo100', u'MasterMasar', u'alijean', u'octopusouphut', u'ragesoss', u'gulker', u'Opaninba', u'King_Gemini', u'Leeirons', u'champagneblue', u'julianonions', u'paperfork', u'Gluckman', u'paulmcdonald', u'emccall7791', u'CapitalR', u'forseti', u'Dave_Hatton', u'melodycurtiss', u'lms0023', u'leigh', u'tgeairn', u'tschoffelen', u'mcpaige', u'dafrwi', u'nall', u'FallenAngelEyes', u'medical_woman', u'PaulGauguin', u'AlisonW', u'madmax', u'jamieventure', u'akxiang', u'scratchedguitar', u'andreafox', u'ctome3', u'jsmallz1', u'richardf', u'davemon', u'Kazuki_Ashiya', u'andrew_writes', u'The_Viper', u'soumyeah', u'tommynoble', u'stoa', u'alexander', u'rfr', u'belamp', u'laidlaw', u'lfaraone', u'twsx', u'Hopeless308', u'Jeremiad', u'wcoenen', u'lumen0', u'timetoshare', u'gral', u'accutler', u'mdhowe', u'AimanStudio', u'Lcawte', u'Ldonbeatz', u'JohnCastle', u'Cadwaladr', u'RoboDick', u'ganesha', u'JerryLaGrou', u'JonJontheSON', u'nexione', u'foxfire0160', u'steamrunner', u'eagletusk', u'BenBalter', u'Chadiz', u'pcreux', u'megamanfan3', u'johnchavens', u'Pridit', u'scottykai', u'ilovekorea', u'z3lim', u'ulor', u'rstens', u'erimus', u'radiohost', u'fanf', u'jarrodtrainque', u'MZajac', u'florstein', u'macros', u'srice13', u'dlee37', u'alan_chambers', u'Koman90', u'wongbombs', u'ravivyas84', u'warpflyght', u'Wolf7', u'Maelwys', u'John_Corona', u'LanternRouge', u'vincereed', u'rarita', u'callmechelsea', u'martenjan', u'syzygos', u'daims09', u'07bargem', u'nihonjoe', u'moverton', u'TunnelingPigeon', u'jablan', u'brasker', u'with_lemon', u'nyletak', u'c', u'Zoofari', u'jacobltobin', u'radmilce', u'Minouris', u'the_menace', u'sunilbajpai', u'TonytheTiger', u'aeural', u'pdh', u'Fred_Rio', u'vramdal', u'aWESome311', u'Cygnus360', u'mijopo', u'AbbieG', u'gadig', u'vikingstad', u'peter_campbell', u'thoughtcriminal', u'iconoclash', u'dabuek', u'Hanargh', u'tree2020', u'IDFINE', u'BrotherE', u'ChrisGriswold', u'ozgurdogan', u'tripledot', u'yasirmturk', u'lidyadya', u'cmrdra', u'zyxw59', u'newbliss', u'DerwiG', u'AndiNell', u'johnkarp', u'bhvilar', u'orangetrousers', u'pigpogm', u'davidmizrachi', u'LeonimuZ', u'MattyWillow', u'mkjeong', u'moink', u'stevecrow74', u'ajmint', u'Mestre_Oda', u'allthewhile', u'renatogontijo', u'Snickersnee', u'Pevensie', u'tsnd', u'GaryWill', u'metabolome', u'stormwind', u'hidrnick', u'gmaxwell', u'DylanAndColeFan', u'Kithira', u'sexytyranno', u'WheelsDeals', u'firemangreg', u'KRG', u'Espio15', u'Lou_Franklin', u'robdylan', u'Possicon', u'thehistorygeek', u'xnightfallx', u'theborg', u'DHadams', u'filmyguy', u'Oly', u'jriddell', u'TheSecondKira', u'tacosunday', u'illintechnology', u'megpoid', u'colombiana_7', u'PentiumIV', u'bigdwiki', u'ajg12594', u'marianian', u'gigigraceyc', u'soulboost', u'engal', u'goschko', u'darrenhusted', u'YBAband', u'ukanime', u'28Bytes', u'apparition11', u'Cabano17', u'Desilet', u'Pomtidom', u'nevilley', u'DeathPhoenix', u'dhn', u'pb30', u'piginthepoke', u'josve05a', u'enfcer', u'cbecker', u'matthew', u'DO', u'jhall1', u'hello_bon', u'Matthew_Yeager', u'beznas', u'nerd2max', u'eladior', u'lpangelrob', u'jakzhumans', u'daphnepassa', u'tondalink', u'MBisanz', u'MrTea', u'nicdumz', u'ShepBot', u'Chickenmonkey', u'ALoyalAmerican', u'maidden', u'bobraines', u'Porton', u'JonEastham', u'SNiedo', u'ronanperceval', u'BlackJacob', u'pateln01', u'brinleyang', u'jedi9', u'tigger89', u'giov9', u'MicroChip123', u'varungarde', u'seor', u'kellan_standley', u'djtask', u'Magi42', u'qurus', u'Hesperian', u'concreto', u'gerryLowry1947', u'tinucherian', u'Camewel', u'CHAGUAL', u'Wim_B', u'zsoverman', u'davidgrove', u'kamalaakar', u'FiberOptix', u'grantb', u'NoTicket', u'hjv', u'normxxx', u'tariqwest', u'Flying_Hamster', u'hseldon10', u'sam', u'BruceRenny', u'pewski', u'kimon', u'jimktrains', u'kober', u'alvestrand', u'missreed', u'britneylopez', u'kmikeym', u'BirgitteSB', u'usagi1400', u'Dottorre', u'woodstock', u'James094', u'Nick_R', u'bellhalla', u'SoWhy', u'billybobfred', u'nicolaosborne', u's_marshall', u'pepo13', u'Jayjay', u'Galadh', u'Keta', u'Hotdogger666', u'GeorgeWingate', u'Frankenroc', u'chaserz', u'jamesyyy', u'AlexandraVino', u'Lamorak', u'Fethroesforia', u'MrChris', u'alexcruise', u'RichJWild', u'freekamia', u'soap', u'ConorMartin1996', u'HPJoker', u'patrick', u'DestinyRae', u'ksy3', u'madwriter9', u'Starstorm231', u'AndrewvdBK', u'Nick_Smale', u'Silent', u'serpentium', u'ppgardne', u'ryantriggs', u'andyzaft', u'nHelke', u'intellijean', u'lady_ev', u'FunPhil', u'mlpearc', u'are_dee', u'Lprsti99', u'ohemsted', u'gary_kirk', u'jdreed', u'jamessssssssss', u'dmgeo', u'JaJaon', u'Terri_G', u'duncanmcc', u'ravenswing', u'bsoft', u'kaippally', u'theKAIN', u'KevinGoolsby', u'new_england', u'darkhorizon', u't', u'ReggaeDelgado', u'eperickson', u'numbertwopencil', u'a_werewolf', u'jezmck', u'mackensen', u'OscarTheCat', u'Stephenjamesx', u'Bob', u'LittleBigPlanet', u'ospalh', u'jofergus', u'suniltams', u'leobard', u'Animatix', u'NITV', u'chicocvenancio', u'RetroRewind', u'namarupa', u'Daniel_Ellis', u'JoelGuelph', u'adgedc', u'Wathyreckk', u'mattgirling', u'fumitol', u'Cameron', u'buzzaz', u'danmux', u'darac', u'irwinclan', u'j1m', u'therealjan', u'GeorgiaAitken', u'jmbeck', u'Greg_Ward', u'pennstatephil', u'turian', u'AGlassOnion', u'andicat', u'Swarm', u'atozxyz', u'bguest', u'riochoa', u'magpie_boss', u'newsline', u'Fbdave', u'jzg', u'pual160', u'biblbroks', u'xixi4', u'TheManvils', u'ciksha', u'ricmarques', u'SadiquaP', u'kendroche', u'sugaki', u'ebello', u'spat', u'alimofun', u'polaron', u'alexd', u'andouble', u'vexroid', u'jaga', u'MissingLeftSock', u'iain_g_scott', u'yonskii', u'DonovanCrow', u'PascoeVale', u'fenix_down', u'M_AlKetbi', u'jtdavies', u'letitgo315', u'jhissong', u'Bumix', u'Reedy', u'simonemonique', u'mike_nobody', u'Jamcob', u'paulej', u'MTVCITY2', u'besenok', u'CyclePat', u'JadeSnake', u'LucindaBrown', u'ppwen', u'RK77', u'd360', u'KyraVixen', u'mllerustad', u'KatelynBuress', u'jamesontai', u'Carlos_Barba', u'VibsK', u'jasz', u'joepeterpierce', u'Ste', u'm', u'Bevone', u'jhecht', u'necesita', u'Dereckson', u'andycarroll', u'KKJJ', u'Frobro22', u'AfricanGenesis', u'albertodv', u'radialblur', u'FallsStart', u'SpaceMakers', u'millrjess', u'joshuajenkins', u'Rushyo', u'Maz204', u'haylon', u'42', u'Neobenedict', u'Oryzomys', u'ARoberts07', u'alby13', u'rawbery79', u'sammieseagull', u'zachblume', u'yamavu', u'dyaimz', u'gavinelder', u'seq23', u'leboism', u'stevei', u'bluemonq', u'skudrafan1', u'elijahgoforth', u'slightsmile', u'dathill', u'thakiddsupreme', u'FastLizard4', u'blurtsmum', u'ikluft', u'brettz9', u'Xp54321', u'luciuskwok', u'JoyousLake', u'ntfs', u'howardberry', u'VH8', u'yjenith', u'woofnet', u'Arteyu', u'SpikeToronto', u'DannyAmazin', u'lastorset', u'golden_eternity', u'gloriacox22', u'kakonya', u'jim_north', u'smuconlaw', u'Lowfly'])
+username = 'ArchonMagnus'#'jmj713'
 
-# user -> interests (categories)
-username = raw_input("Enter username: ")
-interests_file = open('sample_dump/interests_models.pkl', 'rb')
-user_models = pickle.load(interests_file)
-if user_models.has_key(username):
-    user_interests = user_models[username]
-else:
-    edits_query = 'list=usercontribs&ucuser='+username+'&uclimit=100&ucnamespace=0&ucshow=!minor&format=xml'
-    user_edits_xml = wiki_fetch_util.query_wiki(edits_query)
-    edited_pages = wiki_fetch_util.parse_wiki_xml(user_edits_xml, 'item', 'pageid')
-    user_interests = User_Categories.User_Categories(username)
-    for edited_page_id in edited_pages:
-        categories = wiki_fetch_util.fetch_categories_of_id(edited_page_id)
-        user_interests.add_categories(categories)
-user_categories_map = user_interests.get_categories()
-user_categories = user_categories_map.keys()
-print user_categories
-
-tweets_file = open('sample_dump/tweets.pkl', 'rb')
-tweets = pickle.load(tweets_file)
-if tweets.has_key(username):
-    user_tweets = tweets[username]
-    print user_tweets
-
-# tweet -> detect entities -> for ambiguous entities, get candidates -> score candidate categories against user categories
-tweet = raw_input("Enter tweet: ")
+try:
+    uof = open('user_objs.pkl', 'rb')
+    user_obj = pickle.load(uof)
+except:
+    user_obj = rank_util.construct_user_obj(username)
+    user_objs_file = open('user_objs.pkl', 'wb')
+    pickle.dump(user_obj, user_objs_file)
+    user_objs_file.close()
+    
+# take a tweet -> detect entities -> get candidates -> score each candidate against user model
+tweet = 'Limbo'
 entities_map = named_entity_finder.find_candidates_wikipedia_miner(tweet)
+'''
 for surface_form in entities_map.keys():
-    print "Ambiguous term: "+surface_form
-    try:
-        candidates = entities_map[surface_form]
-        count = 1
-        for candidate in candidates:
-            try:
-                article_id = candidate['article_id']
-                title = candidate['title']
-                dbpedia_uri = candidate['dbpedia_uri']
-                print "Candidate "+str(count)+" of "+str(len(candidates))+": "+title
-                count = count+1
-                
-                # wikiminer disambiguation
-                weight = candidate['weight']
-                print "Rank according to Wikipedia Miner: "+str(weight)
+    print "Detected entity: "+surface_form
+    #try:
+    entity_candidates = entities_map[surface_form]
+    pprint.pprint(entity_candidates)
+    if len(entity_candidates)==0:
+        continue # not ambiguous
+    
+    candidate_objs = []
+    for e_c in entity_candidates:
+        try:
+            candidate_obj = rank_util.construct_candidate_obj_from_wikiminer_candidate(e_c)
+            candidate_objs.append(candidate_obj)
+        except Exception as e2:
+            print "Problem with candidate "+str(e_c)
+            print e2
+            continue
+        
+    rank_util.rank_candidates(user_obj, candidate_objs)
+    #except Exception as e1:
+    #    print e1
+    #    continue
+    if True:
+        break
+    '''
+surface_form = entities_map.keys()[0]
+entity_candidates = entities_map[surface_form]
+pprint.pprint(entity_candidates)
 
-                # our disambiguation
-                candidate_categories = wiki_fetch_util.fetch_categories_of_id(article_id)
-                ''' TODO switch this to use the full category hierarchy '''
-                jacc_sim = score_util.jaccard_similarity(candidate_categories, user_categories)
-                print "Rank according to us: "+str(jacc_sim)
-                
-            except Exception as e1:
-                print e1
-                continue
+candidate_objs = []
+for e_c in entity_candidates:
+    try:
+        candidate_obj = rank_util.construct_candidate_obj_from_wikiminer_candidate(e_c)
+        candidate_objs.append(candidate_obj)
     except Exception as e2:
+        print "Problem with candidate "+str(e_c)
         print e2
         continue
+if len(candidate_objs) > 0:  
+    rank_util.rank_candidates(user_obj, candidate_objs)
