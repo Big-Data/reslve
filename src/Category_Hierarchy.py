@@ -21,7 +21,7 @@ class Category_Hierarchy:
         ''' For a given category, returns the number of steps away from the 
         source article that category is positioned in this hierarchy '''
         if not category in self.__category_to_distance__:
-            return -1
+            return 0
         return self.__category_to_distance__[category]
         
     def get_category_to_distance(self):
@@ -29,3 +29,10 @@ class Category_Hierarchy:
         away from the source article that the category is positioned 
         in this category hierarchy graph '''
         return self.__category_to_distance__
+
+    def is_category_in_hierarchy(self, category):
+        return category in self.__category_to_distance__
+    
+    def get_category_list(self):
+        ''' Returns a list of all categories in this hierarchy '''
+        return self.__category_to_distance__.keys()
