@@ -325,23 +325,22 @@ def sim(d_j, q):
     
     candidate_weighted_vector = d_j.get_weighted_vector()
     user_weighted_vector = q.get_weighted_vector()
-    sum_val = 0
+    cosine_sim = 0
     for category in user_weighted_vector:
         w_ij = candidate_weighted_vector[category] 
         w_iq = user_weighted_vector[category]
-        sum_val = sum_val + (w_ij * w_iq)
-    print "sum val:"+str(sum_val)
+        cosine_sim = cosine_sim + (w_ij * w_iq)
+    print "cosine_sim:"+str(cosine_sim)
     
     print "comparing to jaccard"
-    jacc = jaccard_similarity_weighted_vectors(d_j, q)
-    print jacc
+    jaccard_sim = jaccard_similarity_weighted_vectors(d_j, q)
+    print jaccard_sim
         
     print "comparing to cosine function"
-    #cossim = cosine_similarity(d_j.get_weighted_vector(), q.get_weighted_vector())
-    #print cossim
-        
-    return sum_val
-
+    cossim = cosine_similarity(d_j.get_weighted_vector().values(), q.get_weighted_vector().values())
+    print cossim
+    
+    return cosine_sim
 
 def jaccard_similarity_weighted_vectors(d_j, q):
     ''' Computes similarity based on binary absence or presence 
@@ -373,37 +372,40 @@ def jaccard_similarity(doc1_words, doc2_words):
     intersection = [common_word for common_word in doc1_words if common_word in doc2_words]
     return float(len(intersection))/(len(doc1_words) + len(doc2_words) - len(intersection))    
 
+# See http://mines.humanoriented.com/classes/2010/fall/csci568/portfolio_exports/sphilip/cos.html
+def cosine_similarity(doc_vector1, doc_vector2):
+    
+    # Calculate numerator of cosine similarity
+    dot_val = 0.0
+    for i in range(len(doc_vector1)):
+        dot_val += doc_vector1[i] * doc_vector2[i]
+  
+    # Normalize the first vector
+    sum_vector1 = 0.0
+    for i in range(len(doc_vector1)):
+        sum_vector1 += doc_vector1[i]*doc_vector1[i]
+    norm_vector1 = sqrt(sum_vector1)
+  
+    # Normalize the second vector
+    sum_vector2 = 0.0
+    for i in range(len(doc_vector2)):
+        sum_vector2 += doc_vector2[i]*doc_vector2[i]
+    norm_vector2 = sqrt(sum_vector2)
+  
+    return (dot_val/(norm_vector1*norm_vector2))
+
+# Same computation as above function, separated into separate methods
+def cos_sim(a,b):
+    return dot(a,b) / (norm(a) * norm(b))
 def dot(a,b):
     n = len(a)
     sum_val = 0
     for i in xrange(n):
         sum_val += a[i] * b[i];
     return sum_val
-
 def norm(a):
     n = len(a)
     sum_val = 0
     for i in xrange(n):
         sum_val += a[i] * a[i]
     return math.sqrt(sum_val)
-
-def cossim(a,b):
-    return dot(a,b) / (norm(a) * norm(b))
-  
-# See http://mines.humanoriented.com/classes/2010/fall/csci568/portfolio_exports/sphilip/cos.html
-def cosine_similarity(doc_vector1, doc_vector2):
-    # Calculate numerator of cosine similarity
-    dot = [doc_vector1[i] * doc_vector2[i] for i in range(len(doc_vector1))]
-  
-    # Normalize the first vector
-    sum_vector1 = 0.0
-    print range(len(doc_vector1))
-    sum_vector1 += sum_vector1 + (doc_vector1[i]*doc_vector1[i] for i in range(len(doc_vector1)))
-    norm_vector1 = sqrt(sum_vector1)
-  
-    # Normalize the second vector
-    sum_vector2 = 0.0
-    sum_vector2 += sum_vector2 + (doc_vector2[i]*doc_vector2[i] for i in range(len(doc_vector2)))
-    norm_vector2 = sqrt(sum_vector2)
-  
-    return (dot/(norm_vector1*norm_vector2))
