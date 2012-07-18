@@ -42,6 +42,35 @@ def query_user_edits(username):
     
     return page_to_numedits
 
+def query_page_edits(page_id):
+    ''' Returns the total number of revisions ever made on the given page by anyone '''
+    total_num_edits = 0
+    rvstart = ''
+    while True:
+        edits_query = 'prop=revisions&pageids='+str(page_id)+'&rvlimit=5000&format=xml'+str(rvstart)
+        edits_xml = __query_wiki__(edits_query)
+        edited_pages = __parse_wiki_xml__(edits_xml, 'rev', 'revid')
+        total_num_edits = total_num_edits + len(edited_pages)
+        
+        query_continue = __wiki_xml_has_tag__(edits_xml, 'query-continue')  
+        if not query_continue:
+            break
+        next_revisions = __parse_wiki_xml__(edits_xml, 'revisions', 'rvstartid')
+        rvstart = '&rvstartid='+next_revisions[0]
+    
+    return total_num_edits
+
+def query_hierarchy_edits(category_hierarchy):
+    ''' Returns the total number of revisions ever made on the source article of the given Category_Hierarchy '''
+    return query_page_edits(category_hierarchy.get_source_article_id())
+
+def query_total_edits():
+    ''' Returns the total number of edits made on Wikipedia '''
+    stats_query = 'meta=siteinfo&siprop=statistics&format=xml'
+    stats_xml = __query_wiki__(stats_query)
+    edit_stat = __parse_wiki_xml__(stats_xml, 'statistics', 'edits')
+    return edit_stat
+
 def is_active_user(user, min_editcount):
     ''' Return true if the given user has made at least 
     the given number of edits, false otherwise  '''
@@ -117,8 +146,11 @@ def __query_wiki__(query) :
 def __parse_wiki_xml__(wiki_xml, tag_name, attribute) : 
     ''' Parses xml fetched from wikipedia to retrieve the 
     value of the given attribute within the given tag. '''
-    dom = xml.dom.minidom.parseString(wiki_xml)
-    pages = dom.getElementsByTagName(tag_name)
+    try:
+        dom = xml.dom.minidom.parseString(wiki_xml)
+        pages = dom.getElementsByTagName(tag_name)
+    except:
+        pages = []
 
     attr_list = []
     for page in pages : 
