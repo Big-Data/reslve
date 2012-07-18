@@ -1,0 +1,1265 @@
+(iUser
+User
+p0
+(dp1
+S'__cat_to_user_edits_num__'
+p2
+(dp3
+VCategory:Medieval video games
+p4
+I1
+sVCategory:Apocalyptic films
+p5
+I1
+sVCategory:American musicians of Irish descent
+p6
+I1
+sVCategory:Polish fantasy writers
+p7
+I1
+sVCategory:Dark fantasy video games
+p8
+I1
+sVCategory:Novels by D. F. Jones
+p9
+I1
+sVCategory:American indie rock groups
+p10
+I1
+sVCategory:American television actors
+p11
+I1
+sVCategory:Fictional World War II veterans
+p12
+I1
+sVCategory:Medical signs
+p13
+I1
+sVCategory:Hebrew Bible people
+p14
+I1
+sVCategory:Burials in Hebron
+p15
+I1
+sVCategory:Cancelled PlayStation 3 games
+p16
+I1
+sVCategory:Visual perception
+p17
+I1
+sVCategory:Continents
+p18
+I1
+sVCategory:1970s science fiction novels
+p19
+I1
+sVCategory:Telangana geography stubs
+p20
+I1
+sVCategory:American rock singer-songwriters
+p21
+I1
+sVCategory:Fictional organizations in Marvel Comics
+p22
+I1
+sVCategory:2000s science fiction films
+p23
+I1
+sVCategory:1909 births
+p24
+I1
+sVCategory:Judge Dredd characters
+p25
+I1
+sVCategory:American baritones
+p26
+I1
+sVCategory:Urban legends
+p27
+I1
+sVCategory:Fictional laboratories
+p28
+I1
+sVCategory:Populated places in Sumner County, Tennessee
+p29
+I1
+sVCategory:Electronics companies of Taiwan
+p30
+I1
+sVCategory:Characters created by Len Wein
+p31
+I1
+sVCategory:Greek loanwords
+p32
+I1
+sVCategory:American people of English descent
+p33
+I1
+sVCategory:Fictional clones
+p34
+I1
+sVCategory:Antarctica
+p35
+I1
+sVCategory:Fictional Canadian people
+p36
+I1
+sVCategory:Entrepreneurship
+p37
+I1
+sVCategory:Portable audio player manufacturers
+p38
+I1
+sVCategory:Antarctic region
+p39
+I1
+sVCategory:Display technology companies
+p40
+I1
+sVCategory:Cancelled Xbox 360 games
+p41
+I1
+sVCategory:2000 AD comic strips
+p42
+I1
+sVCategory:English folklore
+p43
+I1
+sVCategory:Comics characters introduced in 1974
+p44
+I1
+sVCategory:Comics characters introduced in 1977
+p45
+I1
+sVCategory:Marvel Comics supervillain teams
+p46
+I1
+sVCategory:2007 video games
+p47
+I1
+sVCategory:American thriller films
+p48
+I1
+sVCategory:20th Century Fox films
+p49
+I1
+sVCategory:American film actors
+p50
+I1
+sVCategory:People of the Whitewater controversy
+p51
+I1
+sVCategory:Northumbrian folklore
+p52
+I1
+sVCategory:Business and financial operations occupations
+p53
+I1
+sVCategory:Atari games
+p54
+I1
+sVCategory:2000s thriller films
+p55
+I1
+sVCategory:Earth mysteries
+p56
+I1
+sVCategory:Fictional Korean War veterans
+p57
+I1
+sVCategory:Scientific techniques
+p58
+I1
+sVCategory:Judge Dredd
+p59
+I1
+sVCategory:Computer hardware companies
+p60
+I1
+sVCategory:1963 births
+p61
+I1
+sVCategory:Geography of Miami, Florida
+p62
+I1
+sVCategory:French loanwords
+p63
+I1
+sVCategory:English legendary creatures
+p64
+I1
+sVCategory:Blizzard Entertainment
+p65
+I1
+sVCategory:Acer Inc.
+p66
+I1
+sVCategory:Living people
+p67
+I3
+sVCategory:English-language films
+p68
+I1
+sVCategory:World War II sites of the United States
+p69
+I1
+sVCategory:Nautical lore
+p70
+I1
+sVCategory:Environmental films
+p71
+I1
+sVCategory:Disambiguation pages
+p72
+I1
+sVCategory:American films
+p73
+I1
+sVCategory:Nashville metropolitan area
+p74
+I1
+sVCategory:1948 births
+p75
+I1
+sVCategory:Characters created by Herb Trimpe
+p76
+I1
+sVCategory:Semiconductors
+p77
+I1
+sVCategory:Electron microscopy
+p78
+I1
+sVCategory:Unexplained disappearances
+p79
+I1
+sVCategory:American science fiction films
+p80
+I1
+sVCategory:Taiwan brands
+p81
+I1
+sVCategory:Towns in Tennessee
+p82
+I1
+sVCategory:Games for Windows certified games
+p83
+I1
+sVCategory:Old Testament female saints
+p84
+I1
+sVCategory:Bermuda Triangle
+p85
+I1
+sVCategory:People from Dearborn, Michigan
+p86
+I1
+sVCategory:Accelerator physics
+p87
+I1
+sVCategory:Video game development companies
+p88
+I1
+sVCategory:Ophthalmology
+p89
+I1
+sVCategory:Fundamental physics concepts
+p90
+I1
+sVCategory:Video game publishers
+p91
+I1
+sVCategory:Polar regions of the Earth
+p92
+I1
+sVCategory:Paranormal triangles
+p93
+I1
+sVCategory:Netbook manufacturers
+p94
+I1
+sVCategory:Fictional police officers
+p95
+I1
+sVCategory:Fictional World War I veterans
+p96
+I1
+sVCategory:Fictional judges
+p97
+I1
+sVCategory:1977 novels
+p98
+I1
+sVCategory:American heavy metal guitarists
+p99
+I1
+sVCategory:Video game companies of the United States
+p100
+I1
+sVCategory:1958 deaths
+p101
+I1
+sVCategory:Companies established in 1991
+p102
+I1
+sVCategory:Fictional assassins
+p103
+I1
+sVCategory:Extreme points of Earth
+p104
+I1
+sVCategory:Lua-scripted video games
+p105
+I1
+sVCategory:Fictional Vietnam War veterans
+p106
+I1
+sVCategory:2000 AD characters
+p107
+I1
+sVCategory:American people of Scottish descent
+p108
+I1
+sVCategory:UFO-related locations
+p109
+I1
+sVCategory:American male singers
+p110
+I1
+sVCategory:Companies based in New Taipei
+p111
+I1
+sVCategory:Action role-playing video games
+p112
+I1
+sVCategory:Companies established in 1976
+p113
+I1
+sVCategory:American musicians of German descent
+p114
+I1
+sVCategory:Management occupations
+p115
+I1
+sVCategory:1981 births
+p116
+I1
+sVCategory:Novels about computing
+p117
+I1
+sVCategory:Comics by John Wagner
+p118
+I1
+sVCategory:Adam and Eve
+p119
+I1
+sVCategory:Mobile phone manufacturers
+p120
+I1
+sVCategory:People from Arkansas
+p121
+I1
+sVCategory:Companies based in Irvine, California
+p122
+I1
+sVCategory:French words and phrases
+p123
+I1
+sVCategory:American film producers
+p124
+I1
+sVCategory:American heavy metal singers
+p125
+I1
+sVCategory:Actors from Michigan
+p126
+I1
+sVCategory:Post-apocalyptic comics
+p127
+I1
+sVCategory:Mythological horses
+p128
+I1
+sVCategory:2008 films
+p129
+I1
+sVCategory:Place names of Westmorland origin in the United States
+p130
+I1
+sVCategory:American politics biographical stubs
+p131
+I1
+sVCategory:Villages in Khammam district
+p132
+I1
+sVCategory:Mac OS X games
+p133
+I1
+sVCategory:Mythological dogs
+p134
+I1
+sVCategory:Characters created by John Romita, Sr.
+p135
+I1
+ssS'__cat_to_all_edits_num__'
+p136
+(dp137
+g4
+I838
+sg5
+I2190
+sg6
+I4986
+sg7
+I218
+sg8
+I838
+sg9
+I15
+sg10
+I77
+sg11
+I486
+sg12
+I7622
+sg13
+I604
+sg14
+I753
+sg15
+I753
+sg16
+I838
+sg17
+I604
+sg18
+I7298
+sg19
+I15
+sg20
+I17
+sg21
+I4986
+sg22
+I575
+sg23
+I2190
+sg24
+I7
+sg25
+I1392
+sg26
+I4986
+sg27
+I4676
+sg28
+I575
+sg29
+I54
+sg30
+I1696
+sg31
+I7622
+sg32
+I7298
+sg33
+I4986
+sg34
+I1392
+sg35
+I7298
+sg36
+I7622
+sg37
+I3366
+sg38
+I1696
+sg39
+I7298
+sg40
+I1696
+sg41
+I838
+sg42
+I1392
+sg43
+I58
+sg44
+I7622
+sg45
+I1392
+sg46
+I575
+sg47
+I838
+sg48
+I2190
+sg49
+I2190
+sg50
+I486
+sg51
+I29
+sg52
+I58
+sg53
+I3366
+sg54
+I838
+sg55
+I2190
+sg56
+I4676
+sg57
+I7622
+sg58
+I1799
+sg59
+I1392
+sg60
+I1696
+sg61
+I4986
+sg62
+I4676
+sg63
+I3366
+sg64
+I58
+sg65
+I2796
+sg66
+I1696
+sg67
+I733
+sg68
+I2190
+sg69
+I4676
+sg70
+I4676
+sg71
+I2190
+sg72
+I1038
+sg73
+I2190
+sg74
+I54
+sg75
+I218
+sg76
+I7622
+sg77
+I1728
+sg78
+I1799
+sg79
+I4676
+sg80
+I2190
+sg81
+I1696
+sg82
+I54
+sg83
+I838
+sg84
+I753
+sg85
+I4676
+sg86
+I486
+sg87
+I1799
+sg88
+I2796
+sg89
+I604
+sg90
+I1728
+sg91
+I2796
+sg92
+I7298
+sg93
+I4676
+sg94
+I1696
+sg95
+I1392
+sg96
+I7622
+sg97
+I1392
+sg98
+I15
+sg99
+I4986
+sg100
+I2796
+sg101
+I7
+sg102
+I2796
+sg103
+I7622
+sg104
+I7298
+sg105
+I838
+sg106
+I7622
+sg107
+I1392
+sg108
+I4986
+sg109
+I4676
+sg110
+I4986
+sg111
+I1696
+sg112
+I838
+sg113
+I1696
+sg114
+I4986
+sg115
+I3366
+sg116
+I486
+sg117
+I15
+sg118
+I1392
+sg119
+I753
+sg120
+I1696
+sg121
+I29
+sg122
+I2796
+sg123
+I3366
+sg124
+I7
+sg125
+I4986
+sg126
+I486
+sg127
+I1392
+sg128
+I58
+sg129
+I2190
+sg130
+I54
+sg131
+I29
+sg132
+I17
+sg133
+I838
+sg134
+I58
+sg135
+I7622
+ssS'__username__'
+p138
+S'ArchonMagnus'
+p139
+sS'__hierarchy_to_all_edits_num__'
+p140
+(dp141
+(iCategory_Hierarchy
+Category_Hierarchy
+p142
+(dp143
+S'__source_article_id__'
+p144
+V269826
+p145
+sS'__category_to_distance__'
+p146
+(dp147
+g21
+I1
+sg114
+I1
+sg6
+I1
+sg33
+I1
+sg61
+I1
+sg26
+I1
+sg125
+I1
+sg99
+I1
+sg110
+I1
+sg108
+I1
+ssbI4986
+s(iCategory_Hierarchy
+Category_Hierarchy
+p148
+(dp149
+g144
+V302602
+p150
+sg146
+(dp151
+g103
+I1
+sg12
+I1
+sg57
+I1
+sg31
+I1
+sg106
+I1
+sg76
+I1
+sg36
+I1
+sg96
+I1
+sg44
+I1
+sg135
+I1
+ssbI7622
+s(iCategory_Hierarchy
+Category_Hierarchy
+p152
+(dp153
+g144
+V135384
+p154
+sg146
+(dp155
+g29
+I1
+sg130
+I1
+sg74
+I1
+sg82
+I1
+ssbI54
+s(iCategory_Hierarchy
+Category_Hierarchy
+p156
+(dp157
+g144
+V27709
+p158
+sg146
+(dp159
+g77
+I1
+sg90
+I1
+ssbI1728
+s(iCategory_Hierarchy
+Category_Hierarchy
+p160
+(dp161
+g144
+V21120292
+p162
+sg146
+(dp163
+g10
+I1
+ssbI77
+s(iCategory_Hierarchy
+Category_Hierarchy
+p164
+(dp165
+g144
+V18959138
+p166
+sg146
+(dp167
+g39
+I1
+sg104
+I1
+sg32
+I1
+sg35
+I1
+sg92
+I1
+sg18
+I1
+ssbI7298
+s(iCategory_Hierarchy
+Category_Hierarchy
+p168
+(dp169
+g144
+V16572
+p170
+sg146
+(dp171
+g59
+I1
+sg127
+I1
+sg118
+I1
+sg34
+I1
+sg107
+I1
+sg25
+I1
+sg95
+I1
+sg97
+I1
+sg42
+I1
+sg45
+I1
+ssbI1392
+s(iCategory_Hierarchy
+Category_Hierarchy
+p172
+(dp173
+g144
+V21075514
+p174
+sg146
+(dp175
+g117
+I1
+sg9
+I1
+sg19
+I1
+sg98
+I1
+ssbI15
+s(iCategory_Hierarchy
+Category_Hierarchy
+p176
+(dp177
+g144
+V4749230
+p178
+sg146
+(dp179
+g131
+I1
+sg51
+I1
+sg121
+I1
+sVCategory:Living people
+p180
+I1
+ssbI29
+s(iCategory_Hierarchy
+Category_Hierarchy
+p181
+(dp182
+g144
+V713143
+p183
+sg146
+(dp184
+g46
+I1
+sg22
+I1
+sg28
+I1
+ssbI575
+s(iCategory_Hierarchy
+Category_Hierarchy
+p185
+(dp186
+g144
+V19110872
+p187
+sg146
+(dp188
+g101
+I1
+sg24
+I1
+sg124
+I1
+ssbI7
+s(iCategory_Hierarchy
+Category_Hierarchy
+p189
+(dp190
+g144
+V21072859
+p191
+sg146
+(dp192
+g20
+I1
+sg132
+I1
+ssbI17
+s(iCategory_Hierarchy
+Category_Hierarchy
+p193
+(dp194
+g144
+V9730
+p195
+sg146
+(dp196
+g87
+I1
+sg58
+I1
+sg78
+I1
+ssbI1799
+s(iCategory_Hierarchy
+Category_Hierarchy
+p197
+(dp198
+g144
+V4876
+p199
+sg146
+(dp200
+g102
+I1
+sg88
+I1
+sg91
+I1
+sg122
+I1
+sg65
+I1
+sg100
+I1
+ssbI2796
+s(iCategory_Hierarchy
+Category_Hierarchy
+p201
+(dp202
+g144
+V4345275
+p203
+sg146
+(dp204
+g14
+I1
+sg15
+I1
+sg84
+I1
+sg119
+I1
+ssbI753
+s(iCategory_Hierarchy
+Category_Hierarchy
+p205
+(dp206
+g144
+V2865
+p207
+sg146
+(dp208
+g7
+I1
+sg67
+I1
+sg75
+I1
+ssbI218
+s(iCategory_Hierarchy
+Category_Hierarchy
+p209
+(dp210
+g144
+V4854
+p211
+sg146
+(dp212
+g79
+I1
+sg62
+I1
+sg56
+I1
+sg69
+I1
+sg70
+I1
+sg109
+I1
+sg85
+I1
+sg27
+I1
+sg93
+I1
+ssbI4676
+s(iCategory_Hierarchy
+Category_Hierarchy
+p213
+(dp214
+g144
+V330251
+p215
+sg146
+(dp216
+g72
+I1
+ssbI1038
+s(iCategory_Hierarchy
+Category_Hierarchy
+p217
+(dp218
+g144
+V648954
+p219
+sg146
+(dp220
+g17
+I1
+sg89
+I1
+sg13
+I1
+ssbI604
+s(iCategory_Hierarchy
+Category_Hierarchy
+p221
+(dp222
+g144
+V9939796
+p223
+sg146
+(dp224
+g73
+I1
+sg129
+I1
+sg55
+I1
+sg23
+I1
+sg68
+I1
+sg48
+I1
+sg49
+I1
+sg71
+I1
+sg80
+I1
+sg5
+I1
+ssbI2190
+s(iCategory_Hierarchy
+Category_Hierarchy
+p225
+(dp226
+g144
+V6840589
+p227
+sg146
+(dp228
+g83
+I1
+sg112
+I1
+sg4
+I1
+sg8
+I1
+sg54
+I1
+sg105
+I1
+sg16
+I1
+sg47
+I1
+sg41
+I1
+sg133
+I1
+ssbI838
+s(iCategory_Hierarchy
+Category_Hierarchy
+p229
+(dp230
+g144
+V2423778
+p231
+sg146
+(dp232
+g11
+I1
+sg126
+I1
+sVCategory:Living people
+p233
+I1
+sg116
+I1
+sg86
+I1
+sg50
+I1
+ssbI486
+s(iCategory_Hierarchy
+Category_Hierarchy
+p234
+(dp235
+g144
+V397169
+p236
+sg146
+(dp237
+g111
+I1
+sg40
+I1
+sg60
+I1
+sg30
+I1
+sg94
+I1
+sg66
+I1
+sg120
+I1
+sg81
+I1
+sg113
+I1
+sg38
+I1
+ssbI1696
+s(iCategory_Hierarchy
+Category_Hierarchy
+p238
+(dp239
+g144
+V39862
+p240
+sg146
+(dp241
+g37
+I1
+sg53
+I1
+sg115
+I1
+sg123
+I1
+sg63
+I1
+ssbI3366
+s(iCategory_Hierarchy
+Category_Hierarchy
+p242
+(dp243
+g144
+V21120075
+p244
+sg146
+(dp245
+sbI7
+s(iCategory_Hierarchy
+Category_Hierarchy
+p246
+(dp247
+g144
+V1248684
+p248
+sg146
+(dp249
+g43
+I1
+sg128
+I1
+sg134
+I1
+sg52
+I1
+sg64
+I1
+ssbI58
+ssS'__hierarchy_to_user_edits_num__'
+p250
+(dp251
+g142
+I1
+sg148
+I1
+sg152
+I1
+sg156
+I1
+sg160
+I1
+sg164
+I1
+sg168
+I1
+sg172
+I1
+sg176
+I1
+sg181
+I1
+sg185
+I1
+sg189
+I1
+sg193
+I1
+sg197
+I1
+sg201
+I1
+sg205
+I1
+sg209
+I1
+sg213
+I1
+sg217
+I1
+sg221
+I1
+sg225
+I1
+sg229
+I1
+sg234
+I1
+sg238
+I1
+sg242
+I1
+sg246
+I1
+ssb.
