@@ -21,6 +21,9 @@ class Candidate:
         
     def get_candidateID(self):
         return self.__candidate_ID__
+    
+    def get_candidate_wikiminer_prob(self):
+        return self.__wikiminer_weight__
 
     def get_category_hierarchy(self):
         ''' Returns the Category_Hierarchy that originates from the candidate's associated article '''
