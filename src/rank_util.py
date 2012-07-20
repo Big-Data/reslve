@@ -38,6 +38,7 @@ def rank_candidates(user_obj, candidate_objs):
     candidate_scores = {}
     jacc_scores = {}
     cossim_scores = {}
+    composite_scores = {}
     for candidate_obj in candidate_objs:
         candidate_vector = construct_candidate_vector(candidate_obj, category_dictionary)
         
@@ -50,11 +51,16 @@ def rank_candidates(user_obj, candidate_objs):
         
         cossim = cosine_similarity(candidate_vector.get_weighted_vector().values(), user_vector.get_weighted_vector().values())
         cossim_scores[candidate_obj.get_candidateID()] = cossim
+        
+        wikiminer_prob = candidate_obj.get_candidate_wikiminer_prob()
+        composite_score = get_composite_score(wikiminer_prob, score)
+        composite_scores[candidate_obj.get_candidateID()] = composite_score
     
     # sort by decreasing score
     sorted_candidate_scores = sort_candidates(candidate_scores)
     sorted_jacc_scores = sort_candidates(jacc_scores)
     sorted_cossim_scores = sort_candidates(cossim_scores)
+    sorted_composite_scores = sort_candidates(composite_scores)
     
     print "sorted by ours:"
     pprint.pprint(sorted_candidate_scores)
@@ -63,6 +69,8 @@ def rank_candidates(user_obj, candidate_objs):
     pprint.pprint(sorted_jacc_scores)
     print "sorted by cossim:"
     pprint.pprint(sorted_cossim_scores)
+    print "sorted composite:"
+    pprint.pprint(sorted_composite_scores)
 
     return sorted_candidate_scores
 
@@ -432,3 +440,13 @@ def norm(a):
     for i in xrange(n):
         sum_val += a[i] * a[i]
     return math.sqrt(sum_val)
+
+def get_composite_score(wikiminer_probability, user_candidate_sim):
+    ''' Returns a probability that the given candidate is valid by 
+    combining wikiminer's probability that a candidate is valid (based 
+    on that candidate's commonness, relatedness to context, and context 
+    quality) with our score (based on similarity between user's interest
+    and candidate topic). 
+    For more information on Wikipedia Miner's probability calculation, see
+    wikiminer/src/org/wikipedia/miner/annotation/Disambiguator.getProbabilityOfSense(..)'''
+    return wikiminer_probability + user_candidate_sim
