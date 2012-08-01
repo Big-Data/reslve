@@ -1,4 +1,14 @@
-from util import wiki_fetch_util
+"""
+Makes queries to wikipedia and twitter for user accounts. Collects usernames for 
+which both an active wikipedia account and an active twitter account exist until 
+a total of 1500 such usernames is retrieved. Writes these usernames to a CSV file, 
+along with a column that specifies whether the username actually belongs to the 
+same single person on wikipedia and on twitter. Currently, this value is "unknown" 
+for every username because we need to manually evaluate the likelihood, perhaps 
+using Mechanical Turk.
+"""
+
+from util import wiki_util
 from spreadsheet_labels import USERNAME_COLUMN, MATCH_COLUMN, MATCH_UNKNOWN
 import account_matching
 import csv
@@ -44,7 +54,7 @@ while len(users) < __users_sample_size__:
                     
                 # Only including "active" wikipedia users, ie those who 
                 # have made a minimum number of non-trivial edits
-                if not wiki_fetch_util.is_active_user(username, __min_edits__):
+                if not wiki_util.is_active_user(username, __min_edits__):
                     continue
                 
                 wiki_editors.append(username)
