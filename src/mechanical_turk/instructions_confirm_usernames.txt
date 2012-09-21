@@ -1,0 +1,23 @@
+Note:
+- To be sure Turkers understand the instructions and are properly checking users' profiles, Questions 1-5, 11, and 12 included to make them practice looking up info from a Twitter profile and from a Wikipedia user page.
+- If a Turker answers Questions 1-5, 11, or 12 incorrectly, we disregard their response.
+
+Instructions for Turkers:
+You will be presented with 12 questions that ask you to look up information about Wikipedia and Twitter users. Your goal is to determine whether a username that exists on both Wikipedia and Twitter actually belongs to the same single individual or to two different people. You can determine this by visiting a user's Wikipedia user page and visiting a user's Twitter profile and looking for matching information such as real name, email, occupation, photo, or location.
+A Wikipedia user page has a URL of the form http://en.wikipedia.org/wiki/User:username   For example: http://en.wikipedia.org/wiki/User:Jimbo_Wales
+A Twitter user's profile has a URL of the form http://en.twitter.com/username. For example: http://en.twitter.com/kevinthau
+To respond "Yes" to a question, give a thumbs up. To respond "No", give a thumbs down.
+
+Tasks for Turkers:
+1. According to the Twitter profile, is username 07bargem from the United States?
+2. According to the Wikipedia user page, is username fanf named Tony?
+3. Based on the picture on the user page, does the Wikipedia user who has the username Koman90 have blonde hair? 
+4. Based on the profile picture, is the Twitter user who has the username Koman90 a man? 
+5. Do you think the accounts on Wikipedia and Twitter for the username Koman90 are the same individual person?
+6. Do you think the accounts on Wikipedia and Twitter for the username [insert] belong to the same individual person?
+7. Do you think the accounts on Wikipedia and Twitter for the username [insert] belong to the same individual person? 
+8. Do you think the accounts on Wikipedia and Twitter for the username [insert] belong to the same individual person?
+9. Do you think the accounts on Wikipedia and Twitter for the username [insert] belong to the same individual person?
+10. Do you think the accounts on Wikipedia and Twitter for the username [insert] belong to the same individual person?
+11. Do you think the accounts on Wikipedia and Twitter for the username ericg belong to the same individual person?
+12. Do you think the accounts on Wikipedia and Twitter for the username octopusouphut are the same individual person?

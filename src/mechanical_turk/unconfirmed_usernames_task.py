@@ -1,0 +1,6 @@
+from datasets_generation import crosssite_username_dataset_mgr
+from short_text_sources import short_text_websites
+
+twitter_site = short_text_websites.get_twitter_site()
+usernames_to_evaluate = crosssite_username_dataset_mgr.get_usernames_to_evaluate_mturk(twitter_site)
+print usernames_to_evaluate
