@@ -50,7 +50,7 @@ def get_confirmed_usernames(site):
     return confirmed_matches
 
 def get_usernames_to_evaluate_mturk(site):
-    ''' Returns the usernames that humans have manually confirmed belong 
+    ''' Returns the usernames that humans need to manually confirm belong 
     to the same individual user on Wikipedia and the given site. '''
     usernames_csv_path = __get_usernames_csv_path__(site)
     need_to_be_evaluated = csv_util.query_csv_for_rows_with_value('../'+str(usernames_csv_path), 
