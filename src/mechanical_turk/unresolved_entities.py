@@ -1,5 +1,6 @@
 from dataset_generation import entity_dataset_mgr
 from short_text_sources import short_text_websites
+import random
 
 twitter_site = short_text_websites.get_twitter_site()
 entities_to_evaluate = entity_dataset_mgr.get_ne_candidates_to_evaluate_mturk(twitter_site, '../')
@@ -22,6 +23,10 @@ else:
         
         print "Note: You can check the Wikipedia page of a choice if it will help you understand its meaning better."
         print "Choices:"
-        for candidate in surface_form_obj.get_candidates():
+        # shuffle candidates so that they don't appear
+        # in wikiminer's ranking order and bias the turker
+        candidates = surface_form_obj.get_candidates()
+        random.shuffle(candidates)
+        for candidate in candidates:
             print str(candidate)+\
             " (http://en.wikipedia.org/wiki/"+str(candidate).replace(' ','_')+")"
