@@ -30,22 +30,32 @@ __COLUMN_ENTITY_STRING__ =  "entityTextString"
 
 ###########################################################
 
-def __get_entity_csv_path__(site):
+def __get_entities_csv_path__(site):
     ''' @param site: a Site object '''
     return '../data/spreadsheets/entities_'+str(site.siteName)+'.csv'
 def __get_surface_form_cache_path__(site):
     ''' @param site: a Site object '''
     return '../data/pickles/surface_form_cache_'+str(site.siteName)+'.pkl'    
+def __get_output_str__(site):
+    return "ambiguous entities detected in short texts from "+str(site.siteName)+\
+        " written by usernames that exist on both that site and Wikipedia"
 
-
+def get_ne_candidates_to_evaluate_mturk(site, caller_path):
+    ''' Returns the ambiguous entities mapped to their possible candidates  
+    from which humans need to manually choose the correct candidate. '''
+    surface_form_objs = pkl_util.load_pickle(__get_output_str__(site),
+                                             str(caller_path)+__get_surface_form_cache_path__(site))
+    if surface_form_objs is None:
+        return None
+    return surface_form_objs   
+    
 def build_entities_dataset(shorttext_rows, site):
     
     siteNameStr = str(site.siteName)
     
     # Load or create/initialize the spreadsheet of users' short texts
-    entity_csv_path = __get_entity_csv_path__(site)
-    output_str = "ambiguous entities detected in short texts from "+siteNameStr+\
-    " written by usernames that exist on both that site and Wikipedia"
+    entity_csv_path = __get_entities_csv_path__(site)
+    output_str = __get_output_str__(site)
     headers = [__COLUMN_ENTITY_ID__, __COLUMN_ENTITY_STRING__, COLUMN_SHORTTEXT_ID, COLUMN_SHORTTEXT_STRING, COLUMN_USERNAME]
     entities_in_csv = csv_util.load_or_initialize_csv(entity_csv_path, output_str, headers, __COLUMN_ENTITY_ID__)
     shorttexts_in_csv = csv_util.get_all_column_values(entity_csv_path, COLUMN_SHORTTEXT_ID)
