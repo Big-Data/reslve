@@ -46,6 +46,7 @@ def prompt_continue_building(output_string, curr_entries, desired_num):
 
 def __print_remaining__(output_string, curr_entries, desired_num):
     remaining =  max(0, desired_num - len(curr_entries))
-    print "Still need to append "+str(remaining)+" more "+output_string
     if 0==remaining:
         print "Done - "+str(desired_num)+" entries in "+output_string
+    else:
+        print "Still need to append "+str(remaining)+" more "+output_string
