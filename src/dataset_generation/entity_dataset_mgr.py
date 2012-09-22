@@ -37,9 +37,6 @@ def __get_surface_form_cache_path__(site):
     ''' @param site: a Site object '''
     return '../data/pickles/surface_form_cache_'+str(site.siteName)+'.pkl'    
 
-def create_and_cache_Surface_Form():
-    ''' Creates and saves to a pkl file an object representing the given '''
-    
 
 def build_entities_dataset(shorttext_rows, site):
     
