@@ -16,7 +16,7 @@ By default, the entries in this column are "UNCONFIRMED", ie have not
 yet been evaluated by a human.
 """
 from CONSTANT_VARIABLES import COLUMN_USERNAME
-from datasets_generation import csv_util, prompt_and_print, pkl_util
+from dataset_generation import csv_util, prompt_and_print, pkl_util
 from wikipedia import wikipedia_api_util
 
 __PROMPT_COUNT__ = 10
