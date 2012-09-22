@@ -1,4 +1,4 @@
-from datasets_generation import crosssite_username_dataset_mgr
+from dataset_generation import crosssite_username_dataset_mgr
 from short_text_sources import short_text_websites
 
 twitter_site = short_text_websites.get_twitter_site()

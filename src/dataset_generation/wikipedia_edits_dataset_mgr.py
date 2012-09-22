@@ -7,7 +7,7 @@ Saves this information in a spreadsheet with columns for the username, the
 edited article page ID, and the number of edits that user has made on that page.
 """
 from CONSTANT_VARIABLES import COLUMN_USERNAME
-from datasets_generation import csv_util, prompt_and_print, pkl_util
+from dataset_generation import csv_util, prompt_and_print, pkl_util
 from wikipedia import wikipedia_api_util
 
 __PROMPT_COUNT__ = 10

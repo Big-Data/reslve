@@ -6,7 +6,7 @@ short text id, its text string, and the username who posted it.
 """
 from CONSTANT_VARIABLES import COLUMN_USERNAME, COLUMN_SHORTTEXT_ID, \
     COLUMN_SHORTTEXT_STRING
-from datasets_generation import csv_util, prompt_and_print
+from dataset_generation import csv_util, prompt_and_print
 
 __PROMPT_COUNT__ = 10
 
@@ -59,7 +59,7 @@ def build_shorttexts_dataset(crosssite_usernames, site):
             for shorttext_id in user_shorttexts:
                 try:
                     # create row for user's short texts
-                    shorttext_text = user_shorttexts[shorttext_id]
+                    shorttext_text = user_shorttexts[shorttext_id].decode('utf-8')
                     shorttext_row = [shorttext_id, shorttext_text, username]
                     shorttexts_rows.append(shorttext_row)
                 except:

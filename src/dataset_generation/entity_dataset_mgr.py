@@ -12,7 +12,7 @@ This id construction allows us to distinguish between the two separate Bush enti
 """
 from CONSTANT_VARIABLES import COLUMN_USERNAME, COLUMN_SHORTTEXT_ID, \
     COLUMN_SHORTTEXT_STRING
-from datasets_generation import csv_util, prompt_and_print
+from dataset_generation import csv_util, prompt_and_print
 import named_entity_finder
 import unicodedata
 

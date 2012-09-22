@@ -1,4 +1,4 @@
-from datasets_generation import prompt_and_print, crosssite_username_dataset_mgr, \
+from dataset_generation import prompt_and_print, crosssite_username_dataset_mgr, \
     wikipedia_edits_dataset_mgr, short_text_dataset_mgr, entity_dataset_mgr
 
 def build_all_datasets():
