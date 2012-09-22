@@ -61,12 +61,12 @@ def get_usernames_to_evaluate_mturk(site):
 
 def __get_usernames_csv_path__(site):
     ''' @param site: a Site object '''
-    return 'data/spreadsheets/cross-site-usernames_'+str(site.siteName)+'.csv'
+    return '../data/spreadsheets/cross-site-usernames_'+str(site.siteName)+'.csv'
 def __get_nonexistent_usernames_cache_path__(site):
     ''' @param site: a Site object
         @return: the cache of usernames that do no exist on the given site '''
-    return 'data/pickles/nonexistent_usernames_on_'+str(site.siteName)+'.pkl'
-__wikipedia_editors_cache_path__ = 'data/pickles/wikipedia_editors_cache.pkl'
+    return '../data/pickles/nonexistent_usernames_on_'+str(site.siteName)+'.pkl'
+__wikipedia_editors_cache_path__ = '../data/pickles/wikipedia_editors_cache.pkl'
 
 def build_wikipedia_editor_username_cache():
     ''' Fetches large numbers of active Wikipedia editors who have made edits 

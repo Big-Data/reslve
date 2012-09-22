@@ -21,10 +21,10 @@ __COLUMN_NUM_EDITS__ =  "numberEditsByUser"
 
 def __get_edits_csv_path__(site):
     ''' @param site: a Site object '''
-    return 'data/spreadsheets/wikipedia_edits_'+str(site.siteName)+'.csv'
+    return '../data/spreadsheets/wikipedia_edits_'+str(site.siteName)+'.csv'
 def __get_edits_cache_path__(site):
     ''' @param site: a Site object '''
-    return 'data/pickles/wikipedia_edits_cache_'+str(site.siteName)+'.pkl'    
+    return '../data/pickles/wikipedia_edits_cache_'+str(site.siteName)+'.pkl'    
 
 def build_wikipedia_edits_dataset(crosssite_usernames, site):
     
