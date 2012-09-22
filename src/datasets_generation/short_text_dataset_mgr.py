@@ -12,7 +12,7 @@ __PROMPT_COUNT__ = 10
 
 def __get_shorttexts_csv_path__(site):
     ''' @param site: a Site object '''
-    return 'datasets/spreadsheets/shorttexts_'+str(site.siteName)+'.csv'
+    return 'data/spreadsheets/shorttexts_'+str(site.siteName)+'.csv'
 
 def build_shorttexts_dataset(crosssite_usernames, site):
     

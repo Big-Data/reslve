@@ -27,7 +27,7 @@ __COLUMN_ENTITY_STRING__ =  "entityTextString"
 
 def __get_entity_csv_path__(site):
     ''' @param site: a Site object '''
-    return 'datasets/spreadsheets/entities_'+str(site.siteName)+'.csv'
+    return 'data/spreadsheets/entities_'+str(site.siteName)+'.csv'
 
 def build_entities_dataset(shorttext_rows, site):
     
