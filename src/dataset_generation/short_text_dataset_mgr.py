@@ -20,12 +20,18 @@ def build_shorttexts_dataset(crosssite_usernames, site):
     
     # Load or create/initialize the spreadsheet of users' short texts
     shorttexts_csv_path = __get_shorttexts_csv_path__(site)
-    csv_string = "short texts from "+siteNameStr+" written by usernames that exist on both that site and Wikipedia"
+    csv_string = "cross-site (Wikipedia and "+siteNameStr+") users' short texts"
     headers = [COLUMN_SHORTTEXT_ID, COLUMN_SHORTTEXT_STRING, COLUMN_USERNAME]
-    usernames_in_csv = csv_util.load_or_initialize_csv(shorttexts_csv_path, csv_string, headers, COLUMN_SHORTTEXT_ID)
+    shorttexts_in_csv = csv_util.load_or_initialize_csv(shorttexts_csv_path, csv_string, headers, COLUMN_SHORTTEXT_ID)
+    usernames_in_csv = list(set(csv_util.get_all_column_values(shorttexts_csv_path, COLUMN_USERNAME)))
     
     # only need to fetch the short texts for usernames that we haven't already done
     users_todo = [u for u in crosssite_usernames if u not in usernames_in_csv]
+    if len(users_todo)==0:
+        print "Short texts fetched and stored for all "+\
+        str(len(usernames_in_csv))+" confirmed cross-site editors. Exiting."
+        return 
+    
     print str(len(crosssite_usernames))+" cross-site usernames total, and "+\
     str(len(users_todo))+" users not yet in spreadsheet of short texts "
     
@@ -76,7 +82,7 @@ def build_shorttexts_dataset(crosssite_usernames, site):
             continue # ignore problematic users
                 
     # update the spreadsheet with any new users' short texts that have been fetched
-    csv_util.append_to_spreadsheet(csv_string, shorttexts_csv_path, usernames_in_csv, shorttexts_rows) 
+    csv_util.append_to_spreadsheet(csv_string, shorttexts_csv_path, shorttexts_in_csv, shorttexts_rows) 
 
 def get_shorttext_rows(site):
     shorttext_csv_path = __get_shorttexts_csv_path__(site)
