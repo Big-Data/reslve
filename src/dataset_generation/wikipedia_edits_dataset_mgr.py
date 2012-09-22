@@ -45,6 +45,13 @@ def build_wikipedia_edits_dataset(crosssite_usernames, site):
 
     # only need to fetch the edits for usernames that we haven't already done
     editors_todo = [u for u in crosssite_usernames if u not in usernames_in_csv]
+    
+    # Exit if all available names are done
+    if len(editors_todo)==0:
+        print "Wikipedia edit data fetched and stored for all "+\
+        str(len(crosssite_usernames))+" confirmed cross-site editors. Exiting."
+        return 
+    
     print str(len(crosssite_usernames))+" cross-site editors total, and "+\
     str(len(editors_todo))+" editors not yet in spreadsheet of edits "
     
