@@ -19,25 +19,29 @@ __COLUMN_NUM_EDITS__ =  "numberEditsByUser"
 
 ###########################################################
 
-def __get_edits_csv_path__(site):
-    ''' @param site: a Site object '''
-    return '../data/spreadsheets/wikipedia_edits_'+str(site.siteName)+'.csv'
-def __get_edits_cache_path__(site):
-    ''' @param site: a Site object '''
-    return '../data/pickles/wikipedia_edits_cache_'+str(site.siteName)+'.pkl'    
+__edits_csv_path__ = '../data/spreadsheets/wikipedia_edits.csv'
+__edits_cache_path__ = '../data/pickles/wikipedia_edits_cache.pkl'    
+
+def get_edits_by_user(username):
+    editor_names_to_edits_cache = pkl_util.load_pickle("Wikipedia editor usernames to their edited pages+counts",
+                                                       __edits_cache_path__)
+    try:
+        return editor_names_to_edits_cache[username]
+    except:
+        return []
 
 def build_wikipedia_edits_dataset(crosssite_usernames, site):
     
     siteNameStr = str(site.siteName)
     
     # Load or create/initialize the spreadsheet of users' wikipedia edits
-    edits_csv_path = __get_edits_csv_path__(site)
+    edits_csv_path = __edits_csv_path__
     csv_string = 'Wikipedia edits made by usernames that also exist on '+siteNameStr
     headers = [COLUMN_USERNAME, __COLUMN_ARTICLE_ID__, __COLUMN_NUM_EDITS__]
     usernames_in_csv = csv_util.load_or_initialize_csv(edits_csv_path, csv_string, headers, COLUMN_USERNAME)
     
     # Load the cache of edits, a dict: { username -> {edited page -> num edits } }
-    edits_cache_path = __get_edits_cache_path__(site)
+    edits_cache_path = __edits_cache_path__
     editor_names_to_edits_cache = pkl_util.load_pickle("Wikipedia editor usernames to their edited pages+counts",
                                                        edits_cache_path)
     if editor_names_to_edits_cache is None:
