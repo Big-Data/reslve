@@ -30,13 +30,14 @@ def get_edits_by_user(username):
     except:
         return []
 
-def build_wikipedia_edits_dataset(crosssite_usernames, site):
-    
-    siteNameStr = str(site.siteName)
+def build_edits_by_user(username):
+    build_wikipedia_edits_dataset([username], False)
+
+def build_wikipedia_edits_dataset(crosssite_usernames, prompt=True):
     
     # Load or create/initialize the spreadsheet of users' wikipedia edits
     edits_csv_path = __edits_csv_path__
-    csv_string = 'Wikipedia edits made by usernames that also exist on '+siteNameStr
+    csv_string = 'Wikipedia edits made by usernames that also exist on a site that is a source of short texts'
     headers = [COLUMN_USERNAME, __COLUMN_ARTICLE_ID__, __COLUMN_NUM_EDITS__]
     usernames_in_csv = csv_util.load_or_initialize_csv(edits_csv_path, csv_string, headers, COLUMN_USERNAME)
     
@@ -60,12 +61,15 @@ def build_wikipedia_edits_dataset(crosssite_usernames, site):
     str(len(editors_todo))+" editors not yet in spreadsheet of edits "
     
     # Prompt how many users to fetch edits for
-    desired_num_editors = prompt_and_print.prompt_num_entries_to_build(csv_string, usernames_in_csv)
-    num_to_append = desired_num_editors - len(usernames_in_csv)
-    if len(editors_todo) < num_to_append:
-        print "Only "+str(len(editors_todo))+" cross-site usernames available. If you want "+\
-        "want "+str(desired_num_editors)+" total editors' edits in the edits csv, you'll have to "+\
-        "re-run script and choose to first fetch more cross-site usernames."
+    if prompt:
+        desired_num_editors = prompt_and_print.prompt_num_entries_to_build(csv_string, usernames_in_csv)
+        num_to_append = desired_num_editors - len(usernames_in_csv)
+        if len(editors_todo) < num_to_append:
+            print "Only "+str(len(editors_todo))+" cross-site usernames available. If you want "+\
+            "want "+str(desired_num_editors)+" total editors' edits in the edits csv, you'll have to "+\
+            "re-run script and choose to first fetch more cross-site usernames."
+    else:
+        desired_num_editors = 1
     
     edits_rows = []
     prompt_count = 0
@@ -78,7 +82,7 @@ def build_wikipedia_edits_dataset(crosssite_usernames, site):
         
         '''
         # Intermittently prompt user whether to continue fetching matching usernames or exit script
-        if prompt_count >= __PROMPT_COUNT__:
+        if prompt and prompt_count >= __PROMPT_COUNT__:
             continue_searching = prompt_and_print.prompt_continue_building(csv_string, usernames_in_csv, desired_num_editors)
             if not continue_searching:
                 break
