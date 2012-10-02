@@ -8,7 +8,11 @@ def build_all_datasets():
         crosssite_username_dataset_mgr.build_wikipedia_editor_username_cache()
         
     # Prompt to ask from which site we want to build a dataset
-    site = prompt_and_print.prompt_for_site()
+    try:
+        site = prompt_and_print.prompt_for_site()
+    except KeyError:
+        print "Sorry, that is not a recognized site. Exiting."
+        return
     
     # Build up the spreadsheet of usernames that
     # on exist both Wikipedia and the passed site
