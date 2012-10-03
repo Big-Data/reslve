@@ -23,7 +23,7 @@ __PROMPT_COUNT__ = 10
 
 ####### CONSTANT VARIABLES FOR USERNAME SPREADSHEET #######
 '''Columns for username spreadsheet'''
-__COLUMN_SAME_INDIVIDUAL__ = 'isSameIndividual (AnnotatorID)'
+__COLUMN_SAME_INDIVIDUAL__ = 'isSameIndividual'
 
 ''' cell values for SAME_INDIVIDUAL column that indicate whether
 a human evaluator has judged whether accounts with the same 
@@ -53,19 +53,37 @@ def get_usernames_to_evaluate_mturk(site):
     ''' Returns the usernames that humans need to manually confirm belong 
     to the same individual user on Wikipedia and the given site. '''
     usernames_csv_path = __get_usernames_csv_path__(site)
-    need_to_be_evaluated = csv_util.query_csv_for_rows_with_value('../'+str(usernames_csv_path), 
+    need_to_be_evaluated = csv_util.query_csv_for_rows_with_value(usernames_csv_path, 
                                                                   COLUMN_USERNAME,
                                                                   __COLUMN_SAME_INDIVIDUAL__,
                                                                   __VALUE_UNCONFIRMED__)
     return need_to_be_evaluated
 
+def update_confirmed_usernames(site, confirmed_usernames):
+    ''' Updates the COLUMN_SAME_INDIVIDUAL cell value to VALUE_CONFIRMED 
+    for each of the given usernames confirmed by Mechanical Turk workers 
+    to belong to the same individual. ''' 
+    usernames_csv_path = __get_usernames_csv_path__(site)
+    headers = csv_util.query_csv_for_headers(usernames_csv_path)
+    
+    username_col_index = headers.index(COLUMN_USERNAME)
+    confirmed_col_index = headers.index(__COLUMN_SAME_INDIVIDUAL__)
+    
+    updated_rows = []
+    rows = csv_util.query_csv_for_rows(usernames_csv_path, False)
+    for row in rows:
+        if row[username_col_index] in confirmed_usernames:
+            row[confirmed_col_index] = __VALUE_CONFIRMED_POSITIVE__
+        updated_rows.append(row)
+    csv_util.write_to_spreadsheet(usernames_csv_path, updated_rows)
+
 def __get_usernames_csv_path__(site):
     ''' @param site: a Site object '''
-    return '../data/spreadsheets/cross-site-usernames_'+str(site.siteName)+'.csv'
+    return '/Users/elizabethmurnane/git/reslve/data/spreadsheets/cross-site-usernames_'+str(site.siteName)+'.csv'
 def __get_nonexistent_usernames_cache_path__(site):
     ''' @param site: a Site object
         @return: the cache of usernames that do no exist on the given site '''
-    return '../data/pickles/nonexistent_usernames_on_'+str(site.siteName)+'.pkl'
+    return '/Users/elizabethmurnane/git/reslve/data/pickles/nonexistent_usernames_on_'+str(site.siteName)+'.pkl'
 __wikipedia_editors_cache_path__ = '../data/pickles/wikipedia_editors_cache.pkl'
 
 def build_wikipedia_editor_username_cache():
