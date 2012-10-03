@@ -24,12 +24,22 @@ def append_to_spreadsheet(csv_string, csv_path, identifiers_in_csv, rows_to_add,
             print "Problem with row "+str(row), e
             continue
         
-def query_csv_for_rows(csv_path):  
+def write_to_spreadsheet(csv_path, rows):
+    csv_writer = csv.writer(open(csv_path, 'wb'))
+    for row in rows:
+        csv_writer.writerow(row)
+        
+def query_csv_for_headers(csv_path):
+    rows = csv.reader(open(csv_path))
+    for row in rows:
+        return row # headers row is just the first row
+        
+def query_csv_for_rows(csv_path, exclude_headers=True):  
     rows = []
     row_num = 0
     for row in csv.reader(open(csv_path)):
         try:
-            if row_num!=0: # row 0 is header
+            if not exclude_headers or row_num!=0: # row 0 is header
                 rows.append(row)
             row_num = row_num+1    
         except:
