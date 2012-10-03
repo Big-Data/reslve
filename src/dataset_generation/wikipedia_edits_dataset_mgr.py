@@ -19,8 +19,8 @@ __COLUMN_NUM_EDITS__ =  "numberEditsByUser"
 
 ###########################################################
 
-__edits_csv_path__ = '../data/spreadsheets/wikipedia_edits.csv'
-__edits_cache_path__ = '../data/pickles/wikipedia_edits_cache.pkl'    
+__edits_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/spreadsheets/wikipedia_edits.csv'
+__edits_cache_path__ = '/Users/elizabethmurnane/git/reslve/data/pickles/wikipedia_edits_cache.pkl'    
 
 def get_edits_by_user(username):
     editor_names_to_edits_cache = pkl_util.load_pickle("Wikipedia editor usernames to their edited pages+counts",
