@@ -13,10 +13,3 @@ class Ambiguous_Entity:
         self.username = username
         self.candidates = candidates
         self.site = site
-        
-    def get_candidates(self):
-        try:
-            return [cand['title'] for cand in self.candidates]
-        except:
-            raise
-            return []
