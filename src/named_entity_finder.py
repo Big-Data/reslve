@@ -29,7 +29,8 @@ WIKIPEDIA_MINER_URI = \
     "http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/wikify?"
     
 WIKIPEDIA_MINER_SEARCH_SERVICE_URI = \
-    "http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/search?"
+    "http://wikipedia-miner.cms.waikato.ac.nz/services/search?"
+    #"http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/search?"
 
 
 def find_named_entities_dbpedia(text):
@@ -100,6 +101,7 @@ def find_candidates_wikipedia_miner(text):
     
     request_uri = WIKIPEDIA_MINER_SEARCH_SERVICE_URI + "query=" + urllib.quote(text)
     request_uri += "&complex=true"
+    request_uri += "&minPriorProbability=0"
     request_uri += "&responseFormat=json"
     
     request = Request(request_uri)
@@ -109,9 +111,11 @@ def find_candidates_wikipedia_miner(text):
     except HTTPError, e:
         print 'The server couldn\'t fulfill the request.'
         print 'Error code: ', e.code
+        return
     except URLError, e:
         print 'We failed to reach a server.'
         print 'Reason: ', e.reason
+        return
         
     result = json.loads(response.read())
     
