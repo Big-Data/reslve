@@ -32,19 +32,19 @@ __COLUMN_ENTITY_STRING__ =  "entityTextString"
 
 def __get_entities_csv_path__(site):
     ''' @param site: a Site object '''
-    return '../data/spreadsheets/entities_'+str(site.siteName)+'.csv'
+    return '/Users/elizabethmurnane/git/reslve/data/spreadsheets/entities_'+str(site.siteName)+'.csv'
 def __get_surface_form_cache_path__(site):
     ''' @param site: a Site object '''
-    return '../data/pickles/surface_form_cache_'+str(site.siteName)+'.pkl'    
+    return '/Users/elizabethmurnane/git/reslve/data/pickles/surface_form_cache_'+str(site.siteName)+'.pkl'    
 def __get_output_str__(site):
     return "ambiguous entities detected in short texts from "+str(site.siteName)+\
         " written by usernames that exist on both that site and Wikipedia"
 
-def get_ne_candidates_to_evaluate_mturk(site, caller_path):
+def get_ne_candidates_to_evaluate_mturk(site):
     ''' Returns the ambiguous entities mapped to their possible candidates  
     from which humans need to manually choose the correct candidate. '''
     surface_form_objs = pkl_util.load_pickle(__get_output_str__(site),
-                                             str(caller_path)+__get_surface_form_cache_path__(site))
+                                             __get_surface_form_cache_path__(site))
     if surface_form_objs is None:
         return None
     return surface_form_objs   
@@ -84,7 +84,8 @@ def build_entities_dataset(shorttext_rows, site):
             
             if progress_count%10==0:
                 print "Detecting named entities in short texts posted on "+siteNameStr+\
-                " by cross-site usernames... Number short texts whose entities have been fetched so far: "+str(progress_count)
+                " by cross-site usernames... Number of short texts whose entities have been fetched so far: "+\
+                str(progress_count)
             progress_count = progress_count+1
             
             shorttext_string = shorttext_row[1]
@@ -94,6 +95,9 @@ def build_entities_dataset(shorttext_rows, site):
             surface_forms_to_candidates = named_entity_finder.find_candidates_wikipedia_miner(shorttext_string)
             index_count = 0
             for named_entity_string in surface_forms_to_candidates:
+                
+                if len(named_entity_string) <= 1:
+                    continue # just one letter, maybe an s resulting from a possessive? ignore..
                 
                 candidates = surface_forms_to_candidates[named_entity_string]
                 if len(candidates) <= 1:
