@@ -86,7 +86,7 @@ def build_entities_dataset(shorttext_rows, site):
             if progress_count%10==0:
                 print "Detecting named entities in short texts posted on "+siteNameStr+\
                 " by cross-site usernames... Number of short texts whose entities have been fetched so far: "+\
-                str(progress_count)
+                str(len(entities_in_csv))
             progress_count = progress_count+1
             
             dirty_shorttext = shorttext_row[1]
