@@ -5,7 +5,7 @@ import re
 import string
 
 def get_clean_shorttext(raw_shorttext, site):
-    cleaned_text = __format_text__(raw_shorttext)
+    cleaned_text = __format_text__(raw_shorttext, site)
     return cleaned_text
 
 def __format_text__(raw_text, site):
