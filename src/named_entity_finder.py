@@ -119,6 +119,9 @@ def find_candidates_wikipedia_miner(text):
         
     result = json.loads(response.read())
     
+    if not 'labels' in result:
+        return {}  # problem with this short text so just ignore it..
+    
     surface_forms_to_candidates = {}
     for topic in result['labels']: # for each named entity..
         orig_text = topic['text']
