@@ -5,12 +5,13 @@ import random
 
 __entities_to_judge_csv_path__ = 'entities-for-turk.csv'
 
-twitter_site = short_text_websites.get_twitter_site()
-entities_to_evaluate = entity_dataset_mgr.get_ne_candidates_to_evaluate_mturk(twitter_site)
-if entities_to_evaluate is None:
-    print "No ambiguous entities + candidates in cache. Run all_datasets_build "+\
-    "script and choose to first fetch and store more entities from short texts."
-else:
+def make_entities_csv_for_turk():
+    twitter_site = short_text_websites.get_twitter_site()
+    entities_to_evaluate = entity_dataset_mgr.get_ne_candidates_to_evaluate_mturk(twitter_site)
+    if entities_to_evaluate is None:
+        print "No ambiguous entities + candidates in cache. Run all_datasets_build "+\
+        "script and choose to first fetch and store more entities from short texts."
+        return
     
     rows = []
     headers = ['short_text', 'ambiguous_entity', 'candidates']
@@ -47,3 +48,5 @@ else:
             
     # dump to csv
     csv_util.write_to_spreadsheet(__entities_to_judge_csv_path__, rows)
+    
+make_entities_csv_for_turk()
