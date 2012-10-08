@@ -2,7 +2,7 @@ Instructions for Turkers:
 You will be presented with a word or phrase and the short snippet of text that contains it. Please 
 read the snippet and select the correct meaning of the word or phrase from the choices provided.
 Each choice is given with its corresponding Wikipedia page, which you can reference if it will
-help you better understand its meaning.
+help you better understand the choice's meaning.
 
 Task for Turker:
 Please read this snippet of text: "{X}". Select the correct meaning here of "{Y}":

@@ -35,7 +35,7 @@ def make_entities_csv_for_turk():
         print "From the below set of choices, please select the correct intended meaning of the term \""\
         +str(entity_str)+"\""
         
-        print "Note: You can check the supplied Wikipedia page of a choice if it will help you better understand its meaning."
+        print "Note: You can check the supplied Wikipedia page of a choice if it will help you better understand the choice's meaning."
         print "Choices:"
         # shuffle candidates so that they don't appear
         # in wikiminer's ranking order and bias the turker
