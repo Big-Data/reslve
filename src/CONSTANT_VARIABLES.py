@@ -11,8 +11,6 @@ COLUMN_SHORTTEXT_ID = "shorttextID"
 COLUMN_SHORTTEXT_STRING =  "shorttextString"
 
 
-
-
 ''' Requirements to be considered an "active" user, ie minimum 
 number of contributions on wikipedia/twitter/flickr/etc: '''
 
@@ -29,3 +27,14 @@ ACTIVE_WIKIPEDIA_MIN = 100
 # Naaman, "Is it really about me": 10=active
 # Counts, Fisher: "Taking It All In?": 10=active
 ACTIVE_TWITTER_MIN = 100 
+
+
+# Entity types we restrict our sample to. (See http://schema.org/Thing)
+VALID_RDF_TYPES = ['http://schema.org/CreativeWork',
+                   'http://schema.org/Event',
+                   #'http://schema.org/Intangible',
+                   'http://schema.org/MedicalEntity',
+                   'http://schema.org/Organization',
+                   'http://schema.org/Person',
+                   'http://schema.org/Place',
+                   'http://schema.org/Product']
