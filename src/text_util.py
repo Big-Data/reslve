@@ -1,6 +1,4 @@
 from nltk.corpus import stopwords
-from nltk.downloader import Downloader
-from nltk.stem.wordnet import WordNetLemmatizer
 import nltk
 import re
 import string
@@ -35,9 +33,14 @@ def __format_text__(raw_text):
     ''' remove non-printable characters '''
     cleaned_text = filter(lambda x: x in string.printable, cleaned_text) 
     
-    ''' remove English stop words and @ mentions '''
+    ''' remove English stop words
+        remove RT string, which means retweet and we don't want to disambiguate that
+        remove @ mentions '''
     eng_stopwords = stopwords.words('english')
-    cleaned_text = ' '.join([word for word in cleaned_text.split() if word not in eng_stopwords and not word[0]=='@'])
+    cleaned_text = ' '.join([word for word in cleaned_text.split() if 
+                             word not in eng_stopwords and 
+                             not word=='RT' and 
+                             not word[0]=='@'])
     
     # commenting this out because articles aren't like casual/slang/etc 
     # user authored content that need this kind of processing
