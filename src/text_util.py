@@ -1,13 +1,14 @@
 from nltk.corpus import stopwords
+from short_text_sources import short_text_websites
 import nltk
 import re
 import string
 
-def get_clean_shorttext(raw_shorttext):
+def get_clean_shorttext(raw_shorttext, site):
     cleaned_text = __format_text__(raw_shorttext)
     return cleaned_text
 
-def __format_text__(raw_text):
+def __format_text__(raw_text, site):
     ''' Format the given string to filter out invalid strings '''
     
     ''' make all words lowercase '''
@@ -33,14 +34,17 @@ def __format_text__(raw_text):
     ''' remove non-printable characters '''
     cleaned_text = filter(lambda x: x in string.printable, cleaned_text) 
     
-    ''' remove English stop words
-        remove RT string, which means retweet and we don't want to disambiguate that
-        remove @ mentions '''
+    ''' remove English stop words '''
     eng_stopwords = stopwords.words('english')
     cleaned_text = ' '.join([word for word in cleaned_text.split() if 
-                             word not in eng_stopwords and 
-                             not word=='RT' and 
-                             not word[0]=='@'])
+                             word not in eng_stopwords])
+    
+    ''' if Twitter, remove RT string (which means retweet 
+    so we don't need to disambiguate it) and @mentions '''
+    if short_text_websites.site_is_Twitter(site):
+        cleaned_text = ' '.join([word for word in cleaned_text.split() if 
+                                 not word!='RT' and 
+                                 not word[0]=='@'])
     
     # commenting this out because articles aren't like casual/slang/etc 
     # user authored content that need this kind of processing

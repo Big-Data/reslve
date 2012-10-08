@@ -94,7 +94,7 @@ def build_entities_dataset(shorttext_rows, site):
             
             # get the entities contained in each short text
             # clean the short text before attempting to detect entities in it
-            clean_shorttext = text_util.get_clean_shorttext(dirty_shorttext)
+            clean_shorttext = text_util.get_clean_shorttext(dirty_shorttext, site)
             surface_forms_to_candidates = named_entity_finder.find_candidates_wikipedia_miner(clean_shorttext)
             if len(surface_forms_to_candidates)==0:
                 print "No entities detected in short text "+str(clean_shorttext)

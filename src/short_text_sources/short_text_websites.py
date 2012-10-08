@@ -2,8 +2,11 @@
 from CONSTANT_VARIABLES import ACTIVE_TWITTER_MIN
 from short_text_sources import twitter_api_util
 
+__Twitter_SiteName__ = 'Twitter'
 def get_twitter_site():
-    return Twitter_Site('Twitter')
+    return Twitter_Site(__Twitter_SiteName__)
+def site_is_Twitter(site):
+    return site.siteName==__Twitter_SiteName__
 
 
 ####### The site "Interface" #######
