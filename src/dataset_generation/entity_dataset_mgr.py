@@ -19,6 +19,7 @@ from CONSTANT_VARIABLES import COLUMN_USERNAME, COLUMN_SHORTTEXT_ID, \
 from dataset_generation import csv_util, prompt_and_print, pkl_util
 import Ambiguous_Entity
 import named_entity_finder
+import text_util
 import unicodedata
 
 __PROMPT_COUNT__ = 10
@@ -88,11 +89,16 @@ def build_entities_dataset(shorttext_rows, site):
                 str(progress_count)
             progress_count = progress_count+1
             
-            shorttext_string = shorttext_row[1]
+            dirty_shorttext = shorttext_row[1]
             username = shorttext_row[2]
             
             # get the entities contained in each short text
-            surface_forms_to_candidates = named_entity_finder.find_candidates_wikipedia_miner(shorttext_string)
+            # clean the short text before attempting to detect entities in it
+            clean_shorttext = text_util.get_clean_shorttext(dirty_shorttext)
+            surface_forms_to_candidates = named_entity_finder.find_candidates_wikipedia_miner(clean_shorttext)
+            if len(surface_forms_to_candidates)==0:
+                print "No entities detected in short text "+str(clean_shorttext)
+                continue
             index_count = 0
             for named_entity_string in surface_forms_to_candidates:
                 
@@ -110,7 +116,7 @@ def build_entities_dataset(shorttext_rows, site):
                     
                     entity_id = str(shorttext_id)+'_'+str(index_count)
                     entity_str = named_entity_string.decode('utf-8')
-                    shorttext_str = shorttext_string.decode('utf-8')
+                    shorttext_str = dirty_shorttext.decode('utf-8')
                     entity_row = [entity_id, entity_str, 
                                   shorttext_id, shorttext_str,
                                   username]
