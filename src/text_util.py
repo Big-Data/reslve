@@ -43,7 +43,7 @@ def __format_text__(raw_text, site):
     so we don't need to disambiguate it) and @mentions '''
     if short_text_websites.site_is_Twitter(site):
         cleaned_text = ' '.join([word for word in cleaned_text.split() if 
-                                 not word!='RT' and 
+                                 not word=='RT' and 
                                  not word[0]=='@'])
     
     # commenting this out because articles aren't like casual/slang/etc 
