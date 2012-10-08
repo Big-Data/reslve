@@ -1,0 +1,19 @@
+Instructions for Turkers:
+You will be presented with a word or phrase and the short snippet of text that contains it. Please 
+read the snippet and select the correct meaning of the word or phrase from the choices provided.
+Each choice is given with its corresponding Wikipedia page, which you can reference if it will
+help you understand its meaning better.
+
+Task for Turker:
+Please read this snippet of text: "{X}". Select the correct meaning here of "{Y}":
+- {A}
+- {B}
+- {C}
+- ... etc
+
+(Each task corresponds to a row in the entities-for_turk.csv spreadsheet. 
+Specifically, {X} is the value in the "short_text" column, {Y} is the 
+value in the "ambiguous_entity" column, and {A}, {B}, {C}, etc are the 
+entries in the list that is the value in the "candidates" column. {A} is 
+a string that is the candidate string plus the Wikipedia page corresponding
+to it so that turkers can use it for reference if necessary). 
