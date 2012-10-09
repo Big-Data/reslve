@@ -54,17 +54,6 @@ def format_shorttext_for_NER(raw_shorttext, site):
     
     return cleaned_text
 
-def get_clean_BOW(doc):
-    ''' Tokenizes and filters/formats the words in the given document to be used during 
-    similarity measurement. This method should be used both when a doc goes into the  
-    corpus and when a doc is being compared to another doc for similarity. '''
-    stopset = set(stopwords.words('english'))
-    stemmer = nltk.PorterStemmer()
-    tokens = WordPunctTokenizer().tokenize(doc)
-    clean = [token.lower() for token in tokens if token.lower() not in stopset and len(token) > 2]
-    final = [stemmer.stem(word) for word in clean]
-    return final
-
 def get_nouns(raw_text, site):
     nouns = []
     try:
