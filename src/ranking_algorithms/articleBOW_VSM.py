@@ -1,5 +1,6 @@
 from collections import OrderedDict
 from dataset_generation import wikipedia_edits_dataset_mgr
+from gensim import corpora, models, similarities
 from math import log
 from nltk.corpus import stopwords
 from nltk.tokenize.regexp import WordPunctTokenizer
@@ -11,6 +12,54 @@ import pickle
 
 __articletext_usermodel_cache_path__ = 'usermodel_articletext.pkl'
 
+''' TODO 
+#def rank_articleBOW_VSM_numedits(candidates, username):
+'''
+
+def rank_articleBOW_VSM_gensim(candidates, username):
+    ''' Uses gensim to be faster.
+    See http://graus.nu/thesis/string-similarity-with-tfidf-and-python/ '''
+    
+    if len(candidates)==0:
+        return {}
+    
+    # Make corpus
+    corpus_docs = []
+    user_doc = __get_user_doc__(username)
+    corpus_docs.append(user_doc)
+    for candidate in candidates:
+        candidate_doc = __get_candidate_doc__(candidate)
+        corpus_docs.append(candidate_doc)
+        
+    dictionary = corpora.Dictionary(corpus_docs)
+    corpus = MyCorpus(corpus_docs)
+    tfidf = models.TfidfModel(corpus)
+    
+    user_bow = dictionary.doc2bow(user_doc)
+    tfidf_user = tfidf[user_bow]
+    
+    scores = {}
+    for candidate in candidates:
+        clean_cand = __get_candidate_doc__(candidate)
+        cand_bow = dictionary.doc2bow(clean_cand)
+        tfidf_candidate = tfidf[cand_bow]
+        sim = __compare_docs__(tfidf_user, tfidf_candidate, dictionary)
+        scores[candidate['article_id']] = sim
+    sorted_scores = OrderedDict(sorted(scores.iteritems(), key=operator.itemgetter(1), reverse=True))
+    return sorted_scores
+class MyCorpus(object):
+    def __init__(self, dictionary, corpus_docs):
+        self.corpus_docs = corpus_docs
+        self.dictionary = dictionary
+    def __iter__(self):
+        for doc in self.corpus_docs:
+            yield self.dictionary.doc2bow(doc) 
+def __compare_docs__(tfidf1, tfidf2, dictionary):
+    index = similarities.MatrixSimilarity([tfidf1],num_features=len(dictionary))
+    sim = index[tfidf2]
+    #print str(round(sim*100,2))+'% similar'
+    return round(sim*100,2)
+    
 def rank_articleBOW_VSM(candidates, username, site):
     ''' Ranks each of the given candidates by comparing the text similarity 
     of the Wikipedia article it corresponds to against the Wikipedia articles
@@ -31,8 +80,6 @@ def rank_articleBOW_VSM(candidates, username, site):
             raise
     sorted_scores = OrderedDict(sorted(scores.iteritems(), key=operator.itemgetter(1), reverse=True))
     return sorted_scores
-            
-#def rank_articleBOW_VSM_numedits(candidates, username):
 
 def __make_td_matrix__(username, candidates, site):
     td_matrix = {}
