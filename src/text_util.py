@@ -1,21 +1,18 @@
 from nltk.corpus import stopwords
+from nltk.tokenize.regexp import WordPunctTokenizer
 from short_text_sources import short_text_websites
 import nltk
 import re
 import string
 
-def get_clean_shorttext(raw_shorttext, site):
-    cleaned_text = __format_text__(raw_shorttext, site)
-    return cleaned_text
-
-def __format_text__(raw_text, site):
-    ''' Format the given string to filter out invalid strings '''
-    
-    ''' make all words lowercase '''
-    cleaned_text = raw_text.lower()
+def format_shorttext_for_NER(raw_shorttext, site):
+    ''' Prepares the given short text for named entity extraction. Minimal 
+    processing here to just remove line breaks, links, etc rather than more 
+    substantial formatting like porting or stemming which will interfere with 
+    NER toolkit's ability to recognize entities. '''
     
     ''' remove line breaks '''
-    cleaned_text = cleaned_text.replace('\r\n', ' ').replace('\n', ' ').replace('\r', ' ') 
+    cleaned_text = raw_shorttext.replace('\r\n', ' ').replace('\n', ' ').replace('\r', ' ') 
     
     ''' remove html '''
     cleaned_text = nltk.clean_html(cleaned_text)
@@ -23,56 +20,63 @@ def __format_text__(raw_text, site):
     ''' remove links (www.* or http*) '''
     cleaned_text = re.sub('((www\.[\s]+)|(https?://[^\s]+))','', cleaned_text)
     
-    ''' remove numbers and punctuation '''# (but not contractions) '''
-    punc = ['!', '$', '%', '&amp', ')', '(', '+', '*', ',', '.', ';', ':', '=', '<', '?', '>', '#', '[', ']', '\\', '_', '^', '`', '{', '}', '|', '~', "\"", "\'", "\"", "\'"]
-    cleaned_text = ''.join(ch for ch in cleaned_text if not ch.isdigit() and ch not in punc)
-    cleaned_text = ' '.join([word.lstrip("\"").lstrip("\'").rstrip("\"").rstrip("\'") for word in cleaned_text.split()])
-    cleaned_text = ' '.join([word.lstrip("-").rstrip("-") for word in cleaned_text.split()])
-    cleaned_text = ' '.join([word.lstrip("&").rstrip("&") for word in cleaned_text.split()])
-    cleaned_text = cleaned_text.replace("//", " ").replace("\\", " ")
-    
+    ''' replace double quotes with single quotes to avoid a Wikiminer error '''
+    cleaned_text = cleaned_text.replace("\"", "\'")
+
     ''' remove non-printable characters '''
     cleaned_text = filter(lambda x: x in string.printable, cleaned_text) 
     
-    ''' remove English stop words '''
-    eng_stopwords = stopwords.words('english')
-    cleaned_text = ' '.join([word for word in cleaned_text.split() if 
-                             word not in eng_stopwords])
-    
-    ''' if Twitter, remove RT string (which means retweet 
-    so we don't need to disambiguate it) and @mentions '''
+    ''' if Twitter:
+    - replace hash tags with just the word, ie #cars -> cars 
+    - remove RT string (which means retweet so we don't need to disambiguate it)
+    - remove @mentions '''
     if short_text_websites.site_is_Twitter(site):
+        
+        # hash tags
+        no_hash = []
+        for word in cleaned_text.split():
+            try:
+                if word[0]=='#' and word[1] in string.ascii_letters:
+                    word = word[1:] # remove the hash
+            except:
+                continue
+            no_hash.append(word)
+        cleaned_text = ' '.join(no_hash)
+        
+        # retweets and @mentions
         cleaned_text = ' '.join([word for word in cleaned_text.split() if 
                                  word.lower()!='rt' and 
                                  word[0]!='@'])
-    
-    # commenting this out because articles aren't like casual/slang/etc 
-    # user authored content that need this kind of processing
-    #''' replace repeating letters with just two (ie "aaaaaaaaaand she said heeeeeey!") '''
-    #repeat_pattern = re.compile(r"(.)\1{1,}", re.DOTALL)
-    #text_string = ' '.join([repeat_pattern.sub(r"\1\1", word) for word in text_string.split()])
-    
-#    ''' lemmatize nouns, then verbs, then adjectives '''
-#    wordnet_installed = Downloader().is_installed('wordnet')
-#    if not wordnet_installed: 
-#        nltk.download('wordnet')
-#    lmtzr = WordNetLemmatizer()
-#    cleaned_text = ' '.join([lmtzr.lemmatize(word) for word in cleaned_text.split()])
-#    cleaned_text = ' '.join([lmtzr.lemmatize(word, 'v') for word in cleaned_text.split()])
-#    cleaned_text = ' '.join([lmtzr.lemmatize(word, 'a') for word in cleaned_text.split()])
-#    cleaned_text = ' '.join([lmtzr.lemmatize(word, 'r') for word in cleaned_text.split()])
-    
-#    # some words aren't being recognized by the lemmatizer? so do them manually..
-#    text_string = text_string.replace('wrong_form', 'correct_form')
-    
-#    ''' remove words not found in an English dictionary '''
-#    cleaned_text = ' '.join([word for word in cleaned_text.split() if enchant.Dict("en_US").check(word)])
-    
-    ''' remove isolated single characters '''
-    cleaned_text = ' '.join([word for word in cleaned_text.split() if len(word)>1])
     
     ''' remove misc. remnant strings we don't care about '''
     words_manually_filter = []
     cleaned_text = ' '.join([word for word in cleaned_text.split() if not word in words_manually_filter])
     
     return cleaned_text
+
+def clean_doc_for_BOW(doc):
+    ''' Formats the given document that will be used during similarity measurement. 
+    This method should be used when a string goes into the corpus and when a string
+    is being compared to another string for similarity. '''
+    stopset = set(stopwords.words('english'))
+    stemmer = nltk.PorterStemmer()
+    tokens = WordPunctTokenizer().tokenize(doc)
+    clean = [token.lower() for token in tokens if token.lower() not in stopset and len(token) > 2]
+    final = [stemmer.stem(word) for word in clean]
+    return final
+
+def get_nouns(raw_text, site):
+    nouns = []
+    try:
+        cleaned_text = format_shorttext_for_NER(raw_text, site)
+        text_tokens = nltk.word_tokenize(cleaned_text)
+        for whatever in nltk.pos_tag(text_tokens):
+            try:
+                pos = whatever[1]
+                if 'NN'==pos or 'NNS'==pos or 'NNP'==pos or 'NNPS'==pos or 'NP'==pos:
+                    nouns.append(whatever[0])
+            except:
+                continue
+    except: 
+        return nouns
+    return nouns
