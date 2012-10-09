@@ -176,21 +176,11 @@ def query_page_title(page_id):
     
 def query_page_content_text(page_id):
     try :
-        '''
-        opener = urllib2.build_opener()
-        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
-        wiki_page_url = 'http://en.wikipedia.org/w/index.php?title='++'&printable=yes'
-        print wiki_page_url
-        infile = opener.open(wiki_page_url)
-        page = infile.read()
-        print page
-        '''
         page_title = query_page_title(page_id)
         content_query = 'titles='+str(page_title).replace(' ', '_')+'&prop=revisions&rvprop=content&format=xml'
         content_xml = __query_wiki__(content_query)
         
         dom = parseString(content_xml)
-        print dom.getElementsByTagName('rev')[0].childNodes
         content = dom.getElementsByTagName('rev')[0].childNodes[0].data
         content = content.encode("utf-8")
         return content
