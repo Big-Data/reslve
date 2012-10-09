@@ -32,7 +32,7 @@ def rank_articleBOW_VSM_gensim(candidates, username):
         corpus_docs.append(candidate_doc)
         
     dictionary = corpora.Dictionary(corpus_docs)
-    corpus = MyCorpus(corpus_docs)
+    corpus = MyCorpus(corpus_docs, dictionary)
     tfidf = models.TfidfModel(corpus)
     
     user_bow = dictionary.doc2bow(user_doc)
@@ -48,7 +48,7 @@ def rank_articleBOW_VSM_gensim(candidates, username):
     sorted_scores = OrderedDict(sorted(scores.iteritems(), key=operator.itemgetter(1), reverse=True))
     return sorted_scores
 class MyCorpus(object):
-    def __init__(self, dictionary, corpus_docs):
+    def __init__(self, corpus_docs, dictionary):
         self.corpus_docs = corpus_docs
         self.dictionary = dictionary
     def __iter__(self):
