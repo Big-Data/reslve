@@ -60,7 +60,7 @@ def __compare_docs__(tfidf1, tfidf2, dictionary):
     #print str(round(sim*100,2))+'% similar'
     return round(sim*100,2)
     
-def rank_articleBOW_VSM(candidates, username, site):
+def rank_articleBOW_VSM(candidates, username):
     ''' Ranks each of the given candidates by comparing the text similarity 
     of the Wikipedia article it corresponds to against the Wikipedia articles
     that the given user has edited '''
@@ -69,7 +69,7 @@ def rank_articleBOW_VSM(candidates, username, site):
         return {}
     
     scores = {}
-    td_matrix = __make_td_matrix__(username, candidates, site)
+    td_matrix = __make_td_matrix__(username, candidates)
     for candidate in candidates:
         candidate_id = candidate['article_id']
         try:
@@ -81,7 +81,7 @@ def rank_articleBOW_VSM(candidates, username, site):
     sorted_scores = OrderedDict(sorted(scores.iteritems(), key=operator.itemgetter(1), reverse=True))
     return sorted_scores
 
-def __make_td_matrix__(username, candidates, site):
+def __make_td_matrix__(username, candidates):
     td_matrix = {}
     
     # Corpus of user doc and candidate docs of ambiguous entity
@@ -90,7 +90,7 @@ def __make_td_matrix__(username, candidates, site):
     # Note that each "document" is a list of tokens
     
     # Make document for user
-    user_BOW_doc = __get_user_doc__(username, site)
+    user_BOW_doc = __get_user_doc__(username)
     corpus_of_BOW_docs.append(user_BOW_doc)
     
     # Make documents for all candidates
@@ -152,7 +152,7 @@ def __make_td_matrix__(username, candidates, site):
     
     return td_matrix
     
-def __get_user_doc__(username, site, incorporate_edit_count=False):
+def __get_user_doc__(username, incorporate_edit_count=False):
     ''' Returns a mapping from BOW of an article (a list of tokens) to number
     of times the given user has made non-trivial edits on that article. '''
     try:
