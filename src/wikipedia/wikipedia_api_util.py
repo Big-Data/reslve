@@ -185,7 +185,7 @@ def query_page_content_text(page_id):
         content = content.encode("utf-8")
         return content
     except Exception as e:
-        print "Problem retrieving page content of page "+str(page_id), e
+        print "Problem retrieving page content of page "+str(page_id)+" ("+str(page_title)+")", e
         return ''
 
 def query_page_revisions(page_id):
