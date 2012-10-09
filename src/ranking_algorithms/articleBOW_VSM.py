@@ -128,10 +128,11 @@ def __make_td_matrix__(username, candidates):
             candidate_BOW_doc = candidate_BOW_docs[candidate_id]
             candidate_len = float(len(candidate_BOW_doc))
             candidate_fdist = nltk.FreqDist(candidate_BOW_doc)
+            td_matrix[candidate_id] = {}
+            
             if 0==len(candidate_fdist.keys()):
                 continue
             
-            td_matrix[candidate_id] = {}
             for term in candidate_fdist.iterkeys():
                 try:
                     tf_candidate = candidate_fdist[term] / candidate_len
