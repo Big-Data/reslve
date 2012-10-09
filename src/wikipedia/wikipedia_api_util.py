@@ -3,6 +3,7 @@ Functions to query Wikipedia API for various
 pieces of information and functions to parse results
 '''
 from CONSTANT_VARIABLES import ACTIVE_WIKIPEDIA_MIN
+from xml.dom.minidom import parseString
 import urllib2
 import xml.dom.minidom
 
@@ -159,6 +160,43 @@ def query_usercontribs(username, fetch_all_contribs):
         ucstart = '&ucstart='+next_contribs[0]
     
     return page_to_numedits
+
+def get_wikipedia_page_url(page_title):
+    return 'http://en.wikipedia.org/wiki/'+str(page_title).replace(' ','_')
+
+def query_page_title(page_id):
+    ''' Returns the title of the Wikipedia page that has the given page id '''
+    try:
+        info_query = 'prop=info&pageids='+str(page_id)+'&format=xml'
+        page_info_xml = __query_wiki__(info_query)
+        title = __parse_wiki_xml__(page_info_xml, 'page', 'title')
+        return title[0]
+    except:
+        return ''
+    
+def query_page_content_text(page_id):
+    try :
+        '''
+        opener = urllib2.build_opener()
+        opener.addheaders = [('User-agent', 'Mozilla/5.0')]
+        wiki_page_url = 'http://en.wikipedia.org/w/index.php?title='++'&printable=yes'
+        print wiki_page_url
+        infile = opener.open(wiki_page_url)
+        page = infile.read()
+        print page
+        '''
+        page_title = query_page_title(page_id)
+        content_query = 'titles='+str(page_title).replace(' ', '_')+'&prop=revisions&rvprop=content&format=xml'
+        content_xml = __query_wiki__(content_query)
+        
+        dom = parseString(content_xml)
+        print dom.getElementsByTagName('rev')[0].childNodes
+        content = dom.getElementsByTagName('rev')[0].childNodes[0].data
+        content = content.encode("utf-8")
+        return content
+    except Exception as e:
+        print "Problem retrieving page content of page "+str(page_id), e
+        return ''
 
 def query_page_revisions(page_id):
     ''' Returns the total number of revisions ever made on the given page by anyone '''
