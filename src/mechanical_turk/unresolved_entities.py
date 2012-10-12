@@ -27,16 +27,15 @@ def make_tweet_entities_csv_for_turk():
             if 'Y'!=keep_adding and 'y'!=keep_adding:
                 break
         '''
-        
-        candidate_URIs = surface_form_obj.is_valid_entity()
-        if len(candidate_URIs)<=1:
-            # either not a valid Named Entity or had no valid 
-            # candidates or only one (so not ambiguous), so skip it
+        if not surface_form_obj.is_valid_entity():
+            # either not a valid Named Entity (not a noun 
+            # or had no valid candidates), so skip it
             #print "Skipping "+str(surface_form_obj.entity_str)
             continue
         
         # shuffle candidates so that they don't appear
         # in wikiminer's ranking order and bias the turker
+        candidate_URIs = surface_form_obj.candidates
         random.shuffle(candidate_URIs)
         choices = candidate_URIs[:] # copy (list slicing)
             

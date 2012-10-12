@@ -20,19 +20,20 @@ class Ambiguous_Entity:
         self.site = site
         
     def is_valid_entity(self):
-        ''' If is a valid Named Entity with more than one valid candidates, 
-        returns a list of those valid candidates. Otherwise, returns an empty list '''
+        ''' @return: True if this is a valid Named Entity, ie is a noun
+        with at least one candidate of a valid type (Person, Place, Organization, 
+        etc according to the candidate's rdftypes property). Otherwise, returns false. '''
         nouns = text_util.get_nouns(self.shorttext_str, self.site)
         if not self.entity_str in nouns:
             # named entity must be a noun
-            return []
+            return False
         valid_candidates = self.__get_valid_candidates__()
-        return valid_candidates
+        return (len(valid_candidates)>0)
     
     def __get_valid_candidates__(self):
         ''' Returns the URIs of the candidate resources for this entity
-        that are "valid", ie currently we only consider entities that may 
-        be a Person, Place, Organization, etc (see VALID_RDF_TYPES) '''
+        that are "valid", ie currently we only consider entities that are 
+        a Person, Place, Organization, etc (see VALID_RDF_TYPES) '''
         #print "Candidates of "+str(self.entity_str)+" are: "+str([candidate['dbpedia_uri'] for candidate in self.candidates])
         valid_candidate_resources = []
         for candidate in self.candidates:
