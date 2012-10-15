@@ -36,6 +36,9 @@ class NamedEntity:
         ''' @return: True if this is a valid named entity, ie is a noun
         with at least one candidate of a valid type (Person, Place, Organization, 
         etc according to the candidate's rdftypes property). Otherwise, returns false. '''
+        if len(self.surface_form)<=1:
+            return False # ignore single characters, which are probably resulting from buggy apostrophe stuff..
+        
         nouns = text_util.get_nouns(self.shorttext_str, self.site)
         surface_form_tokens = self.surface_form.split()
         for sft in surface_form_tokens:
