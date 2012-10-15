@@ -25,8 +25,7 @@ __PROMPT_COUNT__ = 10
 
 ####### CONSTANT VARIABLES FOR NAMED ENTITIES SPREADSHEET #######
 '''Columns for entities spreadsheet'''
-__COLUMN_ENTITY_ID__ = "entityID"
-__COLUMN_ENTITY_STRING__ =  "entityTextString"
+__COLUMN_ENTITY_STRING__ =  "entitySurfaceForm"
 
 ###########################################################
 
@@ -56,8 +55,8 @@ def build_entities_dataset(shorttext_rows, site):
     # Load or create/initialize the spreadsheet of users' short texts
     entity_csv_path = __get_entities_csv_path__(site)
     output_str = __get_output_str__(site)
-    headers = [__COLUMN_ENTITY_ID__, __COLUMN_ENTITY_STRING__, COLUMN_SHORTTEXT_ID, COLUMN_SHORTTEXT_STRING, COLUMN_USERNAME]
-    entities_in_csv = csv_util.load_or_initialize_csv(entity_csv_path, output_str, headers, __COLUMN_ENTITY_ID__)
+    headers = [__COLUMN_ENTITY_STRING__, COLUMN_SHORTTEXT_ID, COLUMN_SHORTTEXT_STRING, COLUMN_USERNAME]
+    entities_in_csv = csv_util.load_or_initialize_csv(entity_csv_path, output_str, headers, __COLUMN_ENTITY_STRING__)
     shorttexts_in_csv = csv_util.get_all_column_values(entity_csv_path, COLUMN_SHORTTEXT_ID)
     
     # Load the cache of ambiguous entity objects
