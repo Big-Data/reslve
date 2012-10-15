@@ -42,11 +42,11 @@ def __get_output_str__(site):
 def get_ne_candidates_to_evaluate_mturk(site):
     ''' Returns the ambiguous entities mapped to their possible candidates  
     from which humans need to manually choose the correct candidate. '''
-    surface_form_objs = pkl_util.load_pickle(__get_output_str__(site),
+    ne_objs = pkl_util.load_pickle(__get_output_str__(site),
                                              __get_ne_cache_path__(site))
-    if surface_form_objs is None:
+    if ne_objs is None:
         return None
-    return surface_form_objs   
+    return ne_objs   
     
 def build_entities_dataset(shorttext_rows, site):
     
