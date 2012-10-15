@@ -1,15 +1,13 @@
-#!/usr/bin/env python
-# encoding: utf-8
 """
-Finds named enities (Wikipedia resources) in a given full text string.
+Finds named entities (Wikipedia resources) in a given full text string.
 
 Uses DBPedia Spotlight's (http://dbpedia.org/spotlight) candidates
 interface as well as Wikipedia Miner's (http://wikipedia-miner.cms.waikato.ac.nz)
 services to identify possible DBPedia (named) entities for a given input string.
 """
 
+from Ambiguous_Entity import CandidateResource
 from urllib2 import Request, urlopen, URLError, HTTPError
-from wikipedia import wikipedia_api_util
 import json
 import pprint
 import urllib
@@ -57,20 +55,97 @@ def find_named_entities_wikipedia_miner(text):
         named_entities.append(entity)
     return named_entities
 
-def find_candidates_wikipedia_miner(text):   
+def find_candidates_wikipedia_miner(text):
     """ Finds all named entities in the given text and returns a mapping 
     of each named entity's surface form -> candidate resources
     
     An empty dict is returned if no entities were found. Entities for 
     which no candidate resources were found are not included in the map. """
+    
+    result = query_wikipedia_miner_for_candidates(text)
+    surface_form_to_candidates = {}
+    for entity_result in result['labels']:
+        surface_form = entity_result['text'].lower()
         
+        # handle multiple mentions of the same entity
+        try:
+            candidates = surface_form_to_candidates[surface_form]
+        except:
+            candidates = {} # candidate title -> candidate data
+            
+        for sense in entity_result['senses']:
+            sense_title = sense['title'].replace(" ", "_")
+            
+            if sense_title in candidates:
+                # already mapped entity to this candidate (must be the second 
+                # mention of the same entity, and both mentions share this candidate)
+                continue
+            
+            sense_dbpedia_uri = "http://dbpedia.org/resource/"+sense_title
+            sense_score = sense['weight']
+            
+            cand_obj = CandidateResource(sense_title, sense_dbpedia_uri, sense_score, CandidateResource.SCORE_NOT_AVAILBLE)
+            candidates[sense_title] = cand_obj
+            
+        if len(candidates)>0: # ignore entities that have no candidates
+            surface_form_to_candidates[surface_form] = candidates 
+    return surface_form_to_candidates
+    
+def find_candidates_dbpedia(text):
+    """ Finds all named entities in the given text and returns a mapping 
+    of each named entity's surface form -> candidate resources
+    
+    An empty dict is returned if no entities were found. Entities for 
+    which no candidate resources were found are not included in the map. """
+    
+    result = query_dbpedia_spotlight_for_candidates(text)
+    surface_form_to_candidates = {}
+    for entity_result in result['annotation']['surfaceForm']:    
+        surface_form = entity_result['@name'].lower()
+        
+        # handle multiple mentions of the same entity
+        try:
+            candidates = surface_form_to_candidates[surface_form]
+        except:
+            candidates = {} # candidate title -> candidate data
+            
+        # skip entities with no candidates, which will not have the 'resource' key
+        if not 'resource' in entity_result:
+            continue
+        
+        result_res_list = entity_result['resource']
+        if isinstance(result_res_list, dict):
+            # for NE with a single candidate, dbpedia just returns that one candidate's
+            # dict rather than a list containing it, so we need to put it in a list ourselves
+            result_res_list = [result_res_list]
+        for res in result_res_list:
+            res_title = res['@label'].replace(" ", "_")
+            
+            if res_title in candidates:
+                # already mapped entity to this candidate (must be the second 
+                # mention of the same entity, and both mentions share this candidate)
+                continue
+            
+            res_dbpedia_uri = "http://dbpedia.org/resource/"+res_title
+            res_score = res['@finalScore']
+
+            cand_obj = CandidateResource(res_title, res_dbpedia_uri, CandidateResource.SCORE_NOT_AVAILBLE, res_score)
+            candidates[res_title] = cand_obj
+        
+        if len(candidates)>0: # ignore entities that have no candidates
+            surface_form_to_candidates[surface_form] = candidates
+    return surface_form_to_candidates
+
+def query_wikipedia_miner_for_candidates(text):   
+    ''' Queries Wikipedia Miner's Search service 
+    service and returns the server's JSON response '''
+
     request_uri = WIKIPEDIA_MINER_SEARCH_SERVICE_URI + "query=" + urllib.quote(text)
     request_uri += "&complex=true"
     request_uri += "&minPriorProbability=0"
     request_uri += "&responseFormat=json"
     
     request = Request(request_uri)
-    
     try:
         response = urlopen(request)
     except HTTPError, e:
@@ -81,22 +156,12 @@ def find_candidates_wikipedia_miner(text):
         print 'We failed to reach a server.'
         print 'Reason: ', e.reason
         return
-        
     result = json.loads(response.read())
-    
-    if not 'labels' in result:
-        return {}  # problem with this short text so just ignore it..
-    
-    surface_forms_to_candidates = __get_ne_candidate_map__(result, 'labels', 'text',
-                                                           'senses', 'id', 'title', 'weight')
-    return surface_forms_to_candidates 
+    return result
 
-def find_candidates_dbpedia(text, ambiguous_only=True):
-    """ Finds all named entities in the given text and returns a mapping 
-    of each named entity's surface form -> candidate resources
-    
-    An empty dict is returned if no entities were found. Entities for 
-    which no candidate resources were found are not included in the map. """
+def query_dbpedia_spotlight_for_candidates(text):
+    ''' Queries DBPedia Spotlight's candidates service 
+    service and returns the server's JSON response '''
     
     request_uri = DBPEDIA_SPOTLIGHT_URI + urllib.quote(text)
     request_uri += "&confidence=0"
@@ -104,7 +169,6 @@ def find_candidates_dbpedia(text, ambiguous_only=True):
     
     request = Request(request_uri)
     request.add_header("Accept", "application/json")
-    
     try:
         response = urlopen(request)
     except HTTPError, e:
@@ -113,67 +177,10 @@ def find_candidates_dbpedia(text, ambiguous_only=True):
     except URLError, e:
         print 'We failed to reach a server.'
         print 'Reason: ', e.reason
-
     result = response.read()
     result = json.loads(result)
-    
-    result_map = result['annotation']
-    surface_forms_to_candidates = __get_ne_candidate_map__(result_map, 'surfaceForm', '@name', 
-                                                           'resource', None, '@label', '@finalScore')
-    return surface_forms_to_candidates 
+    return result
 
-def __get_ne_candidate_map__(result_map, ne_key, ne_text_key, 
-                             candidate_key, cand_id_key, cand_title_key, cand_score_key):
-    ''' returns a mapping of named entity text (ie surface
-    form) to the candidate resources it may refer to '''
-    surface_forms_to_candidates = {}
-    for topic in result_map[ne_key]: # for each named entity..
-        try:
-            # the surface form of the named entity
-            orig_text = topic[ne_text_key]
-            
-            # its candidate resources
-            if not candidate_key in topic:
-                continue # no candidates
-            candidates = []
-            result_cand_list = topic[candidate_key]
-            if isinstance(result_cand_list, dict):
-                # want the result_cand_list to be a list, but for NE with a single 
-                # candidate, dbpedia just returns that one candidate's mapping rather
-                # than a list containing it, so we need to put it in a list ourselves
-                result_cand_list = [result_cand_list]
-            for cand_res in result_cand_list:
-                try:
-                    # candidate resource's title
-                    title = cand_res[cand_title_key]
-                    
-                    # candidate resource's URL on DBPedia
-                    dbpedia_uri = "http://dbpedia.org/resource/" + title.replace(" ", "_")
-                    
-                    # candidate resource's wikipedia page ID
-                    if cand_id_key != None:
-                        article_id = cand_res[cand_id_key]
-                    else:
-                        article_id = wikipedia_api_util.query_page_id(title)
-                    
-                    # candidate's score (ie weight, probability) 
-                    score = cand_res[cand_score_key]
-                    
-                    candidate = {'article_id': article_id, 'title': title, 
-                                 'weight': score, 'dbpedia_uri': dbpedia_uri}
-                    candidates.append(candidate)
-                except:
-                    # just ignore problematic candidate...
-                    continue
-                
-            # might only care about ambiguous entities (those with more than a single candidate)
-            if len(candidates)==0:
-                continue
-            surface_forms_to_candidates[orig_text] = candidates
-        except: 
-            # ignore problematic entities..
-            continue
-    return surface_forms_to_candidates
 
 if __name__ == '__main__':
     #ne = find_named_entities("President Obama is the president of the USA")
