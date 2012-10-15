@@ -58,7 +58,7 @@ def get_nouns(raw_text, site):
     nouns = []
     try:
         cleaned_text = format_shorttext_for_NER(raw_text, site)
-        text_tokens = nltk.word_tokenize(cleaned_text)
+        text_tokens = WordPunctTokenizer().tokenize(cleaned_text)
         for token_and_POS in nltk.pos_tag(text_tokens):
             try:
                 POS = token_and_POS[1]
