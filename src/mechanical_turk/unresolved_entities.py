@@ -18,7 +18,7 @@ def make_tweet_entities_csv_for_turk():
     
     # Some instructions for the task
     progress = 0
-    for surface_form_obj in entities_to_evaluate:
+    for ne_obj in entities_to_evaluate:
         
         progress = progress+1
         if progress%50==0:
@@ -27,26 +27,25 @@ def make_tweet_entities_csv_for_turk():
             if 'Y'!=keep_adding and 'y'!=keep_adding:
                 break
         '''
-        if not surface_form_obj.is_valid_entity():
-            # either not a valid Named Entity (not a noun 
-            # or had no valid candidates), so skip it
-            #print "Skipping "+str(surface_form_obj.entity_str)
+        if not ne_obj.is_valid_entity():
             continue
         
         # shuffle candidates so that they don't appear
         # in wikiminer's ranking order and bias the turker
-        candidate_URIs = surface_form_obj.candidates
+        candidate_res_objs = ne_obj.candidate_res_objs
+        candidate_URIs = [candidate_res_objs[candidate_res_title].dbpedia_URI 
+                          for candidate_res_title in candidate_res_objs]
         random.shuffle(candidate_URIs)
         choices = candidate_URIs[:] # copy (list slicing)
             
         # make sure the entity presented to a Turker looks the same as
         # it appears in the short text (ie with the same capitalization)
-        dirty_shorttext = surface_form_obj.shorttext_str
-        entity_str = surface_form_obj.entity_str
-        if not entity_str in dirty_shorttext:
-            entity_str = __match_appearance__(entity_str, dirty_shorttext)
+        original_shorttext = ne_obj.shorttext_str
+        surface_form = ne_obj.surface_form
+        if not surface_form in original_shorttext:
+            surface_form = __match_appearance__(surface_form, original_shorttext)
         
-        choices.append("None of these are the correct meaning of \""+str(entity_str)+"\"")
+        choices.append("None of these are the correct meaning of \""+str(surface_form)+"\"")
         
         '''
         # Tell turker to read the short text
@@ -59,7 +58,7 @@ def make_tweet_entities_csv_for_turk():
         print "Choices: "+str(choices)
         '''
             
-        row = [dirty_shorttext, entity_str, choices]
+        row = [original_shorttext, surface_form, choices]
         rows.append(row)
         
         if len(rows)%50==0:
@@ -70,11 +69,11 @@ def make_tweet_entities_csv_for_turk():
     # dump to csv
     csv_util.write_to_spreadsheet(__entities_to_judge_csv_path__, rows)
     
-def __match_appearance__(entity_str, shorttext_str):
+def __match_appearance__(surface_form, shorttext_str):
     ''' Seems that Wikipedia Miner sometimes returns an entity 
     capitalized even if it is lowercase in the original string '''
-    if entity_str.lower() in shorttext_str:
-        return entity_str.lower()
-    return entity_str
+    if surface_form.lower() in shorttext_str:
+        return surface_form.lower()
+    return surface_form
     
 make_tweet_entities_csv_for_turk()
