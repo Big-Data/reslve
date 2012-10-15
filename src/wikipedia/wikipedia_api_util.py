@@ -167,17 +167,16 @@ def get_wikipedia_page_url(page_title):
 def query_page_title(page_id):
     ''' Returns the title of the Wikipedia page that has the given page id '''
     try:
-        info_query = 'prop=info&pageids='+str(page_id)+'&format=xml'
+        info_query = 'prop=info&pageids'+'='+str(page_id)+'&format=xml'
         page_info_xml = __query_wiki__(info_query)
         title = __parse_wiki_xml__(page_info_xml, 'page', 'title')
         return title[0]
     except:
-        return ''
+        return ''  
     
-def query_page_content_text(page_id):
+def query_page_content_text(page_title):
     try :
-        page_title = query_page_title(page_id)
-        content_query = 'titles='+str(page_title).replace(' ', '_')+'&prop=revisions&rvprop=content&format=xml'
+        content_query = 'titles='+(str(page_title).replace(' ', '_'))+'&prop=revisions&rvprop=content&format=xml'
         content_xml = __query_wiki__(content_query)
         
         dom = parseString(content_xml)
@@ -185,7 +184,7 @@ def query_page_content_text(page_id):
         content = content.encode("utf-8")
         return content
     except Exception as e:
-        print "Problem retrieving page content of page "+str(page_id)+" ("+str(page_title)+")", e
+        print "Problem retrieving page content of page "+str(page_title), e
         return ''
 
 def query_page_revisions(page_id):
