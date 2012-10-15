@@ -1,5 +1,6 @@
 from dataset_generation import entity_dataset_mgr, csv_util
 from short_text_sources import short_text_websites
+from wikipedia import wikipedia_api_util
 import random
 
 __entities_to_judge_csv_path__ = 'entities-for-turk.csv'
@@ -33,7 +34,9 @@ def make_tweet_entities_csv_for_turk():
         # shuffle candidates so that they don't appear
         # in wikiminer's ranking order and bias the turker
         candidate_res_objs = ne_obj.candidate_res_objs
-        candidate_URIs = [candidate_res_objs[candidate_res_title].dbpedia_URI 
+        if len(candidate_res_objs)<=1:
+            continue # have to have at least 2 candidates to be ambiguous
+        candidate_URIs = [wikipedia_api_util.get_wikipedia_page_url(candidate_res_title)
                           for candidate_res_title in candidate_res_objs]
         random.shuffle(candidate_URIs)
         choices = candidate_URIs[:] # copy (list slicing)
