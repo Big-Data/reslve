@@ -100,7 +100,13 @@ def find_candidates_dbpedia(text):
     
     result = query_dbpedia_spotlight_for_candidates(text)
     surface_form_to_candidates = {}
-    for entity_result in result['annotation']['surfaceForm']:    
+    
+    surface_form_list = result['annotation']['surfaceForm']
+    if isinstance(surface_form_list, dict):
+        # for short text with a single detected entity, dbpedia just returns that one entity's
+        # dict rather than a list containing it, so we need to put it in a list ourselves
+        surface_form_list = [surface_form_list]
+    for entity_result in surface_form_list:    
         surface_form = entity_result['@name'].lower()
         
         # handle multiple mentions of the same entity
