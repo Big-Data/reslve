@@ -59,13 +59,25 @@ def get_nouns(raw_text, site):
     try:
         cleaned_text = format_shorttext_for_NER(raw_text, site)
         text_tokens = nltk.word_tokenize(cleaned_text)
-        for whatever in nltk.pos_tag(text_tokens):
+        for token_and_POS in nltk.pos_tag(text_tokens):
             try:
-                pos = whatever[1]
-                if 'NN'==pos or 'NNS'==pos or 'NNP'==pos or 'NNPS'==pos or 'NP'==pos:
-                    nouns.append(whatever[0])
+                POS = token_and_POS[1]
+                if 'NN'==POS or 'NNS'==POS or 'NNP'==POS or 'NNPS'==POS or 'NP'==POS:
+                    nouns.append(token_and_POS[0])
             except:
                 continue
     except: 
         return nouns
     return nouns
+
+def get_clean_BOW_doc(doc):
+    ''' Tokenizes and filters/formats the words in the given document to be used during 
+    similarity measurement. This method should be used both when a doc goes into the  
+    corpus and when a doc is being compared to another doc for similarity. 
+    @return: a list of tokens '''
+    stopset = set(stopwords.words('english'))
+    stemmer = nltk.PorterStemmer()
+    tokens = WordPunctTokenizer().tokenize(doc)
+    clean = [token.lower() for token in tokens if token.lower() not in stopset and len(token) > 2]
+    final = [stemmer.stem(word) for word in clean]
+    return final
