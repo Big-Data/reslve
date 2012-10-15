@@ -14,13 +14,12 @@ This id construction allows us to distinguish between the two separate Bush enti
 Note that only entities that are associated with more than one candidate are included in
 the cache because entities with zero or one candidate are not ambiguous so we ignore those.
 """
+from Ambiguous_Entity import NamedEntity
 from CONSTANT_VARIABLES import COLUMN_USERNAME, COLUMN_SHORTTEXT_ID, \
     COLUMN_SHORTTEXT_STRING
-from dataset_generation import csv_util, prompt_and_print, pkl_util
-import Ambiguous_Entity
+from dataset_generation import pkl_util, csv_util, prompt_and_print
 import named_entity_finder
 import text_util
-import unicodedata
 
 __PROMPT_COUNT__ = 10
 
@@ -34,7 +33,7 @@ __COLUMN_ENTITY_STRING__ =  "entityTextString"
 def __get_entities_csv_path__(site):
     ''' @param site: a Site object '''
     return '/Users/elizabethmurnane/git/reslve/data/spreadsheets/entities_'+str(site.siteName)+'.csv'
-def __get_surface_form_cache_path__(site):
+def __get_ne_cache_path__(site):
     ''' @param site: a Site object '''
     return '/Users/elizabethmurnane/git/reslve/data/pickles/surface_form_cache_'+str(site.siteName)+'.pkl'    
 def __get_output_str__(site):
@@ -45,7 +44,7 @@ def get_ne_candidates_to_evaluate_mturk(site):
     ''' Returns the ambiguous entities mapped to their possible candidates  
     from which humans need to manually choose the correct candidate. '''
     surface_form_objs = pkl_util.load_pickle(__get_output_str__(site),
-                                             __get_surface_form_cache_path__(site))
+                                             __get_ne_cache_path__(site))
     if surface_form_objs is None:
         return None
     return surface_form_objs   
@@ -62,10 +61,9 @@ def build_entities_dataset(shorttext_rows, site):
     shorttexts_in_csv = csv_util.get_all_column_values(entity_csv_path, COLUMN_SHORTTEXT_ID)
     
     # Load the cache of ambiguous entity objects
-    surface_form_objs = pkl_util.load_pickle(output_str, 
-                                             __get_surface_form_cache_path__(site))
-    if surface_form_objs is None:
-        surface_form_objs = []
+    ne_objs = pkl_util.load_pickle(output_str, __get_ne_cache_path__(site))
+    if ne_objs is None:
+        ne_objs = []
     
     # Prompt how many users to fetch short texts for
     desired_num_entities = prompt_and_print.prompt_num_entries_to_build(output_str, entities_in_csv)
@@ -89,61 +87,82 @@ def build_entities_dataset(shorttext_rows, site):
                 str(len(entities_in_csv))
             progress_count = progress_count+1
             
-            dirty_shorttext = shorttext_row[1]
+            original_shorttext = shorttext_row[1]
             username = shorttext_row[2]
             
             # get the entities contained in each short text
             # clean the short text before attempting to detect entities in it
-            clean_shorttext = text_util.get_clean_shorttext(dirty_shorttext, site)
-            surface_forms_to_candidates = named_entity_finder.find_candidates_wikipedia_miner(clean_shorttext)
-            if len(surface_forms_to_candidates)==0:
-                print "No entities detected in short text "+str(clean_shorttext)
-                continue
-            index_count = 0
-            for named_entity_string in surface_forms_to_candidates:
+            clean_shorttext = text_util.format_shorttext_for_NER(original_shorttext, site)
+            
+            sf_to_candidates_wikiminer = named_entity_finder.find_candidates_wikipedia_miner(clean_shorttext)
+            sf_to_candidates_dbpedia = named_entity_finder.find_candidates_dbpedia(clean_shorttext)
+            
+            # merge the candidates of the surface forms detected by both services
+            sf_to_candidates_union = __merge_sf_maps__(sf_to_candidates_wikiminer, sf_to_candidates_dbpedia)
                 
-                if len(named_entity_string) <= 1:
-                    continue # just one letter, maybe an s resulting from a possessive? ignore..
+            # now construct a NamedEntity object for each surface form
+            for surface_form in sf_to_candidates_union:
+                ne_obj = NamedEntity(surface_form,
+                                     shorttext_id, original_shorttext,
+                                     sf_to_candidates_union[surface_form], 
+                                     username, site)
                 
-                candidates = surface_forms_to_candidates[named_entity_string]
-                if len(candidates) <= 1:
-                    # if unable to detect any candidates for this entity 
-                    # or only a single candidate, it's not ambiguous so ignore it
-                    continue
+                # cache this entity object
+                ne_objs.append(ne_obj)
                 
-                named_entity_string = unicodedata.normalize('NFKD', named_entity_string).encode('ascii','ignore').encode('utf-8')
-                try:
-                    
-                    entity_id = str(shorttext_id)+'_'+str(index_count)
-                    entity_str = named_entity_string.decode('utf-8')
-                    shorttext_str = dirty_shorttext.decode('utf-8')
-                    entity_row = [entity_id, entity_str, 
-                                  shorttext_id, shorttext_str,
-                                  username]
-                    entities_rows.append(entity_row)
-                    
-                    # keep track that we'll be adding this entity to the csv
-                    entities_in_csv.append(entity_id)
-                    
-                    # also create an object to store this info 
-                    # along with the candidates that can be cached
-                    surface_form_obj = Ambiguous_Entity.Ambiguous_Entity(entity_id, entity_str, 
-                                                                         shorttext_id, shorttext_str, 
-                                                                         username, candidates, site)
-                    surface_form_objs.append(surface_form_obj)
-                    
-                    # increment the entity's index within 
-                    # this short text's set of all entities
-                    index_count = index_count + 1
-                except:
-                    raise # ignore problematic entities
-        except:
-            raise # ignore problematic short texts
+                # make a row in the spreadsheet for this entity
+                entity_row = [surface_form, 
+                              shorttext_id, original_shorttext,
+                              username]
+                entities_rows.append(entity_row)
+                
+                # keep track that we'll be adding this entity to the csv
+                entities_in_csv.append(surface_form)
+        except Exception as st_e:
+            raise
+            print "Problematic short text ", st_e
+            continue # ignore problematic short texts
                 
     # update the spreadsheet with any new users' short texts that have been fetched
     csv_util.append_to_spreadsheet(output_str, entity_csv_path, entities_in_csv, entities_rows, False)  
     
     # update the cache of ambiguous surface form objects
-    print "Cached a total of "+str(len(surface_form_objs))+" ambiguous named entities"
-    pkl_util.write_pickle(output_str, surface_form_objs, __get_surface_form_cache_path__(site))    
+    print "Cached a total of "+str(len(ne_objs))+" ambiguous named entities"
+    pkl_util.write_pickle(output_str, ne_objs, __get_ne_cache_path__(site))   
+    
+def __merge_sf_maps__(sf_to_candidates_wikiminer, sf_to_candidates_dbpedia):
+
+    # start with the entities detected by wikiminer
+    sf_to_candidates_union = sf_to_candidates_wikiminer 
+    
+    # then add all the entities detected by dbpedia, 
+    # merging candidates for ones also detected by wikiminer
+    for surface_form in sf_to_candidates_dbpedia:
+        if not surface_form in sf_to_candidates_union:
+            # entity not detected by wikiminer, so can just add it to union map
+            sf_to_candidates_union[surface_form] = sf_to_candidates_dbpedia[surface_form]
+            continue
         
+        # otherwise, need to merge the candidate objects...
+        
+        # start with candidates detected by wikiminer
+        union_candidates = sf_to_candidates_union[surface_form]
+        
+        # then add in missing dbpedia candidates or scores
+        dbpedia_candidates = sf_to_candidates_dbpedia[surface_form]
+        for cand_title in dbpedia_candidates:
+            if not cand_title in union_candidates:
+                # candidate not detected by wikiminer, so can just add it
+                union_candidates[cand_title] = dbpedia_candidates[cand_title]
+                continue
+            
+            # otherwise, candidate detected by both
+            # services so will have a score from each
+            cand_obj = union_candidates[cand_title]
+            # set its dbpedia score
+            cand_obj.dbpedia_score = dbpedia_candidates[cand_title].dbpedia_score
+            union_candidates[cand_title] = cand_obj
+        
+        # update the sf -> candidates
+        sf_to_candidates_union[surface_form] = union_candidates  
+    return sf_to_candidates_union
