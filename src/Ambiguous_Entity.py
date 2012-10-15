@@ -37,7 +37,7 @@ class NamedEntity:
         with at least one candidate of a valid type (Person, Place, Organization, 
         etc according to the candidate's rdftypes property). Otherwise, returns false. '''
         nouns = text_util.get_nouns(self.shorttext_str, self.site)
-        if not self.entity_str in nouns:
+        if not self.surface_form in nouns:
             # named entity must be a noun
             return False
         valid_candidates = self.__get_valid_candidate_URIs__()
@@ -50,10 +50,11 @@ class NamedEntity:
         #print "Candidates of "+str(self.entity_str)+" are: "+\
         #str([candidate['dbpedia_uri'] for candidate in self.candidates])
         valid_candidate_resources = []
-        for candidate in self.candidate_res_objs:
+        candidate_objs = self.candidate_res_objs
+        for candidate_title in candidate_objs:
             try:
-                candidate_title = candidate.title.replace(' ', '_')
-                dbpedia_uri = candidate.dbpedia_URI
+                candidate_title = candidate_title.replace(' ', '_')
+                dbpedia_uri = candidate_objs[candidate_title].dbpedia_URI
             
                 response = urllib2.urlopen("http://dbpedia.org/data/"+candidate_title+".json").read()
                 response = simplejson.loads(response.decode('utf-8'))
