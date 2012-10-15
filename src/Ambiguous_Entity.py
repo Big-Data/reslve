@@ -37,11 +37,19 @@ class NamedEntity:
         with at least one candidate of a valid type (Person, Place, Organization, 
         etc according to the candidate's rdftypes property). Otherwise, returns false. '''
         nouns = text_util.get_nouns(self.shorttext_str, self.site)
-        if not self.surface_form in nouns:
-            # named entity must be a noun
-            return False
-        valid_candidates = self.__get_valid_candidate_URIs__()
-        return (len(valid_candidates)>0)
+        surface_form_tokens = self.surface_form.split()
+        for sft in surface_form_tokens:
+            if not sft in nouns:
+                return False
+        return True
+#        if not self.surface_form in nouns:
+#            # named entity must be a noun
+#            return False
+#        print "it's a noun.."+str(self.surface_form)
+#        if True:
+#            return True # for now, including all entities as long as they are nouns
+#        valid_candidates = self.__get_valid_candidate_URIs__()
+#        return (len(valid_candidates)>0)
     
     def __get_valid_candidate_URIs__(self):
         ''' Returns the URIs of the candidate resources for this entity
