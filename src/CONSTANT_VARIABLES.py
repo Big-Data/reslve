@@ -10,6 +10,8 @@ COLUMN_USERNAME = 'username'
 COLUMN_SHORTTEXT_ID = "shorttextID"
 COLUMN_SHORTTEXT_STRING =  "shorttextString"
 
+COLUMN_ENTITY_ID = "entityID"
+
 
 ''' Requirements to be considered an "active" user, ie minimum 
 number of contributions on wikipedia/twitter/flickr/etc: '''

@@ -14,7 +14,7 @@ def make_tweet_entities_csv_for_turk():
         return
     
     rows = []
-    headers = ['short_text', 'ambiguous_entity', 'choices_list']
+    headers = ['entity_id', 'short_text', 'ambiguous_entity', 'choices_list']
     rows.append(headers)
     
     # Some instructions for the task
@@ -60,8 +60,9 @@ def make_tweet_entities_csv_for_turk():
         +str(entity_str)+"\""
         print "Choices: "+str(choices)
         '''
-            
-        row = [original_shorttext, surface_form, choices]
+        
+        entity_id = ne_obj.get_entity_id()
+        row = [entity_id, original_shorttext, surface_form, choices]
         rows.append(row)
         
         if len(rows)%50==0:

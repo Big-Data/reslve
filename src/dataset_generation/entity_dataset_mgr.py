@@ -16,7 +16,7 @@ the cache because entities with zero or one candidate are not ambiguous so we ig
 """
 from Ambiguous_Entity import NamedEntity
 from CONSTANT_VARIABLES import COLUMN_USERNAME, COLUMN_SHORTTEXT_ID, \
-    COLUMN_SHORTTEXT_STRING
+    COLUMN_SHORTTEXT_STRING, COLUMN_ENTITY_ID
 from dataset_generation import pkl_util, csv_util, prompt_and_print
 import named_entity_finder
 import text_util
@@ -55,8 +55,8 @@ def build_entities_dataset(shorttext_rows, site):
     # Load or create/initialize the spreadsheet of users' short texts
     entity_csv_path = __get_entities_csv_path__(site)
     output_str = __get_output_str__(site)
-    headers = [__COLUMN_ENTITY_STRING__, COLUMN_SHORTTEXT_ID, COLUMN_SHORTTEXT_STRING, COLUMN_USERNAME]
-    entities_in_csv = csv_util.load_or_initialize_csv(entity_csv_path, output_str, headers, __COLUMN_ENTITY_STRING__)
+    headers = [COLUMN_ENTITY_ID, __COLUMN_ENTITY_STRING__, COLUMN_SHORTTEXT_ID, COLUMN_SHORTTEXT_STRING, COLUMN_USERNAME]
+    entities_in_csv = csv_util.load_or_initialize_csv(entity_csv_path, output_str, headers, COLUMN_ENTITY_ID)
     shorttexts_in_csv = csv_util.get_all_column_values(entity_csv_path, COLUMN_SHORTTEXT_ID)
     
     # Load the cache of ambiguous entity objects
@@ -110,13 +110,14 @@ def build_entities_dataset(shorttext_rows, site):
                 ne_objs.append(ne_obj)
                 
                 # make a row in the spreadsheet for this entity
-                entity_row = [surface_form, 
+                ne_id = ne_obj.get_entity_id()
+                entity_row = [ne_id, surface_form, 
                               shorttext_id, original_shorttext,
                               username]
                 entities_rows.append(entity_row)
                 
                 # keep track that we'll be adding this entity to the csv
-                entities_in_csv.append(surface_form)
+                entities_in_csv.append(ne_id)
         except Exception as st_e:
             raise
             print "Problematic short text ", st_e

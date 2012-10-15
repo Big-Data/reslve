@@ -15,4 +15,6 @@ Please read this snippet of text: "X". Select the correct meaning here of "Y":
 (Each task corresponds to a row in the entities-for-turk.csv spreadsheet. 
 That is, given a row: X is the value in the row's "short_text" column, Y is the 
 value in its "ambiguous_entity" column, and A B C ... None are the Wikipedia
-resource candidates from the list in its "choices_list" column). 
+resource candidates from the list in its "choices_list" column.  These entities+choices 
+are the union of results from Wikipedia Miner and DBPedia Spotlight. The first column
+is "entity_id" so that we can later easily identify the entity the Turkers disambiguated). 

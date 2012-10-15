@@ -32,6 +32,11 @@ class NamedEntity:
         self.username = username
         self.site = site
         
+    def get_entity_id(self):
+        ''' Using the containing short text's ID concatenated 
+        with this entity's surface form as the entity's ID '''
+        return str(self.shorttext_id)+"_"+str(self.surface_form)
+        
     def is_valid_entity(self):
         ''' @return: True if this is a valid named entity, ie is a noun
         with at least one candidate of a valid type (Person, Place, Organization, 
