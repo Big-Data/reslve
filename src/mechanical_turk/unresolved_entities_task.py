@@ -48,8 +48,6 @@ def make_tweet_entities_csv_for_turk():
         if not surface_form in original_shorttext:
             surface_form = __match_appearance__(surface_form, original_shorttext)
         
-        choices.append("None of these are the correct meaning of \""+str(surface_form)+"\"")
-        
         '''
         # Tell turker to read the short text
         print "\nRead the following piece of text: \""+str(dirty_shorttext)+"\""
