@@ -9,12 +9,12 @@ def make_tweet_entities_csv_for_turk():
     twitter_site = short_text_websites.get_twitter_site()
     entities_to_evaluate = entity_dataset_mgr.get_ne_candidates_to_evaluate_mturk(twitter_site)
     if entities_to_evaluate is None:
-        print "No ambiguous entities + candidates in cache. Run all_datasets_build "+\
+        print "No ambiguous entities + candidates in cache. Run run_all_dataset_generators "+\
         "script and choose to first fetch and store more entities from short texts."
         return
     
     rows = []
-    headers = ['entity_id', 'short_text', 'ambiguous_entity', 'choices_list']
+    headers = ['entity_id', 'short_text', 'ambiguous_entity', 'candidate_link']
     rows.append(headers)
     
     # Some instructions for the task
@@ -62,8 +62,11 @@ def make_tweet_entities_csv_for_turk():
         '''
         
         entity_id = ne_obj.get_entity_id()
-        row = [entity_id, original_shorttext, surface_form, choices]
-        rows.append(row)
+        for choice in choices:
+            # make a separate row for each candidate link 
+            # rather than putting all links in a single cell
+            row = [entity_id, original_shorttext, surface_form, choice]
+            rows.append(row)
         
         if len(rows)%50==0:
             # write the rows every once in a while in case we reach an error
