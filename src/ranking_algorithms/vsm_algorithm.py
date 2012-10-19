@@ -21,12 +21,13 @@ class VSM_Algorithm(object):
         ''' Should be implemented by subclasses '''
         raise Exception("get_article_representation needs to be implemented "+str(self.alg_type))
     
-    def rank_candidates(self, candidate_objs, username):
+    def rank_candidates(self, candidate_objs, username, use_gensim=True):
         # use gensim because it's faster
         candidate_titles = candidate_objs.keys()
-        ranked_candidates = self.__rank_VSM_gensim__(candidate_titles, username)
-        #ranked_candidates = self.__rank_VSM_tdmatrix__(candidate_titles, username)
-        return ranked_candidates
+        if use_gensim:
+            return self.__rank_VSM_gensim__(candidate_titles, username)
+        else:
+            return self.__rank_VSM_tdmatrix__(candidate_titles, username)
         
     def __get_candidate_doc__(self, candidate_title):
         ''' Returns a representation based on
