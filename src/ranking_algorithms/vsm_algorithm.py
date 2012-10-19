@@ -1,0 +1,279 @@
+from collections import OrderedDict
+from dataset_generation import wikipedia_edits_dataset_mgr
+from gensim import similarities, corpora, models
+from math import log
+from wikipedia import wikipedia_api_util
+import math
+import nltk
+import operator
+import pickle
+
+####### The VSM algorithm "Interface" #######
+class VSM_Algorithm(object):
+    ''' VSM based algorithm '''
+    
+    def __init__(self, alg_type, usermodel_path):
+        print "Initializing algorithm based on "+str(alg_type)
+        self.alg_type = alg_type
+        self.usermodel_path = '/Users/elizabethmurnane/git/reslve/data/pickles/usermodel_'+str(usermodel_path)+'.pkl'
+        
+    def get_article_representation(self, article_title):
+        ''' Should be implemented by subclasses '''
+        raise Exception("get_article_representation needs to be implemented "+str(self.alg_type))
+    
+    def rank_candidates(self, candidate_objs, username):
+        # use gensim because it's faster
+        candidate_titles = candidate_objs.keys()
+        ranked_candidates = self.__rank_VSM_gensim__(candidate_titles, username)
+        #ranked_candidates = self.__rank_VSM_tdmatrix__(candidate_titles, username)
+        return ranked_candidates
+        
+    def __get_candidate_doc__(self, candidate_title):
+        ''' Returns a representation based on
+        on this candidate resource's Wikipedia page. 
+        @return: a list of tokens '''
+        return self.get_article_representation(candidate_title)
+        
+    def __get_user_doc__(self, username, incorporate_edit_count=False):
+        ''' Loads or creates+caches the user interest model '''
+        user_models = self.__load_usermodels__(username)
+        try:
+            return user_models[username]
+        except:
+            return self.__init_user_doc__(username, user_models)
+    def __load_usermodels__(self, username):
+        try:
+            print "Attempting to load "+str(self.alg_type)+" user model..."
+            read_model = open(self.usermodel_path, 'rb')
+            user_models = pickle.load(read_model)
+            return user_models
+        except:
+            return {}
+    def __init_user_doc__(self, username, user_models):
+        ''' Returns a mapping from article representation to number
+        of times the given user has made non-trivial edits on that article. '''
+        # Model for user doesn't exist yet, so create it
+        print "Model for user "+username+" not yet created, so creating and caching..."
+        
+        user_doc = []
+        
+        # get article representation for each article user edited and cache it
+        # along with the number of times the user edited that page
+        articleids_to_numedits = wikipedia_edits_dataset_mgr.get_edits_by_user(username)
+        if len(articleids_to_numedits)==0:
+            # no edits by user yet, so make sure those 
+            # have been fetched and stored in the dataset
+            print "No edits by user "+str(username)+\
+            " cached yet, so fetching those now and adding to edits dataset..."
+            wikipedia_edits_dataset_mgr.build_edits_by_user(username)
+            articleids_to_numedits = wikipedia_edits_dataset_mgr.get_edits_by_user(username)
+        
+        print "Processing edited articles to build user model..."
+        progress_count = 1
+        progress_finish = len(articleids_to_numedits)
+        for article_id in articleids_to_numedits:
+            
+            if progress_count%10==0:
+                print "Added "+str(progress_count)+" articles out of "+str(progress_finish)+" to user model..."
+            progress_count = progress_count+1
+            
+            # get the article features
+            article_title = wikipedia_api_util.query_page_title(article_id)
+            article_model = self.get_article_representation(article_title)
+            user_doc.extend(article_model)
+        
+        user_models[username] = user_doc
+        # and save to file
+        write_pkl = open(self.usermodel_path, 'wb')
+        pickle.dump(user_models, write_pkl)
+        write_pkl.close()
+        
+        print "Finished adding all articles to user model and caching it"
+        return user_doc
+        
+    ######### Computing similarity using gensim:
+    def __rank_VSM_gensim__(self, candidate_titles, username):
+        ''' Uses gensim to be faster.
+        See http://graus.nu/thesis/string-similarity-with-tfidf-and-python/ '''
+        if len(candidate_titles)==0:
+            return {}
+        
+        # Make corpus
+        corpus_docs = []
+        user_doc = self.__get_user_doc__(username)
+        corpus_docs.append(user_doc)
+        for candidate_title in candidate_titles:
+            candidate_doc = self.__get_candidate_doc__(candidate_title)
+            corpus_docs.append(candidate_doc)
+            
+        dictionary = corpora.Dictionary(corpus_docs)
+        corpus = DocumentCorpus(corpus_docs, dictionary)
+        tfidf = models.TfidfModel(corpus)
+        
+        user_bow = dictionary.doc2bow(user_doc)
+        tfidf_user = tfidf[user_bow]
+        
+        scores = {}
+        for candidate_title in candidate_titles:
+            clean_cand = self.__get_candidate_doc__(candidate_title)
+            cand_bow = dictionary.doc2bow(clean_cand)
+            tfidf_candidate = tfidf[cand_bow]
+            sim = self.__compare_docs__(tfidf_user, tfidf_candidate, dictionary)
+            scores[candidate_title] = sim
+        sorted_scores = OrderedDict(sorted(scores.iteritems(), key=operator.itemgetter(1), reverse=True))
+        return sorted_scores
+    def __compare_docs__(self, tfidf1, tfidf2, dictionary):
+        index = similarities.MatrixSimilarity([tfidf1],num_features=len(dictionary))
+        sim = index[tfidf2]
+        #print str(round(sim*100,2))+'% similar'
+        return round(sim*100,2)
+        
+    ######### Computing similarity by implementing own inverted term doc frequency matrix:
+    def __rank_VSM_tdmatrix__(self, candidate_titles, username):
+        ''' Ranks each of the given candidates by comparing the text similarity 
+        of the Wikipedia article it corresponds to against the Wikipedia articles
+        that the given user has edited '''
+        
+        if len(candidate_titles)==0:
+            return {}
+        
+        scores = {}
+        td_matrix = self.__make_td_matrix__(username, candidate_titles)
+        for candidate_title in candidate_titles:
+            try:
+                candidate_score = self.__compute_sim_for_candidate__(candidate_title, username, td_matrix)
+                scores[candidate_title] = candidate_score
+            except Exception as e:
+                print "Problem computing similarity of candidate "+str(candidate_title), e   
+                raise
+        sorted_scores = OrderedDict(sorted(scores.iteritems(), key=operator.itemgetter(1), reverse=True))
+        return sorted_scores
+    def __make_td_matrix__(self, username, candidate_titles):
+        td_matrix = {}
+        
+        # Corpus of user doc and candidate docs of ambiguous entity
+        corpus_of_BOW_docs = []
+        
+        # Note that each "document" is a list of tokens
+        
+        # Make document for user
+        user_BOW_doc = self.__get_user_doc__(username)
+        corpus_of_BOW_docs.append(user_BOW_doc)
+        
+        # Make documents for all candidates
+        candidate_BOW_docs = {}
+        for candidate_title in candidate_titles:
+            candidate_BOW_doc = self.__get_candidate_doc__(candidate_title)
+            candidate_BOW_docs[candidate_title] = candidate_BOW_doc
+            corpus_of_BOW_docs.append(candidate_BOW_doc)
+        
+        # Add user doc to matrix (if not already added previously)
+        print "Adding user doc to matrix..."
+        idf_cache = {} # Cache idf values so don't have to keep recalculating
+        td_matrix[username] = {}
+        user_len = float(len(user_BOW_doc))
+        user_fdist = nltk.FreqDist(user_BOW_doc)
+        for term in user_fdist.iterkeys():
+            
+            tf_user = user_fdist[term] / user_len
+            if term in idf_cache:
+                idf_user = idf_cache[term]
+            else:
+                idf_user = self.__compute_idf__(term, corpus_of_BOW_docs)
+                idf_cache[term] = idf_user
+                
+            td_matrix[username][term] = tf_user * idf_user
+        print "User doc added to matrix."
+        
+        # Add candidates' docs to matrix
+        print "Adding candidates to matrix..."
+        for candidate_title in candidate_BOW_docs:
+            try:
+                if candidate_title in td_matrix:
+                    continue 
+                    
+                candidate_BOW_doc = candidate_BOW_docs[candidate_title]
+                candidate_len = float(len(candidate_BOW_doc))
+                candidate_fdist = nltk.FreqDist(candidate_BOW_doc)
+                td_matrix[candidate_title] = {}
+                
+                if 0==len(candidate_fdist.keys()):
+                    continue
+                
+                for term in candidate_fdist.iterkeys():
+                    try:
+                        tf_candidate = candidate_fdist[term] / candidate_len
+                        if term in idf_cache:
+                            idf_candidate = idf_cache[term]
+                        else:
+                            idf_candidate = self.__compute_idf__(term, corpus_of_BOW_docs)
+                            idf_cache[term] = idf_candidate
+                    
+                        td_matrix[candidate_title][term] = tf_candidate * idf_candidate
+                    except Exception as term_exception:
+                        print "Problem with term "+str(term), term_exception
+                        continue
+            except Exception as candidate_exception:
+                raise
+                print "Problem with candidate "+str(candidate_title), candidate_exception
+        print "Candidate docs added to matrix."
+        return td_matrix
+    def __compute_idf__(self, term, corpus):
+        num_texts_with_term = len([True for token_list in corpus if term.lower()
+                                   in token_list])
+    
+        # tf-idf calc involves multiplying against a tf value less than 0, 
+        # so it's important to return a value greater than 1 for consistent
+        # scoring. (Multipling two values less than 1 returns a value less
+        # than each of them.
+        try:
+            return 1.0 + log(float(len(corpus)) / num_texts_with_term)
+        except ZeroDivisionError:
+            return 1.0
+    def __compute_sim_for_candidate__(self, candidate_title, username, td_matrix):  
+        print "Scoring candidate "+str(candidate_title)+"..."
+        user_terms = td_matrix[username].copy()
+        # Take care not to mutate the original data structures
+        # since we're in a loop and need the originals multiple times
+        candidate_terms = td_matrix[candidate_title].copy()
+        
+        # Fill in "gaps" in each map so vectors of the same length can be computed
+        for cand_term in candidate_terms:
+            if cand_term not in user_terms:
+                user_terms[cand_term] = 0.0
+        for user_term in user_terms:
+            if user_term not in candidate_terms:
+                candidate_terms[user_term] = 0.0
+                
+        # Create vectors from term maps
+        v1 = [score for (term, score) in sorted(candidate_terms.items())]
+        v2 = [score for (term, score) in sorted(user_terms.items())]    
+        
+        # Compute similarity amongst documents
+        sim_score = self.__cos_sim__(v1, v2)
+        return sim_score
+    def __cos_sim__(self, a,b):
+        return self.__dot__(a,b) / (self.__norm__(a) * self.__norm__(b))
+    def __dot__(self, a,b):
+        n = len(a)
+        sum_val = 0
+        for i in xrange(n):
+            sum_val += a[i] * b[i];
+        return sum_val
+    def __norm__(self, a):
+        ''' Prevents division by 0'''
+        n = len(a)
+        sum_val = 0
+        for i in xrange(n):
+            sum_val += a[i] * a[i]
+        if sum_val==0:
+            sum_val=1 # prevent division by 0 in cosine sim calculation
+        return math.sqrt(sum_val)
+    
+class DocumentCorpus(object):
+    def __init__(self, corpus_docs, dictionary):
+        self.corpus_docs = corpus_docs
+        self.dictionary = dictionary
+    def __iter__(self):
+        for doc in self.corpus_docs:
+            yield self.dictionary.doc2bow(doc) 
