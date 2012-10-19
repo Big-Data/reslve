@@ -167,10 +167,20 @@ def get_wikipedia_page_url(page_title):
 def query_page_title(page_id):
     ''' Returns the title of the Wikipedia page that has the given page id '''
     try:
-        info_query = 'prop=info&pageids'+'='+str(page_id)+'&format=xml'
+        info_query = 'prop=info&pageids='+str(page_id)+'&format=xml'
         page_info_xml = __query_wiki__(info_query)
         title = __parse_wiki_xml__(page_info_xml, 'page', 'title')
         return title[0]
+    except:
+        return ''  
+    
+def query_page_id(page_title):
+    ''' Returns the ID of the Wikipedia page that has the given page title '''
+    try:
+        info_query = 'prop=info&titles='+str(page_title).replace(' ', '_')+'&format=xml'
+        page_info_xml = __query_wiki__(info_query)
+        page_id = __parse_wiki_xml__(page_info_xml, 'page', 'pageid')
+        return page_id[0]
     except:
         return ''  
     
@@ -217,10 +227,20 @@ def query_total_edits_siteinfo():
 def query_categories_of_res(res_title):
     ''' Returns the wikipedia categories of a wikipedia resource given its title.
     If return_title is true, returns category titles; otherwise, return category ids. '''
-    categories_query = 'titles='+str(res_title)+'&prop=categories&clshow=!hidden&cllimit=max&format=xml'
-    print categories_query
-    categories_xml = __query_wiki__(categories_query)
-    categories = __parse_wiki_xml__(categories_xml, 'cl', 'title')
+    res_title = res_title.replace(' ','_')
+    clcontinue = ''
+    while True:
+        categories_query = 'titles='+res_title+'&prop=categories&clshow=!hidden&cllimit=max&format=xml'+clcontinue
+        categories_xml = __query_wiki__(categories_query)
+        categories = __parse_wiki_xml__(categories_xml, 'cl', 'title', True)
+    
+        # see if more categories
+        query_continue = __wiki_xml_has_tag__(categories_xml, 'query-continue')  
+        if not query_continue:
+            break
+        more_categories = __parse_wiki_xml__(categories_xml, 'categories', 'clcontinue')
+        clcontinue = '&clcontinue='+more_categories[0]
+    
     return categories
 
 def __query_wiki__(query) : 
