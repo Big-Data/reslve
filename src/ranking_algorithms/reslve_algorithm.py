@@ -9,7 +9,7 @@ class RESLVE_Algorithm(object):
     def __init__(self, alg_type, usermodel_path):
         print "Initializing algorithm based on "+str(alg_type)
         self.alg_type = alg_type
-        self.usermodel_path = '/Users/elizabethmurnane/git/reslve/data/pickles/usermodel_'+str(usermodel_path)+'.pkl'
+        self.usermodel_path = '/Users/elizabethmurnane/git/reslve/data/pickles/usermodels/usermodel_'+str(usermodel_path)+'.pkl'
     
     def get_user_doc(self, username, incorporate_edit_count=False):
         ''' Loads or creates+caches the user interest model '''
