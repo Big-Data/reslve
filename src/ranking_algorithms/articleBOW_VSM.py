@@ -11,7 +11,7 @@ class ArticleBOW_VSM(VSM_Algorithm):
     resource's article page and the BOW of the user's edited articles' pages '''
     
     def __init__(self):
-        VSM_Algorithm.__init__(self, "article Bag-of-Words", "articleBOW")
+        VSM_Algorithm.__init__(self, "article Bag-of-Words", "articleBOW-VSM")
     
     def get_article_representation(self, article_title):
         ''' Returns a bag of words build from the text content
