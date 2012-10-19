@@ -78,6 +78,8 @@ def get_clean_BOW_doc(doc):
     stopset = set(stopwords.words('english'))
     stemmer = nltk.PorterStemmer()
     tokens = WordPunctTokenizer().tokenize(doc)
-    clean = [token.lower() for token in tokens if token.lower() not in stopset and len(token) > 2]
-    final = [stemmer.stem(word) for word in clean]
+    non_punct = [''.join(ch for ch in token if not ch in string.punctuation) 
+                    for token in tokens] # remove tokens that are purely punctuation
+    clean_tokens = [token.lower() for token in non_punct if token.lower() not in stopset and len(token) > 2]
+    final = [stemmer.stem(word) for word in clean_tokens]
     return final
