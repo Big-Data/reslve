@@ -214,15 +214,14 @@ def query_total_edits_siteinfo():
     edit_stat = __parse_wiki_xml__(stats_xml, 'statistics', 'edits')
     return edit_stat
 
-def query_categories_of_res(res_id):
-    ''' Returns the wikipedia categories of a wikipedia resource given its id '''
-    categories_query = 'pageids='+str(res_id)+'&prop=categories&clshow=!hidden&format=xml'
+def query_categories_of_res(res_title):
+    ''' Returns the wikipedia categories of a wikipedia resource given its title.
+    If return_title is true, returns category titles; otherwise, return category ids. '''
+    categories_query = 'titles='+str(res_title)+'&prop=categories&clshow=!hidden&cllimit=max&format=xml'
+    print categories_query
     categories_xml = __query_wiki__(categories_query)
     categories = __parse_wiki_xml__(categories_xml, 'cl', 'title')
-    formatted_categories = []
-    for cat in categories:
-        formatted_categories.append(__format_category__(cat))
-    return formatted_categories
+    return categories
 
 def __query_wiki__(query) : 
     ''' Queries wikipedia to retrieve various data in xml format '''
@@ -257,10 +256,3 @@ def __wiki_xml_has_tag__(wiki_xml, tag_name):
     dom = xml.dom.minidom.parseString(wiki_xml)
     pages = dom.getElementsByTagName(tag_name)
     return len(pages) > 0
-
-def __format_category__(category):
-    ''' Formats the category string in the following ways:
-    1. remove leading and trailing white space 
-    '''
-    category = category.strip()
-    return category
