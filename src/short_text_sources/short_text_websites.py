@@ -6,7 +6,7 @@ __Twitter_SiteName__ = 'Twitter'
 def get_twitter_site():
     return Twitter_Site(__Twitter_SiteName__)
 def site_is_Twitter(site):
-    return site.siteName==__Twitter_SiteName__
+    return site!=None and site.siteName==__Twitter_SiteName__
 
 
 ####### The site "Interface" #######
