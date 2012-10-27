@@ -184,7 +184,7 @@ def query_page_id(page_title):
     except:
         return ''  
     
-def query_page_content_text(page_title, remove_issues_header=True):
+def query_page_content_text(page_title):
     try :
         content_query = 'titles='+(str(page_title).replace(' ', '_'))+'&prop=revisions&rvprop=content&format=xml'
         content_xml = __query_wiki__(content_query)
@@ -192,12 +192,7 @@ def query_page_content_text(page_title, remove_issues_header=True):
         dom = parseString(content_xml)
         content = dom.getElementsByTagName('rev')[0].childNodes[0].data
         content = content.encode("utf-8")
-        
-        if remove_issues_header:
-            # remove the issues section at the top
-            issues_end = '}}'
-            content = content[content.find(issues_end) + len(issues_end):]
-            
+        content = __clean_wikimarkup__(content)
         return content
     except Exception as e:
         print "Problem retrieving page content of page "+str(page_title), e
@@ -282,3 +277,26 @@ def __wiki_xml_has_tag__(wiki_xml, tag_name):
     dom = xml.dom.minidom.parseString(wiki_xml)
     pages = dom.getElementsByTagName(tag_name)
     return len(pages) > 0
+
+def __clean_wikimarkup__(content):
+    # remove the pipes in inter-wiki links
+    content = content.replace('|', ' ')
+    
+    # remove these sections. note the order in these lists
+    # is important since some of these strings may be nested
+    markups_to_remove = ["'''", "[[", "]]", "=References=", '=', 'Category:']
+    chunks = [('{{Multiple issues','}}'), ('{{cite','}}'), ('{{Reflist','}}'), ('{{DEFAULTSORT:','}}')]
+    content = __remove_markups__(content, markups_to_remove, chunks)
+    
+    # now remove any remaining braces
+    content = __remove_markups__(content, ['{{', '}}'], [])
+    return content
+def __remove_markups__(content, markups, chunks):
+    for markup in markups:
+        content = content.replace(markup,"")
+    for (chunk_start,chunk_end) in chunks:
+        wikisection_start = content.find(chunk_start)
+        wikisection_end = content.find(chunk_end)
+        to_remove = content[wikisection_start:wikisection_end+len(chunk_end)]
+        content = content.replace(to_remove, '')
+    return content
