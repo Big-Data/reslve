@@ -1,4 +1,5 @@
 from nltk.corpus import stopwords
+from nltk.tokenize.punkt import PunktSentenceTokenizer
 from nltk.tokenize.regexp import WordPunctTokenizer
 from short_text_sources import short_text_websites
 import nltk
@@ -83,3 +84,8 @@ def get_clean_BOW_doc(doc):
     clean_tokens = [token.lower() for token in non_punct if token.lower() not in stopset and len(token) > 2]
     final = [stemmer.stem(word) for word in clean_tokens]
     return final
+
+def get_sentences(text):
+    ''' Returns a list of the sentences in the given text '''
+    sentences = PunktSentenceTokenizer().tokenize(text)
+    return sentences
