@@ -184,7 +184,7 @@ def query_page_id(page_title):
     except:
         return ''  
     
-def query_page_content_text(page_title):
+def query_page_content_text(page_title, remove_issues_header=True):
     try :
         content_query = 'titles='+(str(page_title).replace(' ', '_'))+'&prop=revisions&rvprop=content&format=xml'
         content_xml = __query_wiki__(content_query)
@@ -192,6 +192,12 @@ def query_page_content_text(page_title):
         dom = parseString(content_xml)
         content = dom.getElementsByTagName('rev')[0].childNodes[0].data
         content = content.encode("utf-8")
+        
+        if remove_issues_header:
+            # remove the issues section at the top
+            issues_end = '}}'
+            content = content[content.find(issues_end) + len(issues_end):]
+            
         return content
     except Exception as e:
         print "Problem retrieving page content of page "+str(page_title), e
