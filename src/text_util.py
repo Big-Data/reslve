@@ -5,8 +5,8 @@ import nltk
 import re
 import string
 
-def format_shorttext_for_NER(raw_shorttext, site):
-    ''' Prepares the given short text for named entity extraction. Minimal 
+def format_text_for_NER(raw_shorttext, site):
+    ''' Prepares the given text for named entity extraction. Minimal 
     processing here to just remove line breaks, links, etc rather than more 
     substantial formatting like porting or stemming which will interfere with 
     NER toolkit's ability to recognize entities. '''
@@ -57,7 +57,7 @@ def format_shorttext_for_NER(raw_shorttext, site):
 def get_nouns(raw_text, site):
     nouns = []
     try:
-        cleaned_text = format_shorttext_for_NER(raw_text, site)
+        cleaned_text = format_text_for_NER(raw_text, site)
         text_tokens = WordPunctTokenizer().tokenize(cleaned_text)
         for token_and_POS in nltk.pos_tag(text_tokens):
             try:
