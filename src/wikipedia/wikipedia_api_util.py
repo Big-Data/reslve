@@ -4,6 +4,8 @@ pieces of information and functions to parse results
 '''
 from CONSTANT_VARIABLES import ACTIVE_WIKIPEDIA_MIN
 from xml.dom.minidom import parseString
+import re
+import text_util
 import urllib2
 import xml.dom.minidom
 
@@ -191,8 +193,17 @@ def query_page_content_text(page_title):
         
         dom = parseString(content_xml)
         content = dom.getElementsByTagName('rev')[0].childNodes[0].data
-        content = content.encode("utf-8")
+        if "#REDIRECT" in content:
+            # this is a direct page, so we need original page with the actual content
+            return query_page_content_text(page_title.lower())
+        
+        # clean out wikimarkup 
         content = __clean_wikimarkup__(content)
+        
+        # clean out newlines, non-printable characters, etc
+        content = text_util.format_text_for_NER(content, None)
+        
+        content = content.encode("utf-8")
         return content
     except Exception as e:
         print "Problem retrieving page content of page "+str(page_title), e
@@ -284,19 +295,52 @@ def __clean_wikimarkup__(content):
     
     # remove these sections. note the order in these lists
     # is important since some of these strings may be nested
-    markups_to_remove = ["'''", "[[", "]]", "=References=", '=', 'Category:']
-    chunks = [('{{Multiple issues','}}'), ('{{cite','}}'), ('{{Reflist','}}'), ('{{DEFAULTSORT:','}}')]
-    content = __remove_markups__(content, markups_to_remove, chunks)
+    markups_to_remove = ["''", "'''", "[[", "]]", "=References=", 'Category:', '*#', '*', '[', ']', 
+                         'ca:', 'de:', 'el:', 'es:', 'fr:', 'gl:', 'it:', 'he:', 'la:', 'ja:', 'no:', 
+                         'pl:', 'pt:', 'fi:', 'sv:', 'uk:', 
+                         'DEFAULTSORT:']
+    chunks = [('{{About','}}'), ('{{Refimprove','}}'), ('{{Lead','}}'), ('{{Multiple issues','}}'), 
+              ('{{cite','}}'), ('{{Citation','}}'), ('{{Reflist','}}'), ('{{DEFAULTSORT:','}}'), 
+              ('==Bibliography==','=') # for now just take out the whole bibliography..
+              ]
+    repeated_chunks = [('(pp.',')'), ('(p.',')')]
+    content = __remove_markups__(content, markups_to_remove, chunks, repeated_chunks)
     
     # now remove any remaining braces
-    content = __remove_markups__(content, ['{{', '}}'], [])
+    content = __remove_markups__(content, ['{{', '}}', 'pp.', '=', '==External links=='], [], [])
+    
+    # remove digits like dates, numbers, pages, ISBN numbers, etc.
+    content = ' '.join(word for word in content.split() 
+                       if (not word.isdigit() and 
+                           not word.replace('(', '').replace(')', '').isdigit()))
+    
+    # fix spaces before periods resulting from these removals
+    content = content.replace(" . ", ". ")
+    
+    # use regex to remove some remaining digit strings
+    content = re.sub(", \d+", "", content) # dates after cites, ie (Young, 2005) -> (Young)
+    content = re.sub("(\d+)", "", content) # remove cites of just the date ie (2008)
+    content = content.replace(" ()","").replace(" p. "," ").replace(", p.</ref>", ".</ref>")
+    
     return content
-def __remove_markups__(content, markups, chunks):
+
+def __remove_markups__(content, markups, chunks, repeated_chunks):
     for markup in markups:
         content = content.replace(markup,"")
     for (chunk_start,chunk_end) in chunks:
-        wikisection_start = content.find(chunk_start)
-        wikisection_end = content.find(chunk_end)
-        to_remove = content[wikisection_start:wikisection_end+len(chunk_end)]
-        content = content.replace(to_remove, '')
+        content = remove_chunk(content, chunk_start, chunk_end)
+    for (chunk_start,chunk_end) in repeated_chunks:
+        # these may occur multiple times in the doc, 
+        # so need to iterate to remove all occurrences
+        while chunk_start in content:
+            content = remove_chunk(content, chunk_start, chunk_end)
+        
+    return content
+
+def remove_chunk(content, chunk_start, chunk_end):
+    wikisection_start = content.find(chunk_start)
+    after_chunkstart = wikisection_start+len(chunk_start)
+    wikisection_end = after_chunkstart+content[after_chunkstart:].find(chunk_end)
+    to_remove = content[wikisection_start:wikisection_end+len(chunk_end)]
+    content = content.replace(to_remove, '')
     return content
