@@ -91,20 +91,18 @@ def build_entities_dataset(shorttext_rows, site):
             
             # get the entities contained in each short text
             # clean the short text before attempting to detect entities in it
-            clean_shorttext = text_util.format_shorttext_for_NER(original_shorttext, site)
+            clean_shorttext = text_util.format_text_for_NER(original_shorttext, site)
             
-            sf_to_candidates_wikiminer = named_entity_finder.find_candidates_wikipedia_miner(clean_shorttext)
-            sf_to_candidates_dbpedia = named_entity_finder.find_candidates_dbpedia(clean_shorttext)
+            # use wikipedia miner and dpedia spotlight to detect
+            # named entities and their candidate resources
+            sf_to_candidates_union = named_entity_finder.find_ne_to_candidates(clean_shorttext)
             
-            # merge the candidates of the surface forms detected by both services
-            sf_to_candidates_union = __merge_sf_maps__(sf_to_candidates_wikiminer, sf_to_candidates_dbpedia)
-                
-            # now construct a NamedEntity object for each surface form
+            # now construct a NamedEntity object for each detected surface form
             for surface_form in sf_to_candidates_union:
                 ne_obj = NamedEntity(surface_form,
                                      shorttext_id, original_shorttext,
                                      sf_to_candidates_union[surface_form], 
-                                     username, site)
+                                     username, site)    
                 
                 # cache this entity object
                 ne_objs.append(ne_obj)
@@ -129,40 +127,3 @@ def build_entities_dataset(shorttext_rows, site):
     # update the cache of ambiguous surface form objects
     print "Cached a total of "+str(len(ne_objs))+" ambiguous named entities"
     pkl_util.write_pickle(output_str, ne_objs, __get_ne_cache_path__(site))   
-    
-def __merge_sf_maps__(sf_to_candidates_wikiminer, sf_to_candidates_dbpedia):
-
-    # start with the entities detected by wikiminer
-    sf_to_candidates_union = sf_to_candidates_wikiminer 
-    
-    # then add all the entities detected by dbpedia, 
-    # merging candidates for ones also detected by wikiminer
-    for surface_form in sf_to_candidates_dbpedia:
-        if not surface_form in sf_to_candidates_union:
-            # entity not detected by wikiminer, so can just add it to union map
-            sf_to_candidates_union[surface_form] = sf_to_candidates_dbpedia[surface_form]
-            continue
-        
-        # otherwise, need to merge the candidate objects...
-        
-        # start with candidates detected by wikiminer
-        union_candidates = sf_to_candidates_union[surface_form]
-        
-        # then add in missing dbpedia candidates or scores
-        dbpedia_candidates = sf_to_candidates_dbpedia[surface_form]
-        for cand_title in dbpedia_candidates:
-            if not cand_title in union_candidates:
-                # candidate not detected by wikiminer, so can just add it
-                union_candidates[cand_title] = dbpedia_candidates[cand_title]
-                continue
-            
-            # otherwise, candidate detected by both
-            # services so will have a score from each
-            cand_obj = union_candidates[cand_title]
-            # set its dbpedia score
-            cand_obj.dbpedia_score = dbpedia_candidates[cand_title].dbpedia_score
-            union_candidates[cand_title] = cand_obj
-        
-        # update the sf -> candidates
-        sf_to_candidates_union[surface_form] = union_candidates  
-    return sf_to_candidates_union
