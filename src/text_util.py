@@ -6,7 +6,7 @@ import nltk
 import re
 import string
 
-def format_text_for_NER(raw_shorttext, site):
+def format_text_for_NER(raw_shorttext, site=None):
     ''' Prepares the given text for named entity extraction. Minimal 
     processing here to just remove line breaks, links, etc rather than more 
     substantial formatting like porting or stemming which will interfere with 
@@ -84,6 +84,10 @@ def get_clean_BOW_doc(doc):
     clean_tokens = [token.lower() for token in non_punct if token.lower() not in stopset and len(token) > 2]
     final = [stemmer.stem(word) for word in clean_tokens]
     return final
+
+def get_clean_doc(doc):
+    ''' Joins the clean BOW back into a single string '''
+    return ' '.join(get_clean_BOW_doc(doc))
 
 def get_sentences(text):
     ''' Returns a list of the sentences in the given text '''
