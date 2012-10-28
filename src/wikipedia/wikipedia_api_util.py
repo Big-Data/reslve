@@ -307,7 +307,7 @@ def __clean_wikimarkup__(content):
     content = __remove_markups__(content, markups_to_remove, chunks, repeated_chunks)
     
     # now remove any remaining braces
-    content = __remove_markups__(content, ['{{', '}}', 'pp.', '=', '==External links=='], [], [])
+    content = __remove_markups__(content, ['{{', '}}', 'pp.', '==External links==', '==See also==', '='], [], [])
     
     # remove digits like dates, numbers, pages, ISBN numbers, etc.
     content = ' '.join(word for word in content.split() 
