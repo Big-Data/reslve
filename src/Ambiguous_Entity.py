@@ -1,8 +1,11 @@
 '''
 Represents an ambiguous surface form detected by wikiminer in a short text on the site
 '''
-from CONSTANT_VARIABLES import VALID_RDF_TYPES
+from CONSTANT_VARIABLES import VALID_RDF_TYPES, WIKIPEDIA_MINER_ALG, \
+    DBPEDIA_SPOTLIGHT_ALG
+from collections import OrderedDict
 from wikipedia import wikipedia_api_util
+import operator
 import simplejson
 import text_util
 import urllib2
@@ -101,7 +104,7 @@ class CandidateResource:
     Depending on whether the entity was detected by DBPedia Spotlight, Wikipedia Miner, or
     both, this object stores those services' scores that this candidate is the correct one ''' 
     
-    SCORE_NOT_AVAILBLE = 'Score_Unavailable'
+    SCORE_NOT_AVAILBLE = -1.0
     
     def __init__(self, title, dbpedia_URI, 
                  wikiminer_score=SCORE_NOT_AVAILBLE, dbpedia_score=SCORE_NOT_AVAILBLE):
@@ -115,3 +118,23 @@ class CandidateResource:
         self.dbpedia_URI = dbpedia_URI
         self.wikiminer_score = wikiminer_score
         self.dbpedia_score = dbpedia_score
+    
+    def get_baseline_score(self):
+        ''' Returns the greater of this candidate's wikipedia miner
+        score and dbpedia score or SCORE_NOT_AVAILBLE if neither
+        score is set '''
+        if self.wikiminer_score==self.SCORE_NOT_AVAILBLE:
+            return self.dbpedia_score
+        if self.dbpedia_score==self.SCORE_NOT_AVAILBLE:
+            return self.wikiminer_score
+        return max(self.wikiminer_score, self.dbpedia_score)
+        
+def sort_CandidateResources(cand_objs):
+    ''' Returns an ordered dict of CandidateResource objects, 
+    sorted in decreasing order of toolkit similarity score '''
+    scores_map = {}
+    for cand_obj in cand_objs:
+        scores_map[cand_obj] = cand_obj.get_baseline_score()
+    print sorted(scores_map.values())
+    sorted_cand_objs = OrderedDict(sorted(scores_map.iteritems(), key=operator.itemgetter(1), reverse=True))
+    return sorted_cand_objs
