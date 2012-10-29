@@ -4,6 +4,13 @@ from short_text_sources import short_text_websites
 __usernames_to_judge_csv_path__ = 'usernames-for-turk.csv'
 __usernames_results_csv_path__ = 'Batch_918246_batch_results.csv'
 
+__JUDGMENT_THRESHOLD__ = 0.6
+
+# usernames we evaluated ourselves and have confirmed 
+# belong to the same individual on wikipedia and twitter
+__MANUAL_OVERRIDES_TRUE__ = ['rschen7754', 'bondegezou', 'snowded', 'flameeyes', 'lquilter', 'timtrent', 'hasteur', 'esowteric', 'michaelwuzthere', '1veertje', 'elizium23', 'euchrid', 'theopolisme', 'gavbadger', 'mlpearc', 'jpbowen']
+majority_unknown = ['raynevandunem', 'stuartyeates', 'slightsmile', 'Myownworst', 'eeekster', 'merlinme', 'wardmuylaert']
+
 def make_usernames_csv_for_turk():
     print "Creating csv file of usernames for evaluation on Mechanical Turk..."
     twitter_site = short_text_websites.get_twitter_site()
@@ -60,17 +67,36 @@ def update_usernames_csv_with_judgments():
     # Get the usernames that all workers agreed belonged to a single 
     # person (ie ignore usernames that were rejected by any worker)
     unanimous_confirmed_usernames = []
+    likely_usernames = []
+    conflicting_judgments = []
     for username in judgments:
+        
+        if username in __MANUAL_OVERRIDES_TRUE__:
+            likely_usernames.append(username)
+            continue
+        
         evaluation = judgments[username]
-        num_confirmations = evaluation.get_number_true_evals()
-        # Each username given to 5 workers to evaluate. 
-        # For now, only consider usernames that all workers unanimously agree on
-        if num_confirmations==5:
+        eval_score = evaluation.get_eval_measure()
+        print "Match score for "+str(username)+": "+str(eval_score)
+        
+        if eval_score>=__JUDGMENT_THRESHOLD__:
+            likely_usernames.append(username)
+        elif evaluation.get_number_true_evals()>0:
+            conflicting_judgments.append(username)
+        
+        # Each username given to 5 turkers to evaluate. 
+        if (evaluation.get_number_true_evals()>0 and 
+            evaluation.get_number_false_evals()==0 and 
+            evaluation.get_number_unknown_evals()==0):
+            # all turkers unanimously confirmed this username
             unanimous_confirmed_usernames.append(username)
+    print "Judged "+str(len(judgments))+" usernames"
+    print "Likely matches"+str(len(likely_usernames))
+    print "Conflicting judgments:"+str(conflicting_judgments) 
             
     # Update the judgment cell in the spreadsheet for unanimously confirmed usernames 
-    crosssite_username_dataset_mgr.update_confirmed_usernames(twitter_site, 
-                                                              unanimous_confirmed_usernames)
+    crosssite_username_dataset_mgr.update_confirmed_usernames(twitter_site,
+                                                              likely_usernames)
     print "Updated cross-site-usernames spreadsheet to reflect unanimous positive confirmations"
     
         
@@ -95,7 +121,28 @@ class Turker_Username_Evaluation:
         ''' Returns the number of unique workers that judged the 
         given username to belong to a single individual '''
         return len(set(self.true_evals))
+    def get_number_false_evals(self):
+        return len(set(self.false_evals))
+    def get_number_unknown_evals(self):
+        return len(set(self.unknown_evals))
         
+    def get_eval_measure(self):
+        ''' Returns an averaged measure of the likelihood this username belongs to a single
+        individual, where True, False, and Unknown judgments contribute the following: 
+        a judgment of True = 1
+        a judgment of False = 0
+        a judgment of Unknown = 0.5
+        '''
+        num_true = self.get_number_true_evals()
+        num_false = self.get_number_false_evals()
+        num_unknown = self.get_number_unknown_evals()
+        print str(self.username)+" (true, false, unknown) judgments: "+str(num_true)+", "+str(num_false)+", "+str(num_unknown)
+        
+        #no_unknowns = ((num_true*1.0) + (num_false*0.0)) / (num_true + num_false)        
+        
+        sum_evals = (num_true*1.0) + (num_false*0.0) + (num_unknown*0.5)
+        avg_evals = sum_evals / (num_true + num_false + num_unknown)
+        return avg_evals
         
 prompt_make_or_extract = raw_input("Make username task for Turkers (A) or analyze completed task (B)? ")
 if 'A'==prompt_make_or_extract or 'a'==prompt_make_or_extract:
