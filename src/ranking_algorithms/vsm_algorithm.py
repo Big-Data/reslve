@@ -94,7 +94,7 @@ class VSM_Algorithm(RESLVE_Algorithm):
         # Note that each "document" is a list of tokens
         
         # Make document for user
-        user_BOW_doc = self.__get_user_doc__(username)
+        user_BOW_doc = self.get_user_doc(username)
         corpus_of_BOW_docs.append(user_BOW_doc)
         
         # Make documents for all candidates
