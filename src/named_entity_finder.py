@@ -7,6 +7,7 @@ services to identify possible DBPedia (named) entities for a given input string.
 """
 
 from Ambiguous_Entity import CandidateResource
+from CONSTANT_VARIABLES import WIKIPEDIA_MINER_ALG, DBPEDIA_SPOTLIGHT_ALG
 from urllib2 import Request, urlopen, URLError, HTTPError
 import json
 import pprint
@@ -22,18 +23,6 @@ DBPEDIA_SPOTLIGHT_URI = "http://spotlight.dbpedia.org/rest/candidates?text="
 WIKIPEDIA_MINER_WIKIFY_SERVICE_URI = \
     "http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/wikify?"
     
-def find_ne_to_candidates(text):
-    ''' Returns the union of named entities detected in a 
-    given text by both Wikipedia Miner and DBPedia Spotlight '''
-    
-    # find the named entities and candidates detected by each toolkit
-    sf_to_candidates_wikiminer = find_candidates_wikipedia_miner(text)
-    sf_to_candidates_dbpedia = find_candidates_dbpedia(text)
-    
-    # merge the candidates of the surface forms detected by both services
-    sf_to_candidates_union = __merge_sf_maps__(sf_to_candidates_wikiminer, sf_to_candidates_dbpedia)
-    return sf_to_candidates_union
-
 def find_named_entities_wikipedia_miner(text):
     """Finds named entities in a given text using Wikipedia Miner"""
     
@@ -76,6 +65,9 @@ def find_candidates_wikipedia_miner(text):
     
     result = query_wikipedia_miner_for_candidates(text)
     surface_form_to_candidates = {}
+    if result is None or 'labels' not in result:
+        print "Unable to find any entities+candidates in text "+str(text)
+        return surface_form_to_candidates
     for entity_result in result['labels']:
         surface_form = entity_result['text'].lower()
         
@@ -96,7 +88,7 @@ def find_candidates_wikipedia_miner(text):
             sense_dbpedia_uri = "http://dbpedia.org/resource/"+sense_title
             sense_score = sense['weight']
             
-            cand_obj = CandidateResource(sense_title, sense_dbpedia_uri, sense_score, CandidateResource.SCORE_NOT_AVAILBLE)
+            cand_obj = CandidateResource(sense_title, sense_dbpedia_uri, (WIKIPEDIA_MINER_ALG, sense_score))
             candidates[sense_title] = cand_obj
             
         if len(candidates)>0: # ignore entities that have no candidates
@@ -147,7 +139,7 @@ def find_candidates_dbpedia(text):
             res_dbpedia_uri = "http://dbpedia.org/resource/"+res_title
             res_score = res['@finalScore']
 
-            cand_obj = CandidateResource(res_title, res_dbpedia_uri, CandidateResource.SCORE_NOT_AVAILBLE, res_score)
+            cand_obj = CandidateResource(res_title, res_dbpedia_uri, (DBPEDIA_SPOTLIGHT_ALG, res_score))
             candidates[res_title] = cand_obj
         
         if len(candidates)>0: # ignore entities that have no candidates
@@ -165,6 +157,7 @@ def query_wikipedia_miner_for_candidates(text):
     
     request = Request(request_uri)
     try:
+        print "Querying Wikipedia Miner for named entities and candidate resources..."
         response = urlopen(request)
     except HTTPError, e:
         print 'The server couldn\'t fulfill the request.'
@@ -188,6 +181,7 @@ def query_dbpedia_spotlight_for_candidates(text):
     request = Request(request_uri)
     request.add_header("Accept", "application/json")
     try:
+        print "Querying DBPedia Spotlight for named entities and candidate resources..."
         response = urlopen(request)
     except HTTPError, e:
         print 'The server couldn\'t fulfill the request.'
@@ -198,44 +192,6 @@ def query_dbpedia_spotlight_for_candidates(text):
     result = response.read()
     result = json.loads(result)
     return result
-
-def __merge_sf_maps__(sf_to_candidates_wikiminer, sf_to_candidates_dbpedia):
-
-    # start with the entities detected by wikiminer
-    sf_to_candidates_union = sf_to_candidates_wikiminer 
-    
-    # then add all the entities detected by dbpedia, 
-    # merging candidates for ones also detected by wikiminer
-    for surface_form in sf_to_candidates_dbpedia:
-        if not surface_form in sf_to_candidates_union:
-            # entity not detected by wikiminer, so can just add it to union map
-            sf_to_candidates_union[surface_form] = sf_to_candidates_dbpedia[surface_form]
-            continue
-        
-        # otherwise, need to merge the candidate objects...
-        
-        # start with candidates detected by wikiminer
-        union_candidates = sf_to_candidates_union[surface_form]
-        
-        # then add in missing dbpedia candidates or scores
-        dbpedia_candidates = sf_to_candidates_dbpedia[surface_form]
-        for cand_title in dbpedia_candidates:
-            if not cand_title in union_candidates:
-                # candidate not detected by wikiminer, so can just add it
-                union_candidates[cand_title] = dbpedia_candidates[cand_title]
-                continue
-            
-            # otherwise, candidate detected by both
-            # services so will have a score from each
-            cand_obj = union_candidates[cand_title]
-            
-            # set its dbpedia score
-            cand_obj.dbpedia_score = dbpedia_candidates[cand_title].dbpedia_score
-            union_candidates[cand_title] = cand_obj
-            
-        # update the sf -> candidates
-        sf_to_candidates_union[surface_form] = union_candidates  
-    return sf_to_candidates_union
 
 if __name__ == '__main__':
     #ne = find_named_entities("President Obama is the president of the USA")

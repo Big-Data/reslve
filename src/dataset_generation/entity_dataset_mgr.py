@@ -43,7 +43,7 @@ def get_ne_candidates_to_evaluate_mturk(site):
     ''' Returns the ambiguous entities mapped to their possible candidates  
     from which humans need to manually choose the correct candidate. '''
     ne_objs = pkl_util.load_pickle(__get_output_str__(site),
-                                             __get_ne_cache_path__(site))
+                                   __get_ne_cache_path__(site))
     if ne_objs is None:
         return None
     return ne_objs   
@@ -95,14 +95,21 @@ def build_entities_dataset(shorttext_rows, site):
             
             # use wikipedia miner and dpedia spotlight to detect
             # named entities and their candidate resources
-            sf_to_candidates_union = named_entity_finder.find_ne_to_candidates(clean_shorttext)
+            sf_to_candidates_wikiminer = named_entity_finder.find_candidates_wikipedia_miner(clean_shorttext)
+            sf_to_candidates_dbpedia = named_entity_finder.find_candidates_dbpedia(clean_shorttext)
+            all_detected_surface_forms = set(sf_to_candidates_wikiminer.keys()).union(sf_to_candidates_dbpedia.keys())
             
             # now construct a NamedEntity object for each detected surface form
-            for surface_form in sf_to_candidates_union:
+            for surface_form in all_detected_surface_forms:
                 ne_obj = NamedEntity(surface_form,
                                      shorttext_id, original_shorttext,
-                                     sf_to_candidates_union[surface_form], 
                                      username, site)    
+                
+                # set the NamedEntity's baseline candidate rankings 
+                if surface_form in sf_to_candidates_wikiminer:
+                    ne_obj.set_wikipedia_miner_ranking(sf_to_candidates_wikiminer[surface_form])
+                if surface_form in sf_to_candidates_dbpedia:
+                    ne_obj.set_dbpedia_spotlight_ranking(sf_to_candidates_dbpedia[surface_form])
                 
                 # cache this entity object
                 ne_objs.append(ne_obj)
