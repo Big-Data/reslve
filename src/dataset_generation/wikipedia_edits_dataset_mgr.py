@@ -36,15 +36,13 @@ def build_edits_by_user(username):
 def build_wikipedia_edits_dataset(crosssite_usernames, prompt=True):
     
     # Load or create/initialize the spreadsheet of users' wikipedia edits
-    edits_csv_path = __edits_csv_path__
     csv_string = 'Wikipedia edits made by usernames that also exist on a site that is a source of short texts'
     headers = [COLUMN_USERNAME, __COLUMN_ARTICLE_ID__, __COLUMN_NUM_EDITS__]
-    usernames_in_csv = csv_util.load_or_initialize_csv(edits_csv_path, csv_string, headers, COLUMN_USERNAME)
+    usernames_in_csv = csv_util.load_or_initialize_csv(__edits_csv_path__, csv_string, headers, COLUMN_USERNAME)
     
     # Load the cache of edits, a dict: { username -> {edited page -> num edits } }
-    edits_cache_path = __edits_cache_path__
     editor_names_to_edits_cache = pkl_util.load_pickle("Wikipedia editor usernames to their edited pages+counts",
-                                                       edits_cache_path)
+                                                       __edits_cache_path__)
     if editor_names_to_edits_cache is None:
         editor_names_to_edits_cache = {}
 
@@ -72,7 +70,7 @@ def build_wikipedia_edits_dataset(crosssite_usernames, prompt=True):
         desired_num_editors = 1
     
     edits_rows = []
-    prompt_count = 0
+    #prompt_count = 0
     progress_count = 1
     for username in editors_todo:
         
@@ -106,9 +104,9 @@ def build_wikipedia_edits_dataset(crosssite_usernames, prompt=True):
         editor_names_to_edits_cache[username] = user_edits # add that user+edits to cache
                 
     # update the spreadsheet with any new editors' edits that have been fetched
-    csv_util.append_to_spreadsheet(csv_string, edits_csv_path, usernames_in_csv, edits_rows, False)  
+    csv_util.append_to_spreadsheet(csv_string, __edits_csv_path__, usernames_in_csv, edits_rows, False)  
         
     # update the edit mapping cache
     pkl_util.write_pickle("user edits to file...", 
-                          editor_names_to_edits_cache, edits_cache_path)
+                          editor_names_to_edits_cache, __edits_cache_path__)
         
