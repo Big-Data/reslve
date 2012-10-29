@@ -301,13 +301,14 @@ def __clean_wikimarkup__(content):
                          'DEFAULTSORT:']
     chunks = [('{{About','}}'), ('{{Refimprove','}}'), ('{{Lead','}}'), ('{{Multiple issues','}}'), 
               ('{{cite','}}'), ('{{Citation','}}'), ('{{Reflist','}}'), ('{{DEFAULTSORT:','}}'), 
-              ('==Bibliography==','=') # for now just take out the whole bibliography..
+              ('==Bibliography==','='), # for now just take out the whole bibliography..
+              ('File:','px') # images
               ]
     repeated_chunks = [('(pp.',')'), ('(p.',')')]
     content = __remove_markups__(content, markups_to_remove, chunks, repeated_chunks)
     
     # now remove any remaining braces
-    content = __remove_markups__(content, ['{{', '}}', 'pp.', '==External links==', '==See also==', '='], [], [])
+    content = __remove_markups__(content, ['{{', '}}', 'pp.', '==External links==', '==See also==', '=', '.jpg', '.png'], [], [])
     
     # remove digits like dates, numbers, pages, ISBN numbers, etc.
     content = ' '.join(word for word in content.split() 
