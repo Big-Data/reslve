@@ -33,6 +33,10 @@ def prompt_for_build_entity_csv(site):
     return __prompt_for_build__("Create or update CSV of entities detected in short texts posted on "+\
                                 str(site.siteName)+" by cross-site usernames? (Y/N): ")
     
+def prompt_for_nonmatching_baseline_csv(site):
+    return __prompt_for_build__("Create or update CSV of entities detected in short texts posted on "+\
+                                str(site.siteName)+" by usernames that DO NOT match? (Y/N): ")
+            
 def prompt_num_entries_to_build(output_string, entries_in_file):
     print str(len(entries_in_file))+" entries in file of "+output_string  
     desired_num = int(raw_input("Total number of entries desired? (Enter number): "))
