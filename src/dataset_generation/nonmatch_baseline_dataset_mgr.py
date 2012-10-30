@@ -16,10 +16,10 @@ would be expected to be worse and we can use this performance as a baseline. '''
 
 def __get_nonmatch_entities_csv_path__(site):
     ''' @param site: a Site object '''
-    return '/Users/elizabethmurnane/git/reslve/data/spreadsheets/nonmatch_baseline_entities_'+str(site.siteName)+'.csv'    
+    return '/Users/elizabethmurnane/git/reslve/data/spreadsheets/entities_'+str(site.siteName)+'_nonmatch_baseline.csv'    
 def __get_nonmatch_ne_cache_path__(site):
     ''' @param site: a Site object '''
-    return '/Users/elizabethmurnane/git/reslve/data/pickles/nonmatch_baseline_entity_cache_'+str(site.siteName)+'.pkl'      
+    return '/Users/elizabethmurnane/git/reslve/data/pickles/nonmatch_baseline_NamedEntity_cache_'+str(site.siteName)+'.pkl'      
     
 def build_entities_dataset(site):
     
