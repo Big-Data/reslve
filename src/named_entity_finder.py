@@ -7,7 +7,8 @@ services to identify possible DBPedia (named) entities for a given input string.
 """
 
 from Ambiguous_Entity import CandidateResource
-from CONSTANT_VARIABLES import WIKIPEDIA_MINER_ALG, DBPEDIA_SPOTLIGHT_ALG
+from CONSTANT_VARIABLES import BASELINE_WikipediaMiner, \
+    BASELINE_DbpediaSpotlight
 from urllib2 import Request, urlopen, URLError, HTTPError
 import json
 import pprint
@@ -85,7 +86,7 @@ def find_candidates_wikipedia_miner(text):
             sense_dbpedia_uri = "http://dbpedia.org/resource/"+sense_title
             sense_score = sense['weight']
             
-            cand_obj = CandidateResource(sense_title, sense_dbpedia_uri, (WIKIPEDIA_MINER_ALG, sense_score))
+            cand_obj = CandidateResource(sense_title, sense_dbpedia_uri, (BASELINE_WikipediaMiner, sense_score))
             candidates[sense_title] = cand_obj
             
         if len(candidates)>0: # ignore entities that have no candidates
@@ -135,7 +136,7 @@ def find_candidates_dbpedia(text):
             res_dbpedia_uri = "http://dbpedia.org/resource/"+res_title
             res_score = res['@finalScore']
 
-            cand_obj = CandidateResource(res_title, res_dbpedia_uri, (DBPEDIA_SPOTLIGHT_ALG, res_score))
+            cand_obj = CandidateResource(res_title, res_dbpedia_uri, (BASELINE_DbpediaSpotlight, res_score))
             candidates[res_title] = cand_obj
         
         if len(candidates)>0: # ignore entities that have no candidates

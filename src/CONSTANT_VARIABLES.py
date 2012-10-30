@@ -30,6 +30,23 @@ ACTIVE_WIKIPEDIA_MIN = 100
 # Counts, Fisher: "Taking It All In?": 10=active
 ACTIVE_TWITTER_MIN = 100 
 
+''' The identifiers for the various strategies we use to disambiguate
+an entity (Turker judgements, toolkit services, RESLVE ranking functions): '''
+
+GOLD_MechanicalTurker = 'mechanical_turk_judgement'
+
+BASELINE_WikipediaMiner = 'wikipedia_miner_algorithm'
+BASELINE_DbpediaSpotlight = 'dbpedia_spotlight_algorithm'
+
+RESLVE_ArticleContentBowVsm = 'article_contentbow_vsm_algorithm'
+RESLVE_ArticleIdVsm = 'article_id_vsm_algorithm'
+RESLVE_ArticleTitleBowVsm = 'article_titlebow_vsm_algorithm'
+
+RESLVE_DirectCategoryIdVsm = 'directcategory_id_vsm_algorithm'
+RESLVE_DirectCategoryTitleBowVsm = 'directcategory_titlebow_vsm_algorithm'
+
+RESLVE_ArticleContentBow_Wsd= 'article_contentbow_wsd_algorithm'
+
 
 # Entity types we restrict our sample to. (See http://schema.org/Thing)
 VALID_RDF_TYPES = ['http://schema.org/CreativeWork',
