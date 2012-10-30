@@ -37,7 +37,12 @@ def build_entities_dataset(site):
     entities_rows = []
 
     confirmed_nonmatches = crosssite_username_dataset_mgr.get_confirmed_nonmatch_usernames(site)
-    subset_confirmed_nonmatches = random.sample(confirmed_nonmatches, 50)
+    subset_num = 50
+    print str(len(confirmed_nonmatches))+" usernames confirmed to not belong to single person according to turkers."
+    if len(confirmed_nonmatches) < subset_num:
+        print "Not enough confirmed non-matches. Run script to update cross-site username spreadsheet first."
+        return
+    subset_confirmed_nonmatches = random.sample(confirmed_nonmatches, )
     for username in subset_confirmed_nonmatches:
         shorttexts_response = site.get_user_short_texts(username) # fetch from site
         user_shorttexts = shorttexts_response[site.get_shorttext_response_key()]
