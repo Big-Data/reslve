@@ -40,7 +40,7 @@ def build_entities_dataset(site):
     subset_num = 50
     print str(len(confirmed_nonmatches))+" usernames confirmed to not belong to single person according to turkers."
     if len(confirmed_nonmatches) < subset_num:
-        print "Not enough confirmed non-matches. Run script to update cross-site username spreadsheet first."
+        print "Not enough confirmed non-matches. Run unconfirmed_usernames_task.py to update cross-site username spreadsheet first."
         return
     subset_confirmed_nonmatches = random.sample(confirmed_nonmatches, )
     for username in subset_confirmed_nonmatches:
