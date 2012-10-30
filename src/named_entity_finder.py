@@ -63,11 +63,8 @@ def find_candidates_wikipedia_miner(text):
     An empty dict is returned if no entities were found. Entities for 
     which no candidate resources were found are not included in the map. """
     
-    result = query_wikipedia_miner_for_candidates(text)
     surface_form_to_candidates = {}
-    if result is None or 'labels' not in result:
-        print "Unable to find any entities+candidates in text "+str(text)
-        return surface_form_to_candidates
+    result = query_wikipedia_miner_for_candidates(text)
     for entity_result in result['labels']:
         surface_form = entity_result['text'].lower()
         
@@ -102,9 +99,8 @@ def find_candidates_dbpedia(text):
     An empty dict is returned if no entities were found. Entities for 
     which no candidate resources were found are not included in the map. """
     
-    result = query_dbpedia_spotlight_for_candidates(text)
     surface_form_to_candidates = {}
-    
+    result = query_dbpedia_spotlight_for_candidates(text)
     surface_form_list = result['annotation']['surfaceForm']
     if isinstance(surface_form_list, dict):
         # for short text with a single detected entity, dbpedia just returns that one entity's
