@@ -64,11 +64,18 @@ def update_usernames_csv_with_judgments():
         except:
             continue # just ignore a problematic assignment row
         
-    # Get the usernames that all workers agreed belonged to a single 
-    # person (ie ignore usernames that were rejected by any worker)
-    unanimous_confirmed_usernames = []
+    # usernames that meet a threshold indicating that enough
+    # of a majority of turkers agreed this is the same individual
     likely_usernames = []
     conflicting_judgments = []
+        
+    # usernames that all workers agreed belonged to a single 
+    # person (ie ignore usernames that were rejected by any worker)
+    unanimous_confirmed_usernames = []
+    
+    # Also get usernames that all workers unanimously
+    # agreed do NOT belong to a single individual
+    nonmatch_usernames = []
     for username in judgments:
         
         if username in __MANUAL_OVERRIDES_TRUE__:
@@ -83,6 +90,11 @@ def update_usernames_csv_with_judgments():
             likely_usernames.append(username)
         elif evaluation.get_number_true_evals()>0:
             conflicting_judgments.append(username)
+            
+        if (evaluation.get_number_false_evals()>0 and
+            evaluation.get_number_true_evals()==0 and 
+            evaluation.get_number_unknown_evals()==0):
+            nonmatch_usernames.append(username)
         
         # Each username given to 5 turkers to evaluate. 
         if (evaluation.get_number_true_evals()>0 and 
@@ -95,10 +107,12 @@ def update_usernames_csv_with_judgments():
     print "Conflicting judgments:"+str(conflicting_judgments) 
             
     # Update the judgment cell in the spreadsheet for unanimously confirmed usernames 
-    crosssite_username_dataset_mgr.update_confirmed_usernames(twitter_site,
-                                                              likely_usernames)
-    print "Updated cross-site-usernames spreadsheet to reflect unanimous positive confirmations"
+    crosssite_username_dataset_mgr.update_confirmed_positive_usernames(twitter_site, likely_usernames)
+    print "Updated cross-site-usernames spreadsheet to reflect majority positive confirmations"
     
+    crosssite_username_dataset_mgr.update_confirmed_negative_usernames(twitter_site, nonmatch_usernames)
+    print "Updated cross-site-usernames spreadsheet to reflect unanimous negative confirmations"
+
         
 class Turker_Username_Evaluation:
     ''' Represents a set of judgments by Mechanical Turk workers about 
