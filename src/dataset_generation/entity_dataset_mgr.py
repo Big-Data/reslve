@@ -52,7 +52,21 @@ def get_ne_candidates_cache(site):
     if ne_objs is None:
         return None
     return ne_objs   
+
+__entityless_output_str__ = "short texts containing no entities"
+def get_entityless_shorttexts(site):
+    entityless_shorttexts = pkl_util.load_pickle(__entityless_output_str__, __get_entityless_cache_path__(site))
+    if entityless_shorttexts is None:
+        entityless_shorttexts = [] 
+    return entityless_shorttexts
     
+__problematic_output_str__ = "problematic short texts"
+def get_problematic_shorttexts(site):
+    problematic_shorttexts = pkl_util.load_pickle(__problematic_output_str__, __get_problematic_cache_path__(site))
+    if problematic_shorttexts is None:
+        problematic_shorttexts = []     
+    return problematic_shorttexts
+            
 def build_entities_dataset(shorttext_rows, site):
     
     siteNameStr = str(site.siteName)
@@ -72,17 +86,11 @@ def build_entities_dataset(shorttext_rows, site):
     
     # Load the cache of short texts that contain no entities
     # and that we don't need to keep querying services with
-    entityless_output_str = "short texts containing no entities"
-    entityless_shorttexts = pkl_util.load_pickle(entityless_output_str, __get_entityless_cache_path__(site))
-    if entityless_shorttexts is None:
-        entityless_shorttexts = [] 
+    entityless_shorttexts = get_entityless_shorttexts(site)
         
     # Load the cache of problematic short texts that we can 
     # go back and look at later..
-    problematic_output_str = "problematic short texts"
-    problematic_shorttexts = pkl_util.load_pickle(problematic_output_str, __get_problematic_cache_path__(site))
-    if problematic_shorttexts is None:
-        problematic_shorttexts = []     
+    problematic_shorttexts = get_problematic_shorttexts(site)
     
     # Prompt how many users to fetch short texts for
     desired_num_entities = prompt_and_print.prompt_num_entries_to_build(output_str, shorttexts_in_csv)
@@ -116,6 +124,11 @@ def build_entities_dataset(shorttext_rows, site):
             # get the entities contained in each short text
             # clean the short text before attempting to detect entities in it
             clean_shorttext = text_util.format_text_for_NER(original_shorttext, site)
+            if clean_shorttext=='':
+                # whole string was invalid, perhaps a URL or 
+                # some other content that gets totally filtered
+                problematic_shorttexts.append(shorttext_id)
+                continue
             
             # use wikipedia miner and dpedia spotlight to detect
             # named entities and their candidate resources
@@ -161,8 +174,8 @@ def build_entities_dataset(shorttext_rows, site):
     
     # update the cache of ambiguous surface form objects
     pkl_util.write_pickle(output_str, ne_objs, __get_ne_cache_path__(site))
-    pkl_util.write_pickle(entityless_output_str, entityless_shorttexts, __get_entityless_cache_path__(site))
-    pkl_util.write_pickle(problematic_output_str, problematic_shorttexts, __get_problematic_cache_path__(site))
+    pkl_util.write_pickle(__entityless_output_str__, entityless_shorttexts, __get_entityless_cache_path__(site))
+    pkl_util.write_pickle(__problematic_output_str__, problematic_shorttexts, __get_problematic_cache_path__(site))
     print "Cached a total of "+str(len(ne_objs))+" ambiguous named entities"
     if all_shorttexts_done:
         print "Completed detecting and resolving entities in all short texts available."
