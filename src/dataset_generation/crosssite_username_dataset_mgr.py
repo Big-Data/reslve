@@ -42,12 +42,17 @@ __VALUE_UNCONFIRMED__ = 'UNCONFIRMED'
 def get_confirmed_usernames(site):
     ''' Returns the usernames that humans have manually confirmed belong 
     to the same individual user on Wikipedia and the given site. '''
+    return __get_usernames__(site, __VALUE_CONFIRMED_POSITIVE__)
+def get_confirmed_nonmatch_usernames(site):
+    ''' Returns the usernames that humans have manually confirmed DO NOT 
+    belong to the same individual user on Wikipedia and the given site. '''
+    return __get_usernames__(site, __VALUE_CONFIRMED_NEGATIVE__) 
+def __get_usernames__(site, confirm_value):
     usernames_csv_path = __get_usernames_csv_path__(site)
-    confirmed_matches = csv_util.query_csv_for_rows_with_value(usernames_csv_path, 
-                                                               COLUMN_USERNAME, 
-                                                               __COLUMN_SAME_INDIVIDUAL__, 
-                                                               __VALUE_CONFIRMED_POSITIVE__)
-    return confirmed_matches
+    return csv_util.query_csv_for_rows_with_value(usernames_csv_path, 
+                                                  COLUMN_USERNAME, 
+                                                  __COLUMN_SAME_INDIVIDUAL__, 
+                                                confirm_value)    
 
 def get_usernames_to_evaluate_mturk(site):
     ''' Returns the usernames that humans need to manually confirm belong 
@@ -59,10 +64,17 @@ def get_usernames_to_evaluate_mturk(site):
                                                                   __VALUE_UNCONFIRMED__)
     return need_to_be_evaluated
 
-def update_confirmed_usernames(site, confirmed_usernames):
-    ''' Updates the COLUMN_SAME_INDIVIDUAL cell value to VALUE_CONFIRMED 
+def update_confirmed_positive_usernames(site, usernames):
+    ''' Updates the COLUMN_SAME_INDIVIDUAL cell value to __VALUE_CONFIRMED_POSITIVE__ 
     for each of the given usernames confirmed by Mechanical Turk workers 
     to belong to the same individual. ''' 
+    __update_confirmed_usernames__(site, usernames, __VALUE_CONFIRMED_POSITIVE__)
+def update_confirmed_negative_usernames(site, usernames):
+    ''' Updates the COLUMN_SAME_INDIVIDUAL cell value to __VALUE_CONFIRMED_NEGATIVE__ 
+    for each of the given usernames confirmed by Mechanical Turk workers 
+    to *NOT* belong to the same individual. ''' 
+    __update_confirmed_usernames__(site, usernames, __VALUE_CONFIRMED_NEGATIVE__)
+def __update_confirmed_usernames__(site, confirmed_usernames, confirmed_value):
     usernames_csv_path = __get_usernames_csv_path__(site)
     headers = csv_util.query_csv_for_headers(usernames_csv_path)
     
@@ -73,7 +85,7 @@ def update_confirmed_usernames(site, confirmed_usernames):
     rows = csv_util.query_csv_for_rows(usernames_csv_path, False)
     for row in rows:
         if row[username_col_index] in confirmed_usernames:
-            row[confirmed_col_index] = __VALUE_CONFIRMED_POSITIVE__
+            row[confirmed_col_index] = confirmed_value
         updated_rows.append(row)
     csv_util.write_to_spreadsheet(usernames_csv_path, updated_rows)
 
