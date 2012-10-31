@@ -166,7 +166,6 @@ class Twitter_Site(Site):
     def get_en_lang_users(self, usernames):
         en_lang_users = []
         userinfos = self.get_userinfos(usernames)
-        print userinfos
         for username in userinfos:
             userinfo = userinfos[username]
             if "en"==userinfo["lang"]:
