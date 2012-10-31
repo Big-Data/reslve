@@ -1,6 +1,8 @@
 """ The websites from which we obtain users and short texts """
 from CONSTANT_VARIABLES import ACTIVE_TWITTER_MIN
 from short_text_sources import twitter_api_util
+import json
+import urllib2
 
 __Twitter_SiteName__ = 'Twitter'
 def get_twitter_site():
@@ -129,3 +131,56 @@ class Twitter_Site(Site):
         shorttext_response[self.get_shorttext_response_key()] = tweet_mapping
         shorttext_response[rate_limit_key] = tweets_response[rate_limit_key]
         return shorttext_response
+    
+    def get_userinfos(self, usernames):
+        userinfos = {} # username -> extended user info
+        start = 0
+        end = min(start+100, len(usernames))
+        while start < end:
+            onehundred_users = usernames[start:end]
+            onehundred_list = ','.join(onehundred_users)
+            lookup_query = 'https://api.twitter.com/1/users/lookup.json?screen_name='+onehundred_list
+            try :
+                response = urllib2.urlopen(lookup_query).read()
+                userinfo_list = json.loads(response)
+                for userinfo in userinfo_list:
+                    userinfos[userinfo["screen_name"]] = userinfo
+            except Exception as e1:
+                error_msg = str(e1)
+                if 'HTTP Error 400: Bad Request' in error_msg:
+                    # This is the status code returned during rate limiting.
+                    # https://dev.twitter.com/docs/error-codes-responses
+                    print "Rate limit reached. Exiting."
+                    break
+                if 'HTTP Error 404: Not Found' in error_msg:
+                    # The resource requested, such as a user, does not exist.
+                    # https://dev.twitter.com/docs/error-codes-responses
+                    print "No user resource found. Skipping "+str(onehundred_list)
+                else:
+                    print "Unexpected exception while looking up user information. "
+                    print e1
+            start = start+100
+            end = min(start+100, len(usernames))       
+        return userinfos
+    
+    def get_en_lang_users(self, usernames):
+        en_lang_users = []
+        userinfos = self.get_userinfos(usernames)
+        print userinfos
+        for username in userinfos:
+            userinfo = userinfos[username]
+            if "en"==userinfo["lang"]:
+                en_lang_users.append(username)
+        return en_lang_users   
+    
+    def get_statuses_count(self, usernames):
+        num_shorttexts = {} # username -> num tweets
+        userinfos = self.get_userinfos(usernames)
+        for username in userinfos:
+            userinfo = userinfos[username]
+            num_tweets = userinfo["statuses_count"]
+            num_shorttexts[username] = num_tweets
+        return num_shorttexts
+    
+    def get_shorttext_length_limit(self):
+        return 140 # tweet must be 140 characters or less
