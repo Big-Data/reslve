@@ -132,8 +132,15 @@ def build_entities_dataset(shorttext_rows, site):
             
             # use wikipedia miner and dpedia spotlight to detect
             # named entities and their candidate resources
-            sf_to_candidates_wikiminer = named_entity_finder.find_candidates_wikipedia_miner(clean_shorttext)
-            sf_to_candidates_dbpedia = named_entity_finder.find_candidates_dbpedia(clean_shorttext)
+            try:
+                sf_to_candidates_wikiminer = named_entity_finder.find_candidates_wikipedia_miner(clean_shorttext)
+            except:
+                sf_to_candidates_wikiminer = {}
+            try:
+                sf_to_candidates_dbpedia = named_entity_finder.find_candidates_dbpedia(clean_shorttext)
+            except:
+                sf_to_candidates_dbpedia = {}
+            
             all_detected_surface_forms = set(sf_to_candidates_wikiminer.keys()).union(sf_to_candidates_dbpedia.keys())
             if len(all_detected_surface_forms)==0:
                 entityless_shorttexts.append(shorttext_id)
