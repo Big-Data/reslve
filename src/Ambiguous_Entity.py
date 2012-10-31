@@ -46,13 +46,12 @@ class NamedEntity:
         with this entity's surface form as the entity's ID '''
         return str(self.shorttext_id)+"_"+str(self.surface_form)
         
-    def is_valid_entity(self):
+    def is_valid_entity(self, nouns):
         ''' @return: True if this is a valid named entity, otherwise returns False. 
         Currently the requirements are that this entity is at least two characters and is a noun.'''
         if len(self.surface_form)<=1:
             return False # ignore single characters, which are probably resulting from buggy apostrophe stuff..
         
-        nouns = text_util.get_nouns(self.shorttext_str, self.site)
         surface_form_tokens = self.surface_form.split()
         for sft in surface_form_tokens:
             if not sft in nouns:
