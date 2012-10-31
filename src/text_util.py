@@ -55,6 +55,30 @@ def format_text_for_NER(raw_shorttext, site=None):
     
     return cleaned_text
 
+#def is_english(raw_text, site):
+#    ''' Returns true if the given text contains more English words than non-English words. 
+#    (Not requiring *all* words to be English in order to allow for some misspellings, slang, etc). '''
+#    num_english = 0
+#    num_nonenglish = 0
+#    cleaned_text = format_text_for_NER(raw_text, site)
+#    cleaned_text = ' '.join(get_clean_BOW_doc(cleaned_text, False))
+#    for word in cleaned_text.split():
+#        if wordnet.synsets(word):
+#            num_english = num_english+1
+#        else:
+#            num_nonenglish = num_nonenglish+1
+#    prop_nonenglish = float(num_nonenglish)/float(num_english+num_nonenglish)
+#    print prop_nonenglish
+#    return (prop_nonenglish<.75)
+
+def is_unwanted_automated_msg(surface_form, short_text):
+    # unwanted message like "I uploaded a YouTube video http://..." where entity is "video"
+    is_unwanted_youtube = (surface_form=='video' and (('I uploaded a' in short_text or 
+                                                       'I favorited a' in short_text or 
+                                                       'I liked a' in short_text) and
+                                                      'YouTube video' in short_text))
+    return is_unwanted_youtube
+
 def get_nouns(raw_text, site):
     nouns = []
     try:

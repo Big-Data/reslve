@@ -57,6 +57,14 @@ class NamedEntity:
         for sft in surface_form_tokens:
             if not sft in nouns:
                 return False
+            
+        if text_util.is_unwanted_automated_msg(self.shorttext_str, self.surface_form):
+            return False
+            
+        #is_english = text_util.is_english(self.shorttext_str, self.site)
+        #if not is_english:
+        #    return False
+        
         return True
     
     def get_candidate_URIs(self):
@@ -70,45 +78,6 @@ class NamedEntity:
         candidate_URIs = list(wikiminer_cand_uris.union(dbpedia_cand_uris))
         return candidate_URIs   
     
-#    def get_valid_candidate_URIs(self):
-#        ''' Returns the URIs of the candidate resources for this entity
-#        that are "valid", ie currently we only consider entities that are 
-#        a Person, Place, Organization, etc (see VALID_RDF_TYPES) '''
-#        wikiminer_cand_objs = self.wikipedia_miner_ranking
-#        dbpedia_cand_objs = self.dbpedia_spotlight_ranking
-#        valid_candidate_resources = self.__validate_candidates__(wikiminer_cand_objs, [])
-#        valid_candidate_resources = self.__validate_candidates__(dbpedia_cand_objs, valid_candidate_resources)
-#        return valid_candidate_resources
-#    def __validate_candidates__(self, candidate_objs, already_validated):
-#        valid_candidate_resources = []
-#        for candidate_title in candidate_objs:
-#            try:
-#                candidate_obj = candidate_objs[candidate_title]
-#                candidate_wikipage = candidate_obj.get_wikipedia_page()
-#                if candidate_wikipage in already_validated:
-#                    continue # already validated this candidate
-#            
-#                response = urllib2.urlopen("http://dbpedia.org/data/"+candidate_title+".json").read()
-#                response = simplejson.loads(response.decode('utf-8'))
-#                resource_data = response[candidate_obj.dbpedia_uri]
-#                
-#                if self.__is_candidate_valid_type__(resource_data):
-#                    valid_candidate_resources.append(candidate_wikipage)
-#            except:
-#                continue # ignore problematic candidates       
-#        return valid_candidate_resources 
-#    def __is_candidate_valid_type__(self, candidate_data):
-#        rdftype_key = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
-#        if not rdftype_key in candidate_data: # has no type
-#            return False
-#
-#        rdf_types = candidate_data[rdftype_key]
-#        for type_tuple in rdf_types:
-#            if type_tuple['value'] in VALID_RDF_TYPES:
-#                return True
-#        
-#        # none of its associated types are what we consider valid
-#        return False
     
 class CandidateResource:
     ''' Represents a candidate resource that an ambiguous named entity may refer to. ''' 
@@ -127,4 +96,26 @@ class CandidateResource:
         self.score = score
         
     def get_wikipedia_page(self):
-        return wikipedia_api_util.get_wikipedia_page_url(self.title.replace(' ', '_'))        
+        return wikipedia_api_util.get_wikipedia_page_url(self.title.replace(' ', '_'))
+    
+#    def is_valid_type(self, valid_candidate_cache):
+#        if self.get_wikipedia_page() in valid_candidate_cache:
+#            return True
+#        
+#        response = urllib2.urlopen("http://dbpedia.org/data/"+self.title+".json").read()
+#        response = simplejson.loads(response.decode('utf-8'))
+#        resource_data = response[self.dbpedia_URI]
+#        
+#        rdftype_key = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+#        if rdftype_key in resource_data: 
+#            rdf_types = resource_data[rdftype_key]
+#            for type_tuple in rdf_types:
+#                if type_tuple['value'] in VALID_RDF_TYPES:
+#                    return True
+#                
+#        # has no rdf type but can also test type using wikipedia category
+#        # (ie has a high level category like people, place, etc within some number of direct parents 
+#        # TODO
+#        
+#        # none of its associated types are what we consider valid
+#        return False
