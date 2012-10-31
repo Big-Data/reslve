@@ -57,7 +57,7 @@ class NamedEntity:
             if not sft in nouns:
                 return False
             
-        if text_util.is_unwanted_automated_msg(self.shorttext_str, self.surface_form):
+        if text_util.is_unwanted_automated_msg(self.surface_form, self.shorttext_str):
             return False
             
         #is_english = text_util.is_english(self.shorttext_str, self.site)
