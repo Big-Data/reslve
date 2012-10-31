@@ -1,16 +1,17 @@
 from dataset_generation import entity_dataset_mgr, csv_util, pkl_util
 from short_text_sources import short_text_websites
-from wikipedia import wikipedia_api_util
 import random
+import text_util
 
-__entities_to_judge_csv_path__ = 'entities-for-turk.csv'
+__entities_to_judge_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/entities-for-turk.csv'
+__shorttext_nouns_cache_path__ = '/Users/elizabethmurnane/git/reslve/data/pickles/shorttext_nouns_cache.pkl'
 
-__entities_results_csv_path__ = '/Users/elizabethmurnane/git/reslve/src/mechanical_turk/mturk_entity_disambiguation_results_complete.csv'
-__entity_judgments_cache_path__ = '/Users/elizabethmurnane/git/reslve/data/pickles/entity_judgments_cache.pkl'
+__entities_results_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/mturk_entity_disambiguation_results_complete.csv'
+__entity_judgments_cache_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/entity_judgments_cache.pkl'
 
 def make_tweet_entities_csv_for_turk():
     twitter_site = short_text_websites.get_twitter_site()
-    entities_to_evaluate = entity_dataset_mgr.get_ne_candidates_to_evaluate_mturk(twitter_site)
+    entities_to_evaluate = entity_dataset_mgr.get_ne_candidates_cache(twitter_site)
     if entities_to_evaluate is None:
         print "No ambiguous entities + candidates in cache. Run run_all_dataset_generators "+\
         "script and choose to first fetch and store more entities from short texts."
@@ -20,33 +21,44 @@ def make_tweet_entities_csv_for_turk():
     headers = ['entity_id', 'short_text', 'ambiguous_entity', 'candidate_link']
     rows.append(headers)
     
-    # Some instructions for the task
+    # load cache of short text id -> nouns contained so that don't have to keep re-determining this
+    noun_output_str = 'nouns contained in short texts'
+    shorttext_nouns = pkl_util.load_pickle(noun_output_str, 
+                                           __shorttext_nouns_cache_path__)
+    if shorttext_nouns is None:
+        shorttext_nouns = {}
+        
+    # put valid entities + candidates in the spreadsheet
     progress = 0
     for ne_obj in entities_to_evaluate:
         
         progress = progress+1
         if progress%50==0:
-            print progress
+            print str(progress)+" out of "+str(len(entities_to_evaluate))
         '''    keep_adding = raw_input("Added "+str(len(rows)-1)+" to spreadsheet out of "+str(len(entities_to_evaluate))+". Continue adding more? (Y/N)")
             if 'Y'!=keep_adding and 'y'!=keep_adding:
                 break
         '''
-        if not ne_obj.is_valid_entity():
+            
+        try:
+            nouns = shorttext_nouns[ne_obj.shorttext_str]
+        except:
+            nouns = text_util.get_nouns(ne_obj.shorttext_str, ne_obj.site)
+            shorttext_nouns[ne_obj.shorttext_str] = nouns
+        if not ne_obj.is_valid_entity(nouns):
             continue
         
         # shuffle candidates so that they don't appear
         # in wikiminer's ranking order and bias the turker
-        candidate_res_objs = ne_obj.candidate_res_objs
-        if len(candidate_res_objs)<=1:
+        candidate_URIs = ne_obj.get_candidate_URIs()
+        if len(candidate_URIs)<=1:
             continue # have to have at least 2 candidates to be ambiguous
-        candidate_URIs = [wikipedia_api_util.get_wikipedia_page_url(candidate_res_title)
-                          for candidate_res_title in candidate_res_objs]
         random.shuffle(candidate_URIs)
         choices = candidate_URIs[:] # copy (list slicing)
             
         # make sure the entity presented to a Turker looks the same as
         # it appears in the short text (ie with the same capitalization)
-        original_shorttext = ne_obj.shorttext_str
+        original_shorttext = ne_obj.shorttext_str.decode('latin-1')
         surface_form = ne_obj.surface_form
         if not surface_form in original_shorttext:
             surface_form = __match_appearance__(surface_form, original_shorttext)
@@ -77,6 +89,9 @@ def make_tweet_entities_csv_for_turk():
     # dump to csv
     csv_util.write_to_spreadsheet(__entities_to_judge_csv_path__, rows)
     
+    # write noun cache
+    pkl_util.write_pickle(noun_output_str, shorttext_nouns, __shorttext_nouns_cache_path__)
+    
 def __match_appearance__(surface_form, shorttext_str):
     ''' Seems that Wikipedia Miner sometimes returns an entity 
     capitalized even if it is lowercase in the original string '''
@@ -88,9 +103,9 @@ def get_entity_judgements():
     output_str = "Candidate entities judged by Mechanical Turkers..."
     entity_judgments = pkl_util.load_pickle(output_str, 
                                             __entity_judgments_cache_path__)
-    if False and entity_judgments is not None:
-        return entity_judgments
-    return analyze_entities_judgments(output_str)
+    if entity_judgments is None:
+        entity_judgments = analyze_entities_judgments(output_str)
+    return entity_judgments
 
 def analyze_entities_judgments(output_str):
     ''' Handles updating the entities 
@@ -137,10 +152,9 @@ def analyze_entities_judgments(output_str):
         
     # Get the candidates that workers agreed upon for each entity.
     # For now, ignoring entities that all workers could not select the same candidate for
-    user_selected_candidates = {}
+    turker_selected_candidates = {}
     for entity_id in judgments:
         agreed_candidates = []
-        
         candidate_judgments = judgments[entity_id]
         for candidate_link in candidate_judgments:
             (num_true, num_false) = candidate_judgments[candidate_link]
@@ -148,13 +162,14 @@ def analyze_entities_judgments(output_str):
                 # TODO need to figure out threshold for agreement. require 
                 # turkers to unanimously select a candidate as correct?
                 agreed_candidates.append(candidate_link)
-        user_selected_candidates[entity_id] = agreed_candidates
+        turker_selected_candidates[entity_id] = agreed_candidates
     
-    print "Cached a total of "+str(len(user_selected_candidates))+" Turker judgements about ambiguous entities"
-    pkl_util.write_pickle(output_str, user_selected_candidates, __entity_judgments_cache_path__)
-    return user_selected_candidates
+    print "Cached a total of "+str(len(turker_selected_candidates))+" Turker judgements about ambiguous entities"
+    pkl_util.write_pickle(output_str, turker_selected_candidates, __entity_judgments_cache_path__)
+    
+    return turker_selected_candidates
 
-''' 
+
 prompt_make_or_extract = raw_input("Make entities task for Turkers (A) or analyze completed task (B)? ")
 if 'A'==prompt_make_or_extract or 'a'==prompt_make_or_extract:
     make_tweet_entities_csv_for_turk()
@@ -162,4 +177,3 @@ elif 'B'==prompt_make_or_extract or 'b'==prompt_make_or_extract:
     get_entity_judgements()
 else:
     print "Unrecognized input, exiting."   
-'''
