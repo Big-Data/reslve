@@ -14,7 +14,6 @@ This id construction allows us to distinguish between the two separate Bush enti
 Note that only entities that are associated with more than one candidate are included in
 the cache because entities with zero or one candidate are not ambiguous so we ignore those.
 """
-from Ambiguous_Entity import NamedEntity
 from CONSTANT_VARIABLES import COLUMN_USERNAME, COLUMN_SHORTTEXT_ID, \
     COLUMN_SHORTTEXT_STRING, COLUMN_ENTITY_ID
 from dataset_generation import pkl_util, csv_util, prompt_and_print
@@ -130,39 +129,17 @@ def build_entities_dataset(shorttext_rows, site):
                 problematic_shorttexts.append(shorttext_id)
                 continue
             
-            # use wikipedia miner and dpedia spotlight to detect
-            # named entities and their candidate resources
-            try:
-                sf_to_candidates_wikiminer = named_entity_finder.find_candidates_wikipedia_miner(clean_shorttext)
-            except:
-                sf_to_candidates_wikiminer = {}
-            try:
-                sf_to_candidates_dbpedia = named_entity_finder.find_candidates_dbpedia(clean_shorttext)
-            except:
-                sf_to_candidates_dbpedia = {}
-            
-            all_detected_surface_forms = set(sf_to_candidates_wikiminer.keys()).union(sf_to_candidates_dbpedia.keys())
-            if len(all_detected_surface_forms)==0:
+            detected_entities = named_entity_finder.find_and_construct_named_entities(shorttext_id, original_shorttext, username, site)
+            if len(detected_entities)==0:
                 entityless_shorttexts.append(shorttext_id)
-            
-            # now construct a NamedEntity object for each detected surface form
-            for surface_form in all_detected_surface_forms:
-                ne_obj = NamedEntity(surface_form,
-                                     shorttext_id, original_shorttext,
-                                     username, site)    
                 
-                # set the NamedEntity's baseline candidate rankings 
-                if surface_form in sf_to_candidates_wikiminer:
-                    ne_obj.set_wikipedia_miner_ranking(sf_to_candidates_wikiminer[surface_form])
-                if surface_form in sf_to_candidates_dbpedia:
-                    ne_obj.set_dbpedia_spotlight_ranking(sf_to_candidates_dbpedia[surface_form])
-                
+            for ne_obj in detected_entities:
                 # cache this entity object
                 ne_objs.append(ne_obj)
                 
                 # make a row in the spreadsheet for this entity
                 ne_id = ne_obj.get_entity_id()
-                entity_row = [ne_id, surface_form, 
+                entity_row = [ne_id, ne_obj.surface_form, 
                               shorttext_id, original_shorttext,
                               username]
                 entities_rows.append(entity_row)

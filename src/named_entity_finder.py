@@ -6,12 +6,13 @@ interface as well as Wikipedia Miner's (http://wikipedia-miner.cms.waikato.ac.nz
 services to identify possible DBPedia (named) entities for a given input string.
 """
 
-from Ambiguous_Entity import CandidateResource
+from Ambiguous_Entity import CandidateResource, NamedEntity
 from CONSTANT_VARIABLES import BASELINE_WikipediaMiner, \
     BASELINE_DbpediaSpotlight
 from urllib2 import Request, urlopen, URLError, HTTPError
 import json
 import pprint
+import text_util
 import urllib
 
 WIKIPEDIA_MINER_SEARCH_SERVICE_URI = \
@@ -23,6 +24,37 @@ DBPEDIA_SPOTLIGHT_URI = "http://spotlight.dbpedia.org/rest/candidates?text="
 
 WIKIPEDIA_MINER_WIKIFY_SERVICE_URI = \
     "http://samos.mminf.univie.ac.at:8080/wikipediaminer/services/wikify?"
+    
+def find_and_construct_named_entities(shorttext_id, original_shorttext, username, site=None):
+    # use wikipedia miner and dpedia spotlight to detect
+    # named entities and their candidate resources
+    detected_entities = []
+    clean_shorttext = text_util.format_text_for_NER(original_shorttext, site)
+    try:
+        sf_to_candidates_wikiminer = find_candidates_wikipedia_miner(clean_shorttext)
+    except:
+        sf_to_candidates_wikiminer = {}
+    try:
+        sf_to_candidates_dbpedia = find_candidates_dbpedia(clean_shorttext)
+    except:
+        sf_to_candidates_dbpedia = {}
+    
+    all_detected_surface_forms = set(sf_to_candidates_wikiminer.keys()).union(sf_to_candidates_dbpedia.keys())
+    
+    # now construct a NamedEntity object for each detected surface form
+    for surface_form in all_detected_surface_forms:
+        ne_obj = NamedEntity(surface_form,
+                             shorttext_id, original_shorttext,
+                             username, site)    
+        
+        # set the NamedEntity's baseline candidate rankings 
+        if surface_form in sf_to_candidates_wikiminer:
+            ne_obj.set_wikipedia_miner_ranking(sf_to_candidates_wikiminer[surface_form])
+        if surface_form in sf_to_candidates_dbpedia:
+            ne_obj.set_dbpedia_spotlight_ranking(sf_to_candidates_dbpedia[surface_form])
+    
+        detected_entities.append(ne_obj)
+    return detected_entities
     
 def find_named_entities_wikipedia_miner(text):
     """Finds named entities in a given text using Wikipedia Miner"""
