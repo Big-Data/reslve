@@ -2,6 +2,7 @@
 """ Functions to write to and read from csv files """
 
 from CONSTANT_VARIABLES import DEBUG_ON
+import codecs
 import csv
 
 def append_to_spreadsheet(csv_string, csv_path, identifiers_in_csv, rows_to_add, unique_identifiers=True):    
@@ -13,7 +14,8 @@ def append_to_spreadsheet(csv_string, csv_path, identifiers_in_csv, rows_to_add,
         return
     
     print "Updating the csv file of "+csv_string+"..."
-    csv_writer = csv.writer(open(csv_path, 'a'), quoting=csv.QUOTE_MINIMAL)    
+    f = codecs.open(csv_path, 'a', encoding="utf-8")
+    csv_writer = csv.writer(f, dialect=csv.excel, quoting=csv.QUOTE_MINIMAL)    
     for row in rows_to_add:
         try:
             identifier = row[0]
@@ -25,7 +27,8 @@ def append_to_spreadsheet(csv_string, csv_path, identifiers_in_csv, rows_to_add,
             continue
         
 def write_to_spreadsheet(csv_path, rows):
-    csv_writer = csv.writer(open(csv_path, 'wb'))
+    f = codecs.open(csv_path, 'wb', encoding="utf-8")
+    csv_writer = csv.writer(f, dialect=csv.excel)
     for row in rows:
         csv_writer.writerow(row)
         
