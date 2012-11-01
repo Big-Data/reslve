@@ -1,17 +1,15 @@
 from dataset_generation import entity_dataset_mgr, csv_util, pkl_util
 from short_text_sources import short_text_websites
 import random
-import text_util
 
 __entities_to_judge_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/entities-for-turk.csv'
-__shorttext_nouns_cache_path__ = '/Users/elizabethmurnane/git/reslve/data/pickles/shorttext_nouns_cache.pkl'
 
 __entities_results_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/mturk_entity_disambiguation_results_complete.csv'
 __entity_judgments_cache_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/entity_judgments_cache.pkl'
 
 def make_tweet_entities_csv_for_turk():
     twitter_site = short_text_websites.get_twitter_site()
-    entities_to_evaluate = entity_dataset_mgr.get_ne_candidates_cache(twitter_site)
+    entities_to_evaluate = entity_dataset_mgr.get_valid_ne_candidates(twitter_site)
     if entities_to_evaluate is None:
         print "No ambiguous entities + candidates in cache. Run run_all_dataset_generators "+\
         "script and choose to first fetch and store more entities from short texts."
@@ -21,13 +19,6 @@ def make_tweet_entities_csv_for_turk():
     headers = ['entity_id', 'short_text', 'ambiguous_entity', 'candidate_link']
     rows.append(headers)
     
-    # load cache of short text id -> nouns contained so that don't have to keep re-determining this
-    noun_output_str = 'nouns contained in short texts'
-    shorttext_nouns = pkl_util.load_pickle(noun_output_str, 
-                                           __shorttext_nouns_cache_path__)
-    if shorttext_nouns is None:
-        shorttext_nouns = {}
-        
     # put valid entities + candidates in the spreadsheet
     progress = 0
     for ne_obj in entities_to_evaluate:
@@ -40,14 +31,6 @@ def make_tweet_entities_csv_for_turk():
                 break
         '''
             
-        try:
-            nouns = shorttext_nouns[ne_obj.shorttext_str]
-        except:
-            nouns = text_util.get_nouns(ne_obj.shorttext_str, ne_obj.site)
-            shorttext_nouns[ne_obj.shorttext_str] = nouns
-        if not ne_obj.is_valid_entity(nouns):
-            continue
-        
         # shuffle candidates so that they don't appear
         # in wikiminer's ranking order and bias the turker
         candidate_URIs = ne_obj.get_candidate_URIs()
@@ -88,9 +71,6 @@ def make_tweet_entities_csv_for_turk():
         
     # dump to csv
     csv_util.write_to_spreadsheet(__entities_to_judge_csv_path__, rows)
-    
-    # write noun cache
-    pkl_util.write_pickle(noun_output_str, shorttext_nouns, __shorttext_nouns_cache_path__)
     
 def __match_appearance__(surface_form, shorttext_str):
     ''' Seems that Wikipedia Miner sometimes returns an entity 
