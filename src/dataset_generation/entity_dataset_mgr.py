@@ -16,7 +16,8 @@ the cache because entities with zero or one candidate are not ambiguous so we ig
 """
 from CONSTANT_VARIABLES import COLUMN_USERNAME, COLUMN_SHORTTEXT_ID, \
     COLUMN_SHORTTEXT_STRING, COLUMN_ENTITY_ID
-from dataset_generation import pkl_util, csv_util, prompt_and_print
+from dataset_generation import pkl_util, csv_util, prompt_and_print, \
+    crosssite_username_dataset_mgr
 import named_entity_finder
 import text_util
 
@@ -39,18 +40,72 @@ def __get_entityless_cache_path__(site):
     return '/Users/elizabethmurnane/git/reslve/data/pickles/entityless_shorttexts_cache_'+str(site.siteName)+'.pkl' 
 def __get_problematic_cache_path__(site):       
     return '/Users/elizabethmurnane/git/reslve/data/pickles/problematic_shorttexts_cache_'+str(site.siteName)+'.pkl' 
+def __get_shorttext_nouns_cache_path__(site):
+    return '/Users/elizabethmurnane/git/reslve/data/pickles/shorttext_nouns_cache_'+str(site.siteName)+'.pkl' 
 def __get_output_str__(site):
     return "ambiguous entities detected in short texts from "+str(site.siteName)+\
         " written by usernames that exist on both that site and Wikipedia"
 
-def get_ne_candidates_cache(site):
+def get_num_cached_ne_objs(site):
+    ne_objs = pkl_util.load_pickle(__get_output_str__(site),
+                                   __get_ne_cache_path__(site))
+    if ne_objs is None:
+        return 0
+    return len(ne_objs)
+    
+def get_valid_ne_candidates(site):
     ''' Returns the ambiguous entities mapped to their possible candidates  
     from which humans need to manually choose the correct candidate. '''
     ne_objs = pkl_util.load_pickle(__get_output_str__(site),
                                    __get_ne_cache_path__(site))
     if ne_objs is None:
         return None
-    return ne_objs   
+    return __filter_invalid_entities__(site, ne_objs)   
+def __filter_invalid_entities__(site, ne_objs):
+    valid_ne_objs = []
+    
+    # get English language users
+    crosssite_usernames = crosssite_username_dataset_mgr.get_confirmed_usernames(site)
+    en_lang_users = site.get_en_lang_users(crosssite_usernames)
+    
+    # load cache of short text id -> nouns contained so that we don't have to keep re-determining this
+    noun_output_str = 'nouns contained in short texts'
+    shorttext_nouns = pkl_util.load_pickle(noun_output_str, __get_shorttext_nouns_cache_path__(site))
+    if shorttext_nouns is None:
+        shorttext_nouns = {}
+    
+    for ne_obj in ne_objs:
+        username = ne_obj.username
+        
+        # bypass users whose short text are not in English
+        if (not username in en_lang_users 
+            or username=='rogermx' # this user tweets in Spanish..
+            or username=='mentoz86' # this user has multiple non-English tweets..
+            or username=='michitaro' # this user tweets in Japanese..
+            or username=='tiyoringo'
+            or username=='fabregas0414'
+            or username=='jonkerz'
+            or username=='mentoz86'
+            or username=='kermanshahi'
+            or username=='1veertje'
+            ):
+            continue # only want English short texts / entities
+        
+        # test whether named entity is valid
+        try:
+            nouns = shorttext_nouns[ne_obj.shorttext_str]
+        except:
+            nouns = text_util.get_nouns(ne_obj.shorttext_str, ne_obj.site)
+            shorttext_nouns[ne_obj.shorttext_str] = nouns
+        if not ne_obj.is_valid_entity(nouns):
+            continue
+        
+        valid_ne_objs.append(ne_obj)
+        
+    # write noun cache
+    pkl_util.write_pickle(noun_output_str, shorttext_nouns, __get_shorttext_nouns_cache_path__(site))
+    
+    return valid_ne_objs
 
 __entityless_output_str__ = "short texts containing no entities"
 def get_entityless_shorttexts(site):
