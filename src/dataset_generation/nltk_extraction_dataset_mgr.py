@@ -10,6 +10,26 @@ def get_nltk_entity_cache(site):
     if shorttext_entities is None:
         shorttext_entities = {}    
     return shorttext_entities
+
+def detectable_by_nltk(surface_form, shorttext_id, detected_entities_cache, entities_only=False):
+    (noun_entities, named_entities) = detected_entities_cache[shorttext_id]
+    
+    # make everything lowercase for comparison
+    noun_entities = [noun_ent.lower() for noun_ent in noun_entities]
+    named_entities = [named_ent.lower() for named_ent in named_entities]
+    surface_form = surface_form.lower()
+    
+    if (surface_form in named_entities or 
+        surface_form in ' '.join(named_entities)):
+        # surface form is a Named Entity
+        return True
+    
+    if entities_only:
+        # restricting to only entities and we just tested that it's not an entity
+        return False
+    
+    return (surface_form in noun_entities or 
+            surface_form in ' '.join(noun_entities).decode('latin-1'))
     
 def extract_entities(shorttext_rows, site):
 
