@@ -1,8 +1,8 @@
 '''
 Represents an ambiguous surface form detected by wikiminer in a short text on the site
 '''
+from CONSTANT_VARIABLES import BASELINE_DbpediaSpotlight
 from dataset_generation import nltk_extraction_dataset_mgr
-from wikipedia import wikipedia_api_util
 import text_util
 
 class NamedEntity:
@@ -77,7 +77,7 @@ class NamedEntity:
         if len(self.surface_form)<=1:
             return False # ignore single characters, which are probably resulting from buggy apostrophe stuff..
         
-        if len(self.get_candidate_URIs())<=1:
+        if len(self.get_candidate_titles())<=1:
             return False # have to have at least 2 candidates to be ambiguous
         
         if text_util.is_unwanted_automated_msg(self.surface_form, self.shorttext_str):
@@ -90,14 +90,14 @@ class NamedEntity:
 
         return True
     
-    def get_candidate_URIs(self):
+    def get_candidate_titles(self):
         ''' Returns the URIs of all the candidate resources 
         detected by wikipedia miner and/or dbpedia spotlight '''
         wikiminer_cand_objs = self.wikipedia_miner_ranking
         dbpedia_cand_objs = self.dbpedia_spotlight_ranking
         
-        wikiminer_cand_uris = set([candidate_obj.get_wikipedia_page() for candidate_obj in wikiminer_cand_objs.values()])
-        dbpedia_cand_uris = set([candidate_obj.get_wikipedia_page() for candidate_obj in dbpedia_cand_objs.values()])
+        wikiminer_cand_uris = set([candidate_obj.title for candidate_obj in wikiminer_cand_objs.values()])
+        dbpedia_cand_uris = set([candidate_obj.title for candidate_obj in dbpedia_cand_objs.values()])
         candidate_URIs = list(wikiminer_cand_uris.union(dbpedia_cand_uris))
         return candidate_URIs   
     
@@ -118,9 +118,14 @@ class CandidateResource:
         self.dbpedia_URI = dbpedia_URI
         self.score = score
         
-    def get_wikipedia_page(self):
-        return wikipedia_api_util.get_wikipedia_page_url(self.title.replace(' ', '_'))
-    
+    def get_score(self):
+        ''' Providing a function for this because the DBPedia Spotlight 
+        scores will be in unicode, which we want to decode '''    
+        (algorithm_id, float_score) = self.score
+        if algorithm_id==BASELINE_DbpediaSpotlight:
+            return float(float_score.decode('utf-8'))
+        return float_score
+  
 #    def is_valid_type(self, valid_candidate_cache):
 #        if self.get_wikipedia_page() in valid_candidate_cache:
 #            return True
