@@ -15,8 +15,8 @@ def detectable_by_nltk(surface_form, shorttext_id, detected_entities_cache, enti
     (noun_entities, named_entities) = detected_entities_cache[shorttext_id]
     
     # make everything lowercase for comparison
-    noun_entities = [noun_ent.lower() for noun_ent in noun_entities]
-    named_entities = [named_ent.lower() for named_ent in named_entities]
+    noun_entities = [noun_ent.lower().decode('latin-1') for noun_ent in noun_entities]
+    named_entities = [named_ent.lower().decode('latin-1') for named_ent in named_entities]
     surface_form = surface_form.lower()
     
     if (surface_form in named_entities or 
@@ -29,7 +29,7 @@ def detectable_by_nltk(surface_form, shorttext_id, detected_entities_cache, enti
         return False
     
     return (surface_form in noun_entities or 
-            surface_form in ' '.join(noun_entities).decode('latin-1'))
+            surface_form in ' '.join(noun_entities))
     
 def extract_entities(shorttext_rows, site):
 
