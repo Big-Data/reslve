@@ -2,7 +2,7 @@ from dataset_generation import entity_dataset_mgr, csv_util, pkl_util
 from short_text_sources import short_text_websites
 import random
 
-__entities_to_judge_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/entities-for-turk.csv'
+__entities_to_judge_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/entities-for-turk2.csv'
 
 __entities_results_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/mturk_entity_disambiguation_results_complete.csv'
 __entity_judgments_cache_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/entity_judgments_cache.pkl'
@@ -15,6 +15,22 @@ def make_tweet_entities_csv_for_turk():
         "script and choose to first fetch and store more entities from short texts."
         return
     
+    judged_row_plus_headers = csv_util.query_csv_for_rows(__entities_results_csv_path__, False)
+    judged_row_num = 0
+    already_judged = [] # list of (entity id, candidate link)
+    for judge_row in judged_row_plus_headers:
+        try:
+            if judged_row_num==0: # row 0 is header
+                entity_id_col = judge_row.index('Input.entity_id')
+                candidate_link_col = judge_row.index('Input.candidate_link') 
+            else:
+                judged_tuple = (judge_row[entity_id_col], judge_row[candidate_link_col])
+                if not judged_tuple in already_judged:
+                    already_judged.append(judged_tuple)
+            judged_row_num = judged_row_num+1    
+        except:
+            continue # just ignore a problematic row      
+        
     rows = []
     headers = ['entity_id', 'short_text', 'ambiguous_entity', 'candidate_link']
     rows.append(headers)
@@ -34,8 +50,6 @@ def make_tweet_entities_csv_for_turk():
         # shuffle candidates so that they don't appear
         # in wikiminer's ranking order and bias the turker
         candidate_URIs = ne_obj.get_candidate_URIs()
-        if len(candidate_URIs)<=1:
-            continue # have to have at least 2 candidates to be ambiguous
         random.shuffle(candidate_URIs)
         choices = candidate_URIs[:] # copy (list slicing)
             
@@ -46,19 +60,11 @@ def make_tweet_entities_csv_for_turk():
         if not surface_form in original_shorttext:
             surface_form = __match_appearance__(surface_form, original_shorttext)
         
-        '''
-        # Tell turker to read the short text
-        print "\nRead the following piece of text: \""+str(dirty_shorttext)+"\""
-        
-        # Tell turker to look at entity and choose correct candidate
-        print "From the below set of choices, please select the Wikipedia page "+\
-        "that corresponds to the correct meaning of the word or phrase, \""\
-        +str(entity_str)+"\""
-        print "Choices: "+str(choices)
-        '''
-        
         entity_id = ne_obj.get_entity_id()
         for choice in choices:
+            if ((entity_id, choice) in already_judged):
+                continue
+            
             # make a separate row for each candidate link 
             # rather than putting all links in a single cell
             row = [entity_id, original_shorttext, surface_form, choice]

@@ -29,6 +29,10 @@ def prompt_for_build_shorttexts_csv(site):
     return __prompt_for_build__("Create or update CSV of short texts posted on "+\
                                 str(site.siteName)+" by cross-site usernames? (Y/N): ")
     
+def prompt_for_cache_nltk_entities(site):
+    return __prompt_for_build__("Cache nouns and entities detected by nltk in short texts from "+\
+                                str(site.siteName)+"? (Y/N): ")    
+    
 def prompt_for_build_entity_csv(site):
     return __prompt_for_build__("Create or update CSV of entities detected in short texts posted on "+\
                                 str(site.siteName)+" by cross-site usernames? (Y/N): ")
