@@ -1,6 +1,7 @@
 '''
 Represents an ambiguous surface form detected by wikiminer in a short text on the site
 '''
+from dataset_generation import nltk_extraction_dataset_mgr
 from wikipedia import wikipedia_api_util
 import text_util
 
@@ -45,25 +46,48 @@ class NamedEntity:
         ''' Using the containing short text's ID concatenated 
         with this entity's surface form as the entity's ID '''
         return str(self.shorttext_id)+"_"+str(self.surface_form)
+    
+    def get_surface_form(self):
+        return self.surface_form.decode('latin-1')
         
-    def is_valid_entity(self, nouns):
+    def get_short_text(self):
+        return self.shorttext_str.decode('latin-1')
+        
+    def is_valid_entity(self, en_lang_users, valid_entity_cache):
         ''' @return: True if this is a valid named entity, otherwise returns False. 
-        Currently the requirements are that this entity is at least two characters and is a noun.'''
+        Currently the requirements are that this entity is at least two characters, 
+        has at least 2 candidate resources (ie is ambiguous), is a noun, and is not
+        an automated message through another service.'''
+        
+        # bypass users whose short text are not in English
+        username = self.username
+        if (not username in en_lang_users 
+            or username=='rogermx' # this user tweets in Spanish..
+            or username=='mentoz86' # this user has multiple non-English tweets..
+            or username=='michitaro' # this user tweets in Japanese..
+            or username=='tiyoringo'
+            or username=='fabregas0414'
+            or username=='jonkerz'
+            or username=='mentoz86'
+            or username=='kermanshahi'
+            or username=='1veertje'
+            ):
+            return False
+        
         if len(self.surface_form)<=1:
             return False # ignore single characters, which are probably resulting from buggy apostrophe stuff..
         
-        surface_form_tokens = self.surface_form.split()
-        for sft in surface_form_tokens:
-            if not sft in nouns:
-                return False
-            
+        if len(self.get_candidate_URIs())<=1:
+            return False # have to have at least 2 candidates to be ambiguous
+        
         if text_util.is_unwanted_automated_msg(self.surface_form, self.shorttext_str):
             return False
-            
-        #is_english = text_util.is_english(self.shorttext_str, self.site)
-        #if not is_english:
-        #    return False
         
+        if not nltk_extraction_dataset_mgr.detectable_by_nltk(self.get_surface_form(), 
+                                                              self.shorttext_id, 
+                                                              valid_entity_cache):
+            return False
+
         return True
     
     def get_candidate_URIs(self):
