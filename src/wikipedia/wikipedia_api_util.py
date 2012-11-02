@@ -163,8 +163,11 @@ def query_usercontribs(username, fetch_all_contribs):
     
     return page_to_numedits
 
+__page_url_prefix__ = 'http://en.wikipedia.org/wiki/'
 def get_wikipedia_page_url(page_title):
-    return 'http://en.wikipedia.org/wiki/'+str(page_title).replace(' ','_')
+    return __page_url_prefix__+str(page_title).replace(' ','_')
+def get_page_title_from_url(page_url):
+    return page_url.replace(__page_url_prefix__, '').replace(' ','_')
 
 def query_page_title(page_id):
     ''' Returns the title of the Wikipedia page that has the given page id '''
@@ -188,6 +191,9 @@ def query_page_id(page_title):
     
 def query_page_content_text(page_title):
     try :
+        if "#" in page_title:
+            # ignore anchor tags (for example Microbrewery#Craft beer) and just get the main page title 
+            page_title = page_title[:page_title.index("#")]
         content_query = 'titles='+(str(page_title).replace(' ', '_'))+'&prop=revisions&rvprop=content&format=xml'
         content_xml = __query_wiki__(content_query)
         
@@ -195,7 +201,8 @@ def query_page_content_text(page_title):
         content = dom.getElementsByTagName('rev')[0].childNodes[0].data
         if "#REDIRECT" in content:
             # this is a direct page, so we need original page with the actual content
-            return query_page_content_text(page_title.lower())
+            orig_page_title = content[content.index('[[')+2:content.index(']]')]
+            return query_page_content_text(orig_page_title)
         
         # clean out wikimarkup 
         content = __clean_wikimarkup__(content)
