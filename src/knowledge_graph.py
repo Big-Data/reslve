@@ -108,23 +108,23 @@ class DBPediaCategories(object):
             self.add_category(tgt_category)
         self.categories[src_category][relation].append(tgt_category)
 
-
-# Running the script
-
-dbpedia_categories_file = "/Users/elizabethmurnane/git/reslve/data/skos_categories_en_10000.nt"
-# dbpedia_categories_file = "skos_categories_en.nt"
-
-dbpedia_categories = DBPediaCategories(dbpedia_categories_file)
-
-print "Parsed %d categories" % len(dbpedia_categories.categories)
-
-#pprint.pprint(dbpedia_categories.categories['Category:Swedish_monarchs'])
-
-pprint.pprint(dbpedia_categories.get_neighbors('Category:Swedish_monarchs', 
-                            distance=1))
-pprint.pprint(dbpedia_categories.get_neighbors('Category:Swedish_monarchs', 
-                            distance=2))
-pprint.pprint(dbpedia_categories.get_neighbors('Category:Swedish_monarchs', 
-                            distance=3))
-pprint.pprint(dbpedia_categories.get_neighbors('Category:Swedish_monarchs', 
-                            distance=4))                            
+def usage_example():
+    # Running the script
+    
+    dbpedia_categories_file = "/Users/elizabethmurnane/git/reslve/data/skos_categories_en_10000.nt"
+    # dbpedia_categories_file = "skos_categories_en.nt"
+    
+    dbpedia_categories = DBPediaCategories(dbpedia_categories_file)
+    
+    print "Parsed %d categories" % len(dbpedia_categories.categories)
+    
+    #pprint.pprint(dbpedia_categories.categories['Category:Swedish_monarchs'])
+    
+    pprint.pprint(dbpedia_categories.get_neighbors('Category:Swedish_monarchs', 
+                                distance=1))
+    pprint.pprint(dbpedia_categories.get_neighbors('Category:Swedish_monarchs', 
+                                distance=2))
+    pprint.pprint(dbpedia_categories.get_neighbors('Category:Swedish_monarchs', 
+                                distance=3))
+    pprint.pprint(dbpedia_categories.get_neighbors('Category:Swedish_monarchs', 
+                                distance=4))                            
