@@ -1,8 +1,8 @@
 from dataset_generation import crosssite_username_dataset_mgr, csv_util
 from short_text_sources import short_text_websites
 
-__usernames_to_judge_csv_path__ = 'usernames-for-turk.csv'
-__usernames_results_csv_path__ = 'Batch_918246_batch_results.csv'
+__usernames_to_judge_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/usernames-for-turk.csv'
+__usernames_results_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/Batch_918246_batch_results.csv'
 
 __JUDGMENT_THRESHOLD__ = 0.6
 
