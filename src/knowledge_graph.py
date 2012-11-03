@@ -111,7 +111,7 @@ class DBPediaCategories(object):
 
 # Running the script
 
-dbpedia_categories_file = "data/skos_categories_en_10000.nt"
+dbpedia_categories_file = "/Users/elizabethmurnane/git/reslve/data/skos_categories_en_10000.nt"
 # dbpedia_categories_file = "skos_categories_en.nt"
 
 dbpedia_categories = DBPediaCategories(dbpedia_categories_file)
