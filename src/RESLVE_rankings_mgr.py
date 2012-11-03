@@ -1,5 +1,5 @@
-from dataset_generation import prompt_and_print, entity_dataset_mgr, \
-    crosssite_username_dataset_mgr, pkl_util
+from dataset_generation import pkl_util, entity_dataset_mgr, \
+    crosssite_username_dataset_mgr
 from mechanical_turk import unresolved_entities_task
 from ranking_algorithms.article_VSM import Article_ContentBOW_VSM, \
     Article_ID_VSM, Article_TitleBOW_VSM
@@ -18,27 +18,20 @@ def  __get_resolved_entities_cache_path__(site):
 def get_resolved_entities(site, test_mode):
     if test_mode:
         # in test mode, so we want to re-run the ranking algorithms and return the results
-        return __run_all_algorithms__(test_mode)
+        return __run_all_algorithms__(site, test_mode)
        
     # try to read RESLVE system's results from cache; if cache
     # unavailable,  rerun the algorithms and write to cache
     resolved_entities = pkl_util.load_pickle(__resolved_entities_output_str__, 
                                             __get_resolved_entities_cache_path__(site))
     if resolved_entities is None:
-        return __run_all_algorithms__(test_mode)
+        return __run_all_algorithms__(site, test_mode)
     return resolved_entities
 
-def __run_all_algorithms__(test_mode):
+def __run_all_algorithms__(site, test_mode):
     ''' @param test_mode: True if still working on algorithms and boosting
     performance and therefore don't want to cache their rankings in a file yet;
     False if ready to cache algorithms' rankings ''' 
-    
-    # Prompt to ask which site's short text entities we want to disambiguate
-    try:
-        site = prompt_and_print.prompt_for_site()
-    except KeyError:
-        print "Sorry, that is not a recognized site. Exiting."
-        return
     
     # Valid entities and their labels annotated by Mechanical Turk workers
     entities_to_evaluate = entity_dataset_mgr.get_valid_ne_candidates(site)
@@ -48,9 +41,13 @@ def __run_all_algorithms__(test_mode):
         print "No labeled ambiguous entities + candidates available. Run appropriate scripts first."
         return {}
     
+    # entities that have been labeled by human judges
+    entities_to_resolve = [ne_obj for ne_obj in entities_to_evaluate 
+                           if ne_obj.get_entity_id() in entity_judgments]
+    
     # Usernames that do not belong to the same individual on the site and
     # Wikipedia and that we'll use as a baseline for no background knowledge
-    nonmatch_usernames = crosssite_username_dataset_mgr.get_confirmed_nonmatch_usernames()
+    nonmatch_usernames = crosssite_username_dataset_mgr.get_confirmed_nonmatch_usernames(site)
     
     # RESLVE algorithms based on articles' page content
     article_contentBowVsm = Article_ContentBOW_VSM()
@@ -71,14 +68,15 @@ def __run_all_algorithms__(test_mode):
     reslve_algorithms = [article_contentBowVsm, article_idVsm, article_titleBowVsm, 
                          directCategory_idVsm, directCategory_titleBowVsm, 
                          graphCategory_idVsm, graphCategory_titleBowVsm, 
-                         articleContent_bowWsd]
+                         articleContent_bowWsd
+                         ]
     
     resolved_entities = []
-    for ne_obj in entities_to_evaluate:
-        entity_id = ne_obj.get_entity_id()
-        if not entity_id in entity_judgments:
-            continue # this entity wasn't labeled by a human judge
+    for ne_obj in entities_to_resolve:
+        print str(len(resolved_entities))+" out of "+\
+        str(len(entities_to_resolve))+" resolved.."
         
+        entity_id = ne_obj.get_entity_id()
         evaluated_candidates = entity_judgments[entity_id]
         
         # construct a ResolvedEntity object to represent this
@@ -86,13 +84,14 @@ def __run_all_algorithms__(test_mode):
         resolved_entity = ResolvedEntity(ne_obj, evaluated_candidates)   
         resolved_entities.append(resolved_entity)
         
-        for rslve_alg in reslve_algorithms:
-            
+        for reslve_alg in reslve_algorithms:
+            print "Ranking candidates using RESLVE's "+str(reslve_alg.alg_type)+" algorithm..."
+                        
             candidate_titles = ne_obj.get_candidate_titles()
             
             # perform the RESLVE ranking..
-            reslve_ranking_user_match = rslve_alg.rank_candidates(candidate_titles, 
-                                                                  ne_obj.username)
+            reslve_ranking_user_match = reslve_alg.rank_candidates(candidate_titles, 
+                                                                   ne_obj.username)
             
             # perform the same algorithm's ranking again but this time use 
             # a non-match user's interest model as background information, 
@@ -100,10 +99,10 @@ def __run_all_algorithms__(test_mode):
             # semantic background knowledge and thus have lower performance
             random.shuffle(nonmatch_usernames)
             random_nonmatch_username = nonmatch_usernames[0]
-            reslve_ranking_user_nonmatch = rslve_alg.rank_candidates(candidate_titles, 
-                                                                     random_nonmatch_username)
+            reslve_ranking_user_nonmatch = reslve_alg.rank_candidates(candidate_titles, 
+                                                                      random_nonmatch_username)
             
-            resolved_entity.add_reslve_ranking(rslve_alg.alg_id, 
+            resolved_entity.add_reslve_ranking(reslve_alg.alg_id, 
                                                reslve_ranking_user_match, reslve_ranking_user_nonmatch)
 
     if not test_mode:

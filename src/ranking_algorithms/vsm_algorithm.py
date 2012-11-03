@@ -35,6 +35,7 @@ class VSM_Algorithm(RESLVE_Algorithm):
             return {}
         
         # Make corpus
+        print "Building corpus of documents..."
         corpus_docs = []
         user_doc = self.get_user_doc(username)
         corpus_docs.append(user_doc)
@@ -42,6 +43,7 @@ class VSM_Algorithm(RESLVE_Algorithm):
             candidate_doc = self.__get_candidate_doc__(candidate_title)
             corpus_docs.append(candidate_doc)
             
+        print "Creating tf-idf matrix..."
         dictionary = corpora.Dictionary(corpus_docs)
         corpus = DocumentCorpus(corpus_docs, dictionary)
         tfidf = models.TfidfModel(corpus)
@@ -49,8 +51,10 @@ class VSM_Algorithm(RESLVE_Algorithm):
         user_bow = dictionary.doc2bow(user_doc)
         tfidf_user = tfidf[user_bow]
         
+        print "Scoring candidates..."
         scores = {}
         for candidate_title in candidate_titles:
+            print str(len(scores))+" candidates scored out of "+str(len(candidate_titles))
             clean_cand = self.__get_candidate_doc__(candidate_title)
             cand_bow = dictionary.doc2bow(clean_cand)
             tfidf_candidate = tfidf[cand_bow]
