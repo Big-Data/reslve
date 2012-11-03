@@ -7,7 +7,7 @@ __entities_to_judge_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechan
 __entities_results_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/mturk_entity_disambiguation_results_complete.csv'
 __candidate_judgments_output_str__ = "Candidate resources judged by Mechanical Turkers..."
 def  __get_candidate_judgments_cache_path__(site):
-    return '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/resolved_entities_cache_'+str(site.siteName)+'.pkl'
+    return '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/candidate_judgments_cache_'+str(site.siteName)+'.pkl'
 
 def get_entity_judgements(site):
     judgments = pkl_util.load_pickle(__candidate_judgments_output_str__, 
