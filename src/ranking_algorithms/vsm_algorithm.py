@@ -14,9 +14,8 @@ class VSM_Algorithm(RESLVE_Algorithm):
         ''' Should be implemented by subclasses '''
         raise Exception("get_article_representation needs to be implemented "+str(self.alg_type))
     
-    def rank_candidates(self, candidate_objs, username, use_gensim=True):
+    def rank_candidates(self, candidate_titles, username, use_gensim=True):
         # use gensim because it's faster
-        candidate_titles = candidate_objs.keys()
         if use_gensim:
             return self.__rank_VSM_gensim__(candidate_titles, username)
         else:
