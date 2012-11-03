@@ -10,11 +10,11 @@ def  __get_candidate_judgments_cache_path__(site):
     return '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/resolved_entities_cache_'+str(site.siteName)+'.pkl'
 
 def get_entity_judgements(site):
-    resolved_entities = pkl_util.load_pickle(__candidate_judgments_output_str__, 
-                                             __get_candidate_judgments_cache_path__(site)) 
-    if resolved_entities is None:
-        resolved_entities = analyze_entity_judgments(site)
-    return resolved_entities
+    judgments = pkl_util.load_pickle(__candidate_judgments_output_str__, 
+                                     __get_candidate_judgments_cache_path__(site)) 
+    if judgments is None:
+        judgments = analyze_entity_judgments(site)
+    return judgments
 
 def make_tweet_entities_csv_for_turk():
     twitter_site = short_text_websites.get_twitter_site()
@@ -133,7 +133,7 @@ def analyze_entity_judgments(site):
         except:
             continue # just ignore a problematic row    
         
-    print "Cached a total of "+str(len(judgments))+" entities resolved through Turker annotation"
+    print "Cached a total of "+str(len(judgments))+" entities judged by human Mechanical Turk annotators"
     pkl_util.write_pickle(__candidate_judgments_output_str__, judgments, __get_candidate_judgments_cache_path__(site))
     return judgments
 
