@@ -1,11 +1,20 @@
 from dataset_generation import entity_dataset_mgr, csv_util, pkl_util
 from short_text_sources import short_text_websites
+from wikipedia import wikipedia_api_util
 import random
 
 __entities_to_judge_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/entities-for-turk2.csv'
-
 __entities_results_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/mturk_entity_disambiguation_results_complete.csv'
-__entity_judgments_cache_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/entity_judgments_cache.pkl'
+__candidate_judgments_output_str__ = "Candidate resources judged by Mechanical Turkers..."
+def  __get_candidate_judgments_cache_path__(site):
+    return '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/resolved_entities_cache_'+str(site.siteName)+'.pkl'
+
+def get_entity_judgements(site):
+    resolved_entities = pkl_util.load_pickle(__candidate_judgments_output_str__, 
+                                             __get_candidate_judgments_cache_path__(site)) 
+    if resolved_entities is None:
+        resolved_entities = analyze_entity_judgments(site)
+    return resolved_entities
 
 def make_tweet_entities_csv_for_turk():
     twitter_site = short_text_websites.get_twitter_site()
@@ -49,9 +58,9 @@ def make_tweet_entities_csv_for_turk():
             
         # shuffle candidates so that they don't appear
         # in wikiminer's ranking order and bias the turker
-        candidate_URIs = ne_obj.get_candidate_URIs()
-        random.shuffle(candidate_URIs)
-        choices = candidate_URIs[:] # copy (list slicing)
+        candidate_URLs = ne_obj.get_candidate_wikiURLs()
+        random.shuffle(candidate_URLs)
+        choices = candidate_URLs[:] # copy (list slicing)
             
         # make sure the entity presented to a Turker looks the same as
         # it appears in the short text (ie with the same capitalization)
@@ -77,7 +86,6 @@ def make_tweet_entities_csv_for_turk():
         
     # dump to csv
     csv_util.write_to_spreadsheet(__entities_to_judge_csv_path__, rows)
-    
 def __match_appearance__(surface_form, shorttext_str):
     ''' Seems that Wikipedia Miner sometimes returns an entity 
     capitalized even if it is lowercase in the original string '''
@@ -85,21 +93,10 @@ def __match_appearance__(surface_form, shorttext_str):
         return surface_form.lower()
     return surface_form
 
-def get_entity_judgements():
-    output_str = "Candidate entities judged by Mechanical Turkers..."
-    entity_judgments = pkl_util.load_pickle(output_str, 
-                                            __entity_judgments_cache_path__)
-    if entity_judgments is None:
-        entity_judgments = analyze_entities_judgments(output_str)
-    return entity_judgments
-
-def analyze_entities_judgments(output_str):
-    ''' Handles updating the entities 
-    spreadsheet given new Mechanical Turker evaluations '''
-    print "Updating entities spreadsheet with Mechanical Turker "+\
-    "judgments about correct candidate resources..."
-    
-    judgments = {} # maps { entity ID -> { candidate link -> (num times judged correct, num times judged wrong) }}
+def analyze_entity_judgments(site):
+    ''' Returns a mapping { entity ID -> { candidate link -> 
+    (num turkers judged candidate relevant, num turkers judged it irrelevant) }} '''
+    judgments = {} 
     row_num = 0
     rows_plus_headers = csv_util.query_csv_for_rows(__entities_results_csv_path__, False)
     for row in rows_plus_headers:
@@ -118,9 +115,9 @@ def analyze_entities_judgments(output_str):
                 else:
                     selected_candidates = {}
                     
-                selected_candidate = row[candidate_link_col]
-                if selected_candidate in selected_candidates:
-                    (num_true, num_false) = selected_candidates[selected_candidate]
+                selected_candidate_title = wikipedia_api_util.get_page_title_from_url(row[candidate_link_col])
+                if selected_candidate_title in selected_candidates:
+                    (num_true, num_false) = selected_candidates[selected_candidate_title]
                 else:
                     (num_true, num_false) = (0,0)
                     
@@ -129,37 +126,22 @@ def analyze_entities_judgments(output_str):
                     num_true = num_true+1
                 else:
                     num_false = num_false+1
-                selected_candidates[selected_candidate] = (num_true, num_false)
+                selected_candidates[selected_candidate_title] = (num_true, num_false)
                 judgments[judged_entity_id] = selected_candidates
                     
             row_num = row_num+1    
         except:
             continue # just ignore a problematic row    
         
-    # Get the candidates that workers agreed upon for each entity.
-    # For now, ignoring entities that all workers could not select the same candidate for
-    turker_selected_candidates = {}
-    for entity_id in judgments:
-        agreed_candidates = []
-        candidate_judgments = judgments[entity_id]
-        for candidate_link in candidate_judgments:
-            (num_true, num_false) = candidate_judgments[candidate_link]
-            if num_true > num_false:
-                # TODO need to figure out threshold for agreement. require 
-                # turkers to unanimously select a candidate as correct?
-                agreed_candidates.append(candidate_link)
-        turker_selected_candidates[entity_id] = agreed_candidates
-    
-    print "Cached a total of "+str(len(turker_selected_candidates))+" Turker judgements about ambiguous entities"
-    pkl_util.write_pickle(output_str, turker_selected_candidates, __entity_judgments_cache_path__)
-    
-    return turker_selected_candidates
+    print "Cached a total of "+str(len(judgments))+" entities resolved through Turker annotation"
+    pkl_util.write_pickle(__candidate_judgments_output_str__, judgments, __get_candidate_judgments_cache_path__(site))
+    return judgments
 
 
 prompt_make_or_extract = raw_input("Make entities task for Turkers (A) or analyze completed task (B)? ")
 if 'A'==prompt_make_or_extract or 'a'==prompt_make_or_extract:
     make_tweet_entities_csv_for_turk()
 elif 'B'==prompt_make_or_extract or 'b'==prompt_make_or_extract:
-    get_entity_judgements()
+    analyze_entity_judgments()
 else:
     print "Unrecognized input, exiting."   
