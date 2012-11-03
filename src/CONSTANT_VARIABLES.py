@@ -45,7 +45,10 @@ RESLVE_ArticleTitleBowVsm = 'article_titlebow_vsm_algorithm'
 RESLVE_DirectCategoryIdVsm = 'directcategory_id_vsm_algorithm'
 RESLVE_DirectCategoryTitleBowVsm = 'directcategory_titlebow_vsm_algorithm'
 
-RESLVE_ArticleContentBow_Wsd= 'article_contentbow_wsd_algorithm'
+RESLVE_GraphCategoryIdVsm = 'graphcategory_id_vsm_algorithm'
+RESLVE_GraphCategoryTitleBowVsm = 'graphcategory_titlebow_vsm_algorithm'
+
+RESLVE_ArticleContentBow_Wsd = 'article_contentbow_wsd_algorithm'
 
 
 # Entity types we restrict our sample to. (See http://schema.org/Thing)
