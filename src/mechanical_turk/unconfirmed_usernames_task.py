@@ -9,6 +9,11 @@ __JUDGMENT_THRESHOLD__ = 0.6
 # usernames we evaluated ourselves and have confirmed 
 # belong to the same individual on wikipedia and twitter
 __MANUAL_OVERRIDES_TRUE__ = ['rschen7754', 'bondegezou', 'snowded', 'flameeyes', 'lquilter', 'timtrent', 'hasteur', 'esowteric', 'michaelwuzthere', '1veertje', 'elizium23', 'euchrid', 'theopolisme', 'gavbadger', 'mlpearc', 'jpbowen']
+
+# usernames Turkers said are not the same person but we
+# evaluated ourselves and are not completely unconvinced 
+__MANUAL_OVERRIDES_FALSE_UNCLEAR__ = ['mikheil']
+
 majority_unknown = ['raynevandunem', 'stuartyeates', 'slightsmile', 'Myownworst', 'eeekster', 'merlinme', 'wardmuylaert']
 
 def make_usernames_csv_for_turk():
@@ -75,7 +80,8 @@ def update_usernames_csv_with_judgments():
     
     # Also get usernames that all workers unanimously
     # agreed do NOT belong to a single individual
-    nonmatch_usernames = []
+    unanimous_nonmatch_usernames = []
+    
     for username in judgments:
         
         if username in __MANUAL_OVERRIDES_TRUE__:
@@ -91,17 +97,19 @@ def update_usernames_csv_with_judgments():
         elif evaluation.get_number_true_evals()>0:
             conflicting_judgments.append(username)
             
-        if (evaluation.get_number_false_evals()>0 and
-            evaluation.get_number_true_evals()==0 and 
-            evaluation.get_number_unknown_evals()==0):
-            nonmatch_usernames.append(username)
-        
         # Each username given to 5 turkers to evaluate. 
         if (evaluation.get_number_true_evals()>0 and 
             evaluation.get_number_false_evals()==0 and 
             evaluation.get_number_unknown_evals()==0):
             # all turkers unanimously confirmed this username
             unanimous_confirmed_usernames.append(username)
+            
+        if (evaluation.get_number_false_evals()>0 and
+            evaluation.get_number_true_evals()==0 and 
+            evaluation.get_number_unknown_evals()==0 and
+            not username.lower() in __MANUAL_OVERRIDES_FALSE_UNCLEAR__):
+            unanimous_nonmatch_usernames.append(username)
+        
     print "Judged "+str(len(judgments))+" usernames"
     print "Likely matches"+str(len(likely_usernames))
     print "Conflicting judgments:"+str(conflicting_judgments) 
@@ -110,7 +118,7 @@ def update_usernames_csv_with_judgments():
     crosssite_username_dataset_mgr.update_confirmed_positive_usernames(twitter_site, likely_usernames)
     print "Updated cross-site-usernames spreadsheet to reflect majority positive confirmations"
     
-    crosssite_username_dataset_mgr.update_confirmed_negative_usernames(twitter_site, nonmatch_usernames)
+    crosssite_username_dataset_mgr.update_confirmed_negative_usernames(twitter_site, unanimous_nonmatch_usernames)
     print "Updated cross-site-usernames spreadsheet to reflect unanimous negative confirmations"
 
         
