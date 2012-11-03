@@ -12,11 +12,18 @@ class ResolvedEntity():
         self.labeled_candidates = labeled_candidates
         self.reslve_rankings = {}
         
-    def add_reslve_ranking(self, alg_id, cand_score_map):
-        self.reslve_rankings[alg_id] = cand_score_map
+    def add_reslve_ranking(self, alg_id, ranking_usermatch, ranking_user_nonmatch):
+        ''' 
+        @param ranking_usermatch: a mapping from candidate title -> score according 
+        to the running the RESLVE algorithm with the given id and giving it the 
+        usermodel of the person who authored the entity
+        @param ranking_user_nonmatch: a mapping from candidate title -> score according 
+        to the running the RESLVE algorithm with the given id and giving it the 
+        usermodel of the person who DID NOT author the entity '''
+        self.reslve_rankings[alg_id] = (ranking_usermatch, ranking_user_nonmatch)
         
-    ''' Tests whether various rankings are correct, ie whether
-        they agree with the human annotator judgments) '''
+    ''' Tests whether various rankings are correct, ie
+        whether they agree with the human judges) '''
     def is_reslve_correct(self, alg_id):
         return self.__is_correct__(self.get_top_candidates_reslve(alg_id))
     def is_baseline_wikiminer_correct(self):
@@ -36,6 +43,10 @@ class ResolvedEntity():
         return False
         
     def get_unanimous_candidates_goldstandard(self):
+        ''' Returns the candidates that workers agreed upon as 
+        relevant for this entity. Currently, requiring all workers
+        to unanimously agree (ie must have all turkers label a candidate
+        as relevant and no turkers label it as not relevant). '''
         unanimous_candidates = []
         for candidate_title in self.labeled_candidates:
             judgment = self.labeled_candidates[candidate_title]
