@@ -3,6 +3,7 @@ Represents an ambiguous surface form detected by wikiminer in a short text on th
 '''
 from CONSTANT_VARIABLES import BASELINE_DbpediaSpotlight
 from dataset_generation import nltk_extraction_dataset_mgr
+from wikipedia import wikipedia_api_util
 import text_util
 
 class NamedEntity:
@@ -91,15 +92,23 @@ class NamedEntity:
         return True
     
     def get_candidate_titles(self):
-        ''' Returns the URIs of all the candidate resources 
+        ''' Returns the titles of all the candidate resources 
         detected by wikipedia miner and/or dbpedia spotlight '''
         wikiminer_cand_objs = self.wikipedia_miner_ranking
         dbpedia_cand_objs = self.dbpedia_spotlight_ranking
         
-        wikiminer_cand_uris = set([candidate_obj.title for candidate_obj in wikiminer_cand_objs.values()])
-        dbpedia_cand_uris = set([candidate_obj.title for candidate_obj in dbpedia_cand_objs.values()])
-        candidate_URIs = list(wikiminer_cand_uris.union(dbpedia_cand_uris))
-        return candidate_URIs   
+        wikiminer_cand_titles = set([candidate_obj.title for candidate_obj in wikiminer_cand_objs.values()])
+        dbpedia_cand_titles = set([candidate_obj.title for candidate_obj in dbpedia_cand_objs.values()])
+        candidate_titles = list(wikiminer_cand_titles.union(dbpedia_cand_titles))
+        return candidate_titles   
+    
+    def get_candidate_wikiURLs(self):
+        ''' Returns the wikipedia page URLs of all the candidate resources 
+        detected by wikipedia miner and/or dbpedia spotlight '''
+        candidate_titles = self.get_candidate_titles()
+        candidate_URLs = [wikipedia_api_util.get_wikipedia_page_url(candidate_title) 
+                          for candidate_title in candidate_titles]
+        return candidate_URLs
     
     
 class CandidateResource:
