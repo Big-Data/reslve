@@ -37,6 +37,10 @@ __VALUE_CONFIRMED_NEGATIVE__ = 'CONFIRMED_NEGATIVE'
 __VALUE_CONFIRMED_UNKNOWN__ = 'CONFIRMED_UNKNOWN' 
 # if not evaluated by any human
 __VALUE_UNCONFIRMED__ = 'UNCONFIRMED' 
+
+# users whose short texts aren't in English (and so we want to ignore)
+__NON_ENGLISH__ = ['eraserhead1', 'speedfish', 'keresaspa', 'jaga']
+
 ###########################################################
 
 def get_confirmed_usernames(site):
@@ -49,10 +53,11 @@ def get_confirmed_nonmatch_usernames(site):
     return __get_usernames__(site, __VALUE_CONFIRMED_NEGATIVE__) 
 def __get_usernames__(site, confirm_value):
     usernames_csv_path = __get_usernames_csv_path__(site)
-    return csv_util.query_csv_for_rows_with_value(usernames_csv_path, 
-                                                  COLUMN_USERNAME, 
-                                                  __COLUMN_SAME_INDIVIDUAL__, 
-                                                confirm_value)    
+    usernames = csv_util.query_csv_for_rows_with_value(usernames_csv_path, 
+                                                       COLUMN_USERNAME, 
+                                                       __COLUMN_SAME_INDIVIDUAL__, 
+                                                       confirm_value)    
+    return [username for username in usernames if username not in __NON_ENGLISH__]
 
 def get_usernames_to_evaluate_mturk(site):
     ''' Returns the usernames that humans need to manually confirm belong 
