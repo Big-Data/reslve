@@ -8,14 +8,14 @@ from ranking_algorithms.direct_categories import DirectCategory_ID_VSM, \
     DirectCategory_TitleBOW_VSM
 from ranking_algorithms.graph_categories import CategoryGraph_ID_VSM, \
     CategoryGraph_TitleBOW_VSM
-from results.candidate_rankings import ResolvedEntity
+from results.Resolved_Entity import ResolvedEntity
 import random
 
 __resolved_entities_output_str__ = "Candidate resources judged by Mechanical Turkers..."
 def  __get_resolved_entities_cache_path__(site):
     return '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/resolved_entities_cache_'+str(site.siteName)+'.pkl'
 
-def get_resolved_entities_cache(site, test_mode):
+def get_resolved_entities(site, test_mode):
     if test_mode:
         # in test mode, so we want to re-run the ranking algorithms and return the results
         return __run_all_algorithms__(test_mode)
