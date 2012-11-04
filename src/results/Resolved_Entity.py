@@ -71,7 +71,13 @@ class ResolvedEntity():
             cand_score_map = self.reslve_rankings[alg_id][tuple_index]
         except:
             cand_score_map = {}
-        return self.__get_top_candidates__(cand_score_map)
+        reslve_top = self.__get_top_candidates__(cand_score_map)
+        if cand_score_map.get(reslve_top[0]) > 0:
+            return reslve_top
+        # reslve failed to assign a score so choose wikipedia's or dbpedia's
+        # top ranked candidate, depending on which service has higher probability
+        best_service_top = self.get_most_confident_baseline_service()
+        return [best_service_top] # expects a list to be returned
     
     def get_top_candidates_baseline_random(self):
         ''' From the ambiguous entity's set of candidate resources, randomly select one. '''
@@ -88,22 +94,60 @@ class ResolvedEntity():
     def get_top_candidates_baseline_dbpedia(self):
         return self.__get_top_candidates_baseline_service__(self.ne_obj.dbpedia_spotlight_ranking)
     def __get_top_candidates_baseline_service__(self, cand_obj_ranking):
-        service_ranked_objs = cand_obj_ranking # cand_title -> CandidateResource
+        service_ranked_scores = self.__get_baseline_service_candidate_scores__(cand_obj_ranking)
+        return self.__get_top_candidates__(service_ranked_scores)        
+    def __get_baseline_service_candidate_scores__(self, service_ranked_objs):
+        '''@param service_ranked_objs:  cand_title -> CandidateResource '''
         service_ranked_scores = {}
         for cand_title in service_ranked_objs:
             cand_score = service_ranked_objs[cand_title].get_score()
-            service_ranked_scores[cand_title] = cand_score
-        return self.__get_top_candidates__(service_ranked_scores)        
+            service_ranked_scores[cand_title] = cand_score        
+        return service_ranked_scores
     
+    def get_most_confident_baseline_service(self):
+        wikiminer_ranking = self.ne_obj.wikipedia_miner_ranking
+        dbpedia_ranking = self.ne_obj.dbpedia_spotlight_ranking        
+        if len(wikiminer_ranking)==0:
+            return self.get_top_candidates_baseline_dbpedia()[0]
+        if len(dbpedia_ranking)==0:
+            return self.get_top_candidates_baseline_wikiminer()[0]
+            
+        # they can't both be empty or else we wouldn't even be analyzing
+        # this entity, so the fact we reached this point means they both
+        # have a ranking and we want to select the top ranked candidate
+        # between the two services with the highest probability..
+        
+        wikiminer_cand_scores = self.__get_baseline_service_candidate_scores__(wikiminer_ranking)
+        sorted_wikiminer = self.__get_sorted_candidate_scores__(wikiminer_cand_scores)
+        wikiminer_top_cand_title = sorted_wikiminer.keys()[0]
+        top_wikiminer_score = sorted_wikiminer[wikiminer_top_cand_title]
+        
+        dbpedia_cand_scores = self.__get_baseline_service_candidate_scores__(dbpedia_ranking)
+        sorted_dbpedia = self.__get_sorted_candidate_scores__(dbpedia_cand_scores)
+        dbpedia_top_cand_title = sorted_dbpedia.keys()[0]
+        top_dbpedia_score = sorted_dbpedia[dbpedia_top_cand_title]
+        
+        if top_wikiminer_score>=1.0 or top_dbpedia_score>=1.0:
+            # they're supposed to be probabilities, so this should not happen..
+            raise
+        
+        if top_wikiminer_score > top_dbpedia_score:
+            return wikiminer_top_cand_title
+        elif top_dbpedia_score > top_wikiminer_score:
+            return dbpedia_top_cand_title
+        else:
+            # they're equally confident so select one at random..
+            both = [wikiminer_top_cand_title, dbpedia_top_cand_title]
+            random.shuffle(both)
+            return both[0]
+            
     def __get_top_candidates__(self, candidate_scores):
         ''' Returns the candidate with the highest score in the given map. 
         If more than one candidate ties with the same score, returns them all. '''
         top_candidates = []
         if len(candidate_scores)==0:
             return top_candidates
-        if not isinstance(candidate_scores, OrderedDict):
-            # sort scores
-            candidate_scores = OrderedDict(sorted(candidate_scores.iteritems(), key=operator.itemgetter(1), reverse=True))
+        candidate_scores = self.__get_sorted_candidate_scores__(candidate_scores)
         top_score = candidate_scores.items()[0][1]
         for candidate_title in candidate_scores:
             candidate_score = candidate_scores[candidate_title]
@@ -111,3 +155,10 @@ class ResolvedEntity():
                 # a tie with multiple candidates having same sim score
                 top_candidates.append(candidate_title)
         return top_candidates
+    def __get_sorted_candidate_scores__(self, candidate_scores):
+        if len(candidate_scores)==0:
+            return {}
+        if not isinstance(candidate_scores, OrderedDict):
+            # sort scores
+            candidate_scores = OrderedDict(sorted(candidate_scores.iteritems(), key=operator.itemgetter(1), reverse=True))
+        return candidate_scores
