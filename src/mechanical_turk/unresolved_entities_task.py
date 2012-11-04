@@ -1,20 +1,10 @@
-from dataset_generation import entity_dataset_mgr, csv_util, pkl_util
+from dataset_generation import entity_dataset_mgr, csv_util
 from short_text_sources import short_text_websites
 from wikipedia import wikipedia_api_util
 import random
 
 __entities_to_judge_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/entities-for-turk2.csv'
 __entities_results_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/mturk_entity_disambiguation_results_complete.csv'
-__candidate_judgments_output_str__ = "Candidate resources judged by Mechanical Turkers..."
-def  __get_candidate_judgments_cache_path__(site):
-    return '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/candidate_judgments_cache_'+str(site.siteName)+'.pkl'
-
-def get_entity_judgements(site):
-    judgments = pkl_util.load_pickle(__candidate_judgments_output_str__, 
-                                     __get_candidate_judgments_cache_path__(site)) 
-    if judgments is None:
-        judgments = analyze_entity_judgments(site)
-    return judgments
 
 def make_tweet_entities_csv_for_turk():
     twitter_site = short_text_websites.get_twitter_site()
@@ -134,7 +124,7 @@ def analyze_entity_judgments(site):
             continue # just ignore a problematic row    
         
     print "Cached a total of "+str(len(judgments))+" entities judged by human Mechanical Turk annotators"
-    pkl_util.write_pickle(__candidate_judgments_output_str__, judgments, __get_candidate_judgments_cache_path__(site))
+    entity_dataset_mgr.save_entity_judgements(judgments, site)
     return judgments
 
 
