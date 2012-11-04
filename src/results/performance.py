@@ -69,10 +69,13 @@ def compare_ranking_precision(site):
         print "RESLVE nonmatch baseline using "+alg_id+" precision: "+str(nonmatch_baseline_accuracy)
         
         # improvement achieved by incorporating the user interest model
-        matching_user_improvement = float(reslve_correct-nonmatch_baseline_correct)/float(nonmatch_baseline_correct)
-        print "Improvement boost by incorporating user interest model into RESLVE "+\
-        alg_id+" improvement: "+str(matching_user_improvement)
-        
+        if nonmatch_baseline_correct==0:
+            improvement_str =  "Infinite (non match baseline failed to correctly resolve any entity)"
+        else:
+            matching_user_improvement = float(reslve_correct-nonmatch_baseline_correct)/float(nonmatch_baseline_correct)
+            improvement_str = str(matching_user_improvement)
+        print "Improvement boost by incorporating user interest model into RESLVE's "+\
+        str(alg_id)+": "+str(improvement_str)
     
 # Prompt to ask which site's short text entities we want to disambiguate
 try:
