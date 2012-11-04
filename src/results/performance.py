@@ -19,6 +19,7 @@ def compare_ranking_precision(site):
     # the total number of entities for which our algorithms and the 
     # baseline ranking techniques selected the correct candidate
     reslve_algs_correct = defaultdict(int) # alg id -> # times correct
+    nonmatch_algs_baseline_correct = defaultdict(int)
     wikiminer_correct = 0
     dbpedia_correct = 0
     random_correct = 0
@@ -33,6 +34,8 @@ def compare_ranking_precision(site):
         for alg_id in resolved_entity.reslve_rankings.keys():
             if resolved_entity.is_reslve_correct(alg_id):
                 reslve_algs_correct[alg_id] = reslve_algs_correct[alg_id]+1
+            if resolved_entity.is_baseline_reslve_nonmatch_correct(alg_id):
+                nonmatch_algs_baseline_correct[alg_id] = nonmatch_algs_baseline_correct[alg_id]+1
         if resolved_entity.is_baseline_wikiminer_correct():
             wikiminer_correct = wikiminer_correct+1
         if resolved_entity.is_baseline_dbpedia_correct():
@@ -60,6 +63,16 @@ def compare_ranking_precision(site):
         reslve_correct = reslve_algs_correct[alg_id]
         reslve_accuracy = float(reslve_correct)/float(total_evaluated)
         print "RESLVE "+alg_id+" precision: "+str(reslve_accuracy)
+        
+        nonmatch_baseline_correct = nonmatch_algs_baseline_correct[alg_id]
+        nonmatch_baseline_accuracy = float(nonmatch_baseline_correct)/float(total_evaluated)
+        print "RESLVE nonmatch baseline using "+alg_id+" precision: "+str(nonmatch_baseline_accuracy)
+        
+        # improvement achieved by incorporating the user interest model
+        matching_user_improvement = float(reslve_correct-nonmatch_baseline_correct)/float(nonmatch_baseline_correct)
+        print "Improvement boost by incorporating user interest model into RESLVE "+\
+        alg_id+" improvement: "+str(matching_user_improvement)
+        
     
 # Prompt to ask which site's short text entities we want to disambiguate
 try:

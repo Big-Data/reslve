@@ -1,6 +1,5 @@
 from dataset_generation import pkl_util, entity_dataset_mgr, \
     crosssite_username_dataset_mgr
-from mechanical_turk import unresolved_entities_task
 from ranking_algorithms.article_VSM import Article_ContentBOW_VSM, \
     Article_ID_VSM, Article_TitleBOW_VSM
 from ranking_algorithms.article_WSD import Article_ContentBOW_WSD
@@ -23,7 +22,7 @@ def get_resolved_entities(site, test_mode):
     # try to read RESLVE system's results from cache; if cache
     # unavailable,  rerun the algorithms and write to cache
     resolved_entities = pkl_util.load_pickle(__resolved_entities_output_str__, 
-                                            __get_resolved_entities_cache_path__(site))
+                                             __get_resolved_entities_cache_path__(site))
     if resolved_entities is None:
         return __run_all_algorithms__(site, test_mode)
     return resolved_entities
@@ -35,7 +34,7 @@ def __run_all_algorithms__(site, test_mode):
     
     # Valid entities and their labels annotated by Mechanical Turk workers
     entities_to_evaluate = entity_dataset_mgr.get_valid_ne_candidates(site)
-    entity_judgments = unresolved_entities_task.get_entity_judgements(site)
+    entity_judgments = entity_dataset_mgr.get_entity_judgements(site)
     if (entities_to_evaluate is None or len(entities_to_evaluate)==0 or 
         entity_judgments is None or len(entity_judgments))==0:
         print "No labeled ambiguous entities + candidates available. Run appropriate scripts first."
@@ -55,8 +54,8 @@ def __run_all_algorithms__(site, test_mode):
     article_titleBowVsm = Article_TitleBOW_VSM()
     
     # RESLVE algorithms based on articles' direct categories
-    directCategory_idVsm = DirectCategory_ID_VSM
-    directCategory_titleBowVsm = DirectCategory_TitleBOW_VSM
+    directCategory_idVsm = DirectCategory_ID_VSM()
+    directCategory_titleBowVsm = DirectCategory_TitleBOW_VSM()
     
     # RESLVE algorithms based on articles' full category hierarchy
     graphCategory_idVsm = CategoryGraph_ID_VSM()
@@ -105,6 +104,6 @@ def __run_all_algorithms__(site, test_mode):
             resolved_entity.add_reslve_ranking(reslve_alg.alg_id, 
                                                reslve_ranking_user_match, reslve_ranking_user_nonmatch)
 
-    if not test_mode:
-        # Cache resolved entities
-        pkl_util.write_pickle(__resolved_entities_output_str__, resolved_entities, __get_resolved_entities_cache_path__(site))
+    # Cache resolved entities
+    pkl_util.write_pickle(__resolved_entities_output_str__, resolved_entities, __get_resolved_entities_cache_path__(site))
+    return resolved_entities

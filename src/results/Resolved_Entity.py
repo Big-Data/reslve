@@ -25,7 +25,9 @@ class ResolvedEntity():
     ''' Tests whether various rankings are correct, ie
         whether they agree with the human judges) '''
     def is_reslve_correct(self, alg_id):
-        return self.__is_correct__(self.get_top_candidates_reslve(alg_id))
+        return self.__is_correct__(self.get_top_candidates_reslve(alg_id, True))
+    def is_baseline_reslve_nonmatch_correct(self, alg_id):
+        return self.__is_correct__(self.get_top_candidates_reslve(alg_id, False))
     def is_baseline_wikiminer_correct(self):
         return self.__is_correct__(self.get_top_candidates_baseline_wikiminer())
     def is_baseline_dbpedia_correct(self):
@@ -56,9 +58,17 @@ class ResolvedEntity():
                 unanimous_candidates.append(candidate_title)
         return unanimous_candidates
 
-    def get_top_candidates_reslve(self, alg_id):
+    def get_top_candidates_reslve(self, alg_id, match_or_nonmatch):
+        ''' @param match_or_nonmatch: True if RESLVE algorithm that uses
+        matching user's interest model, False if RESLVE algorithm that uses
+        random non-matching user's interest model that serves as a baseline '''
         try:
-            cand_score_map = self.reslve_rankings[alg_id]
+            # reslve ranking is a tuple (matching user model, nonmatching usermodel baseline)
+            if match_or_nonmatch:
+                tuple_index = 0
+            else:
+                tuple_index = 1
+            cand_score_map = self.reslve_rankings[alg_id][tuple_index]
         except:
             cand_score_map = {}
         return self.__get_top_candidates__(cand_score_map)
