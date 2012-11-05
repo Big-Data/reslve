@@ -1,4 +1,5 @@
-from dataset_generation import entity_dataset_mgr, csv_util
+from dataset_generation import entity_dataset_mgr, csv_util, prompt_and_print
+from nltk.compat import defaultdict
 from short_text_sources import short_text_websites
 from wikipedia import wikipedia_api_util
 import random
@@ -87,6 +88,11 @@ def analyze_entity_judgments(site):
     ''' Returns a mapping { entity ID -> { candidate link -> 
     (num turkers judged candidate relevant, num turkers judged it irrelevant) }} '''
     judgments = {} 
+    
+    # a mapping of turker id -> {candidate title -> true/false judgment} 
+    # for each candidate annotated by the turker
+    annotator_decisions = defaultdict(list)
+    
     row_num = 0
     rows_plus_headers = csv_util.query_csv_for_rows(__entities_results_csv_path__, False)
     for row in rows_plus_headers:
@@ -95,7 +101,7 @@ def analyze_entity_judgments(site):
                 entity_id_col = row.index('Input.entity_id')
                 candidate_link_col = row.index('Input.candidate_link') 
                 
-                #turkerID_col = row.index('WorkerId')
+                turkerID_col = row.index('WorkerId')
                 answer_col = row.index('Answer.Q1')
             else:
                 judged_entity_id = row[entity_id_col]
@@ -118,10 +124,16 @@ def analyze_entity_judgments(site):
                     num_false = num_false+1
                 selected_candidates[selected_candidate_title] = (num_true, num_false)
                 judgments[judged_entity_id] = selected_candidates
+                
+                turkerID = row[turkerID_col]
+                annotator_decisions[turkerID].append({selected_candidate_title:judgment})
                     
             row_num = row_num+1    
         except:
-            continue # just ignore a problematic row    
+            continue # just ignore a problematic row   
+        
+    # Cache each annotator's decisions for later inter-rater agreement calculations
+    entity_dataset_mgr.save_annotator_decisions(annotator_decisions, site)   
         
     print "Cached a total of "+str(len(judgments))+" entities judged by human Mechanical Turk annotators"
     entity_dataset_mgr.save_entity_judgements(judgments, site)
@@ -132,6 +144,7 @@ prompt_make_or_extract = raw_input("Make entities task for Turkers (A) or analyz
 if 'A'==prompt_make_or_extract or 'a'==prompt_make_or_extract:
     make_tweet_entities_csv_for_turk()
 elif 'B'==prompt_make_or_extract or 'b'==prompt_make_or_extract:
-    analyze_entity_judgments()
+    site = prompt_and_print.prompt_for_site()
+    analyze_entity_judgments(site)
 else:
     print "Unrecognized input, exiting."   

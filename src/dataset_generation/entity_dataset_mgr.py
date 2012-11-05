@@ -46,7 +46,9 @@ def __get_detected_entities_output_str__(site):
 __candidate_judgments_output_str__ = "Candidate resources judged by Mechanical Turkers..."
 def  __get_candidate_judgments_cache_path__(site):
     return '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/candidate_judgments_cache_'+str(site.siteName)+'.pkl'
-
+__annotator_output_str__ = "Labels (relevant vs not relevant) assigned to candidates by Turker annotators..."
+def __get_annotator_cache_path__(site):
+    return '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/annotator_decisions_cache_'+str(site.siteName)+'.pkl'
 
 def get_entity_judgements(site):
     judgments = pkl_util.load_pickle(__candidate_judgments_output_str__, 
@@ -56,6 +58,16 @@ def get_entity_judgements(site):
     return judgments
 def save_entity_judgements(judgments, site):
     pkl_util.write_pickle(__candidate_judgments_output_str__, judgments, __get_candidate_judgments_cache_path__(site))
+    
+def get_annotator_decisions(site):
+    ''' Loads the cache of turker IDs and their candidate decisions
+    sp we can compute measures of inter-annotator agreement. '''
+    annotator_decisions = pkl_util.load_pickle(__annotator_output_str__, __get_annotator_cache_path__(site)) 
+    if annotator_decisions is None:
+        print "No cache of annotator decisions available. Run unresolved_entities_task.py first."
+    return annotator_decisions    
+def save_annotator_decisions(annotator_decisions, site):
+    pkl_util.write_pickle(__annotator_output_str__, annotator_decisions, __get_annotator_cache_path__(site))
 
 def get_num_cached_ne_objs(site):
     ne_objs = pkl_util.load_pickle(__get_detected_entities_output_str__(site),
