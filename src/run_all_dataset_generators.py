@@ -1,5 +1,6 @@
 from dataset_generation import prompt_and_print, crosssite_username_dataset_mgr, \
-    wikipedia_edits_dataset_mgr, short_text_dataset_mgr, entity_dataset_mgr
+    wikipedia_edits_dataset_mgr, short_text_dataset_mgr, entity_dataset_mgr, \
+    nltk_extraction_dataset_mgr
 
 def build_all_datasets():
     
@@ -35,6 +36,10 @@ def build_all_datasets():
      
     # Get the shorttexts fetched from the given site   
     shorttext_rows = short_text_dataset_mgr.get_shorttext_rows(site)
+    
+    # Cache the nouns and Named Entities detected by nltk, which are used when validating entities later
+    if prompt_and_print.prompt_for_cache_nltk_entities(site):
+        nltk_extraction_dataset_mgr.extract_entities(shorttext_rows, site)
         
     # Build the spreadsheet of named entities that are
     # contained within these short texts on the given site
