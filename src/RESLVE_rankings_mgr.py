@@ -43,6 +43,8 @@ def __run_all_algorithms__(site, test_mode):
     # entities that have been labeled by human judges
     entities_to_resolve = [ne_obj for ne_obj in entities_to_evaluate 
                            if ne_obj.get_entity_id() in entity_judgments]
+    print str(len(entities_to_evaluate))+" and "+str(len(entity_judgments))+\
+    " judgments available, resulting in "+str(len(entities_to_resolve))+" entities to resolve"
     
     # Usernames that do not belong to the same individual on the site and
     # Wikipedia and that we'll use as a baseline for no background knowledge
@@ -103,6 +105,9 @@ def __run_all_algorithms__(site, test_mode):
             
             resolved_entity.add_reslve_ranking(reslve_alg.alg_id, 
                                                reslve_ranking_user_match, reslve_ranking_user_nonmatch)
+        
+        # cache intermittently in case we need to exit..    
+        pkl_util.write_pickle(__resolved_entities_output_str__, resolved_entities, __get_resolved_entities_cache_path__(site))
 
     # Cache resolved entities
     pkl_util.write_pickle(__resolved_entities_output_str__, resolved_entities, __get_resolved_entities_cache_path__(site))
