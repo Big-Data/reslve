@@ -4,7 +4,7 @@ from short_text_sources import short_text_websites
 from wikipedia import wikipedia_api_util
 import random
 
-__entities_to_judge_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/entities-for-turk_Twitter2.csv'
+__entities_to_judge_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/entities-for-turk_Twitter.csv'
 __entities_results_csv_path__ = '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/mturk_entity_disambiguation_results_complete.csv'
 
 def make_tweet_entities_csv_for_turk():
