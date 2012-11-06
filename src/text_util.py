@@ -72,12 +72,23 @@ def format_text_for_NER(raw_shorttext, site=None):
 #    return (prop_nonenglish<.75)
 
 def is_unwanted_automated_msg(surface_form, short_text):
-    # unwanted message like "I uploaded a YouTube video http://..." where entity is "video"
+    ''' Determine if this surface form conveys little semantic  
+    information in an automated tweet that will merely be redundant. '''
+    
+    # unwanted entity like "video" in a msg like "I uploaded a YouTube video http://..."
     is_unwanted_youtube = (surface_form=='video' and (('I uploaded a' in short_text or 
                                                        'I favorited a' in short_text or 
                                                        'I liked a' in short_text) and
                                                       'YouTube video' in short_text))
-    return is_unwanted_youtube
+    if is_unwanted_youtube:
+        return True
+    
+    # unwanted entity like "sunny" in a msg like "Miami's weather forecast for tomorrow: Sunny"
+    is_unwanted_weather = (surface_form.lower()=='sunny' and (('weather forecast for tomorrow:' in short_text)))
+    if is_unwanted_weather:
+        return True
+    
+    return False
 
 def get_nouns(raw_text, site):
     nouns = []
