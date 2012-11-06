@@ -12,7 +12,7 @@ import random
 
 __resolved_entities_output_str__ = "Candidate resources judged by Mechanical Turkers..."
 def  __get_resolved_entities_cache_path__(site):
-    return '/Users/elizabethmurnane/git/reslve/data/mechanical_turk/resolved_entities_cache_'+str(site.siteName)+'.pkl'
+    return '/Users/elizabethmurnane/git/reslve/data/pickles/resolved_entities_cache_'+str(site.siteName)+'.pkl'
 
 def get_resolved_entities(site, test_mode):
     if test_mode:
