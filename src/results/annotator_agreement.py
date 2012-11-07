@@ -7,6 +7,7 @@ Values of kappa between 2/3 and 1.0 generally considered acceptable.
 from dataset_generation import entity_dataset_mgr
 from nltk.metrics.agreement import AnnotationTask
 from segeval.agreement import Kappa, Pi, Bias
+#from segeval.data import Dataset
 import random
 import segeval.agreement
 
@@ -134,6 +135,9 @@ def compute_annotator_agreement_libs(site):
     raters = ['rater1','rater2','rater3']
     judgments = entity_dataset_mgr.get_entity_judgements(site)
     
+    true_label = 'true_label'
+    false_label = 'false_label'
+    
     # iterate through the rater's labels to put them into the 
     # proper data formats that the different agreement libs require
     for entity_id in judgments:
@@ -147,9 +151,9 @@ def compute_annotator_agreement_libs(site):
             # check for the case when all raters choose the same label
             unanimous_decision = None
             if num_true==0:
-                unanimous_decision = 'false_label'
+                unanimous_decision = false_label
             elif num_false==0:
-                unanimous_decision = 'true_label'
+                unanimous_decision = true_label
             if unanimous_decision!=None:
                 # all raters labeled this candidate either
                 # unanimously with true or unanimously with false
@@ -172,14 +176,14 @@ def compute_annotator_agreement_libs(site):
                 random.shuffle(raters_copy)
                 segeval_rater_map = {}
                 for rater in raters_copy[:num_true]:
-                    nltk_dataArray.append((rater, candidate_title, 'true_label')) # [(rater, item, label)...]
-                    segeval_rater_map[rater] = ['true_label'] # { coder -> [labels] } 
+                    nltk_dataArray.append((rater, candidate_title, true_label)) # [(rater, item, label)...]
+                    segeval_rater_map[rater] = [true_label] # { coder -> [labels] } 
                 for rater in raters_copy[num_true:]:
-                    nltk_dataArray.append((rater, candidate_title, 'false_label')) # [(rater, item, label)...]
-                    segeval_rater_map[rater] = ['false_label'] # { coder -> [labels] } 
+                    nltk_dataArray.append((rater, candidate_title, false_label)) # [(rater, item, label)...]
+                    segeval_rater_map[rater] = [false_label] # { coder -> [labels] } 
                     
     compute_annotator_agreement_nltkmetrics(nltk_dataArray)
-    compute_annotator_agreement_segeval(segeval_items_masses)
+    #compute_annotator_agreement_segeval(Dataset(segeval_items_masses))
                     
 def compute_annotator_agreement_nltkmetrics(data_array):
     ''' See http://nltk.org/api/nltk.metrics.html#nltk.metrics.agreement '''
@@ -187,7 +191,7 @@ def compute_annotator_agreement_nltkmetrics(data_array):
     print "####### Agreement coefficients according to NLTK metrics.agreement #######"
     
     t = AnnotationTask(data=data_array)
-    print "Average observed agreement across all coders and items:"+str(t.avg_Ao())
+    print "Average observed agreement across all coders and items: "+str(t.avg_Ao())
     
     print "Cohen's Kappa (Cohen 1960): "+str(t.kappa())
     print "Weighted kappa (Cohen 1968): "+str(t.weighted_kappa())
@@ -209,11 +213,12 @@ def compute_annotator_agreement_segeval(items_masses):
     
     print "Actual (ie, observed or Aa), segmentation agreement without accounting for chance: "+str(segeval.agreement.actual_agreement(items_masses))
     
-    print "Cohen's Kappa (Cohen 1960)"+str(Kappa.cohen_kappa(items_masses))
     print "Fleiss' Kappa (or multi-Kappa) (Davies Fleiss 1982): "+str(Kappa.fleiss_kappa(items_masses))
     
-    print "Scott's pi (Scott 1955): "+str(Pi.scotts_pi(items_masses))
     print "Fleiss' Pi (or multi-Pi) originally proposed (Fleiss 1971): "+str(Pi.fleiss_pi(items_masses))
    
     print "Artstein and Poesio's annotator bias, or B (Artstein Poesio 2008): "+str(Bias.artstein_poesio_bias(items_masses))
     
+    # (applicable for only two coders) 
+    # print "Cohen's Kappa (Cohen 1960)"+str(Kappa.cohen_kappa(items_masses))
+    # print "Scott's pi (Scott 1955): "+str(Pi.scotts_pi(items_masses))
