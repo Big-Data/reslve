@@ -1,5 +1,5 @@
-from dataset_generation import prompt_and_print, entity_dataset_mgr, \
-    crosssite_username_dataset_mgr, nltk_extraction_dataset_mgr
+from dataset_generation import prompt_and_print, crosssite_username_dataset_mgr, \
+    nltk_extraction_dataset_mgr
 from nltk.compat import defaultdict
 from results import annotator_agreement
 import RESLVE_rankings_mgr
@@ -115,8 +115,11 @@ def compare_ranking_precision(site):
         " precision in the difficult cases when Wikipedia Miner and DBPedia Spotlight fail completely."
         
 def eval_annotator_agreement(site):
-    annotator_decisions = entity_dataset_mgr.get_annotator_decisions(site)
-    annotator_agreement.compute_annotator_agreement(annotator_decisions)
+    # our own implementation of some standard agreement metrics
+    annotator_agreement.compute_annotator_agreement(site) 
+    
+    # additional agreement measures using nltk and segeval
+    annotator_agreement.compute_annotator_agreement_libs(site) 
 
     
 # Prompt to ask which site's short text entities we want to disambiguate
