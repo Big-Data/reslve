@@ -46,18 +46,6 @@ GOLD_MechanicalTurker = 'mechanical_turk_judgement'
 BASELINE_WikipediaMiner = 'wikipedia_miner_algorithm'
 BASELINE_DbpediaSpotlight = 'dbpedia_spotlight_algorithm'
 
-RESLVE_ArticleContentBowVsm = 'article_contentbow_vsm_algorithm'
-RESLVE_ArticleIdVsm = 'article_id_vsm_algorithm'
-RESLVE_ArticleTitleBowVsm = 'article_titlebow_vsm_algorithm'
-
-RESLVE_DirectCategoryIdVsm = 'directcategory_id_vsm_algorithm'
-RESLVE_DirectCategoryTitleBowVsm = 'directcategory_titlebow_vsm_algorithm'
-
-RESLVE_GraphCategoryIdVsm = 'graphcategory_id_vsm_algorithm'
-RESLVE_GraphCategoryTitleBowVsm = 'graphcategory_titlebow_vsm_algorithm'
-
-RESLVE_ArticleContentBow_Wsd = 'article_contentbow_wsd_algorithm'
-
 
 def get_RESLVE_algorithm_constructors():
     ''' The constructors of the various RESLVE algorithms

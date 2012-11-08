@@ -1,5 +1,3 @@
-from CONSTANT_VARIABLES import RESLVE_ArticleContentBowVsm, RESLVE_ArticleIdVsm, \
-    RESLVE_ArticleTitleBowVsm
 from ranking_algorithms.vsm_algorithm import VSM_Algorithm
 from wikipedia import wikipedia_api_util
 import text_util
@@ -13,7 +11,7 @@ class Article_ContentBOW_VSM(VSM_Algorithm):
     resource's article page and the BOW of the user's edited articles' pages '''
     
     def __init__(self):
-        VSM_Algorithm.__init__(self, RESLVE_ArticleContentBowVsm, "article Bag-of-Words", "articleBOW-VSM")
+        VSM_Algorithm.__init__(self, 'reslveID_article_contentbow_vsm', "article Bag-of-Words", "articleBOW-VSM")
     
     def get_article_representation(self, article_title):
         ''' Returns a bag of words build from the text content
@@ -32,7 +30,7 @@ class Article_ID_VSM(VSM_Algorithm):
     the user has edited. '''
     
     def __init__(self):
-        VSM_Algorithm.__init__(self, RESLVE_ArticleIdVsm, "article ID", "articleID")
+        VSM_Algorithm.__init__(self, 'reslveID_article_id_vsm', "article ID", "articleID")
     
     def get_article_representation(self, article_title):
         ''' Returns a list containing the id of this article
@@ -47,7 +45,7 @@ class Article_TitleBOW_VSM(VSM_Algorithm):
     overlap with words in titles of articles the user has edited. '''
     
     def __init__(self):
-        VSM_Algorithm.__init__(self, RESLVE_ArticleTitleBowVsm, "article's title BOW", "articleTitleBOW")
+        VSM_Algorithm.__init__(self, 'reslveID_article_titlebow_vsm', "article's title BOW", "articleTitleBOW")
     
     def get_article_representation(self, article_title):
         ''' Returns a bag of words build from the title of the given article.
