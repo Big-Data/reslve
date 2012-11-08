@@ -21,7 +21,7 @@ def run_RESLVE():
     
     alg_num = raw_input("Which RESLVE algorithm do you want to run? "+\
     "\n1=Article Content, 2=Article ID, 3=Article Title, 4=Direct Category ID, "+\
-    "5=Direct Category Title, 6=Category Graph ID, 7=Category Graph Title, 8 = Article Content WSD")
+    "5=Direct Category Title, 6=Category Graph ID, 7=Category Graph Title, 8=Article Content WSD")
     cache_resolved_entities = raw_input("Cache resolved entities? (Y/N): ")
     
     RESLVE_alg = reslve_algorithms[alg_num]()
@@ -31,7 +31,6 @@ def run_RESLVE():
     performance.compare_ranking_precision(resolved_entities)
     performance.eval_annotator_agreement(site)
     
-
 def __get_RESLVE_algorithm_constructors__():
     ''' The constructors of the various RESLVE algorithms
     that can be used to create a reslve_algorithm object '''
@@ -57,3 +56,5 @@ def __get_RESLVE_algorithm_constructors__():
                          graphCategory_idVsm, graphCategory_titleBowVsm, 
                          articleContent_bowWsd]
     return reslve_algorithms
+
+run_RESLVE()
