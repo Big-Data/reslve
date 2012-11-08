@@ -24,7 +24,7 @@ def run_RESLVE():
     "5=Direct Category Title, 6=Category Graph ID, 7=Category Graph Title, 8=Article Content WSD")
     cache_resolved_entities = raw_input("Cache resolved entities? (Y/N): ")
     
-    RESLVE_alg = reslve_algorithms[alg_num]()
+    RESLVE_alg = reslve_algorithms[int(alg_num)]()
     resolved_entities = RESLVE_rankings_mgr.run_all_algorithms(RESLVE_alg, site, cache_resolved_entities)
 
     # evaluate and compare performance
