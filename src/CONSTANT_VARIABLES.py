@@ -1,11 +1,4 @@
 ####### GLOBAL CONSTANT VARIABLES #######
-from ranking_algorithms.article_VSM import Article_ContentBOW_VSM, \
-    Article_ID_VSM, Article_TitleBOW_VSM
-from ranking_algorithms.article_WSD import Article_ContentBOW_WSD
-from ranking_algorithms.direct_categories import DirectCategory_ID_VSM, \
-    DirectCategory_TitleBOW_VSM
-from ranking_algorithms.graph_categories import CategoryGraph_ID_VSM, \
-    CategoryGraph_TitleBOW_VSM
 
 DEBUG_ON = False
 
@@ -45,34 +38,6 @@ GOLD_MechanicalTurker = 'mechanical_turk_judgement'
 
 BASELINE_WikipediaMiner = 'wikipedia_miner_algorithm'
 BASELINE_DbpediaSpotlight = 'dbpedia_spotlight_algorithm'
-
-
-def get_RESLVE_algorithm_constructors():
-    ''' The constructors of the various RESLVE algorithms
-    that can be used to create a reslve_algorithm object '''
-    
-    # RESLVE algorithms based on articles' page content
-    article_contentBowVsm = Article_ContentBOW_VSM
-    article_idVsm = Article_ID_VSM
-    article_titleBowVsm = Article_TitleBOW_VSM
-    
-    # RESLVE algorithms based on articles' direct categories
-    directCategory_idVsm = DirectCategory_ID_VSM
-    directCategory_titleBowVsm = DirectCategory_TitleBOW_VSM
-    
-    # RESLVE algorithms based on articles' full category hierarchy
-    graphCategory_idVsm = CategoryGraph_ID_VSM
-    graphCategory_titleBowVsm = CategoryGraph_TitleBOW_VSM
-
-    # RESLVE algorithm based on WSD lesk approach
-    articleContent_bowWsd = Article_ContentBOW_WSD
-    
-    reslve_algorithms = [article_contentBowVsm, article_idVsm, article_titleBowVsm, 
-                         directCategory_idVsm, directCategory_titleBowVsm, 
-                         graphCategory_idVsm, graphCategory_titleBowVsm, 
-                         articleContent_bowWsd]
-    return reslve_algorithms
-
 
 # Entity types we restrict our sample to. (See http://schema.org/Thing)
 VALID_RDF_TYPES = ['http://schema.org/CreativeWork',
