@@ -1,14 +1,8 @@
-from dataset_generation import prompt_and_print, crosssite_username_dataset_mgr, \
-    nltk_extraction_dataset_mgr
 from nltk.compat import defaultdict
 from results import annotator_agreement
-import RESLVE_rankings_mgr
 
-def compare_ranking_precision(site):
-    
-    # load cache of ResolvedEntity objects
-    resolved_entities = RESLVE_rankings_mgr.get_resolved_entities(site, True)
-    
+def compare_ranking_precision(resolved_entities):
+
     # the total number of entities we have unanimous annotator judgments for
     total_evaluated = 0
     
@@ -28,15 +22,7 @@ def compare_ranking_precision(site):
     toolkit_failures = 0
     reslve_success_when_toolkits_fail = 0
 
-    crosssite_usernames = crosssite_username_dataset_mgr.get_confirmed_usernames(site)
-    en_lang_users = site.get_en_lang_users(crosssite_usernames)
-    valid_entity_cache = nltk_extraction_dataset_mgr.get_nltk_entity_cache(site)
-    
     for resolved_entity in resolved_entities:
-        
-        if not resolved_entity.ne_obj.is_valid_entity(en_lang_users, valid_entity_cache):
-            continue
-        
         gold_standard_candidates = resolved_entity.get_unanimous_candidates_goldstandard()
         if len(gold_standard_candidates)==0:
             annotator_disagreement = annotator_disagreement+1
@@ -120,12 +106,3 @@ def eval_annotator_agreement(site):
     
     # additional agreement measures using nltk and segeval
     annotator_agreement.compute_annotator_agreement_libs(site) 
-
-    
-# Prompt to ask which site's short text entities we want to disambiguate
-try:
-    site = prompt_and_print.prompt_for_site()
-    compare_ranking_precision(site)
-    eval_annotator_agreement(site)
-except KeyError:
-    print "Sorry, that is not a recognized site. Exiting."
