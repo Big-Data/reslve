@@ -28,7 +28,7 @@ def get_resolved_entities(site, use_cache):
     return resolved_entities
 
 def run_all_algorithms(site, use_cache):
-    ''' @param cache_resolved_entities: False if still working on algorithms and boosting
+    ''' @param use_cache: False if still working on algorithms and boosting
     performance and therefore don't want to cache their rankings in a file yet;
     True if ready to cache algorithms' rankings ''' 
     
