@@ -7,7 +7,7 @@ import RESLVE_rankings_mgr
 def compare_ranking_precision(site):
     
     # load cache of ResolvedEntity objects
-    resolved_entities = RESLVE_rankings_mgr.get_resolved_entities(site, False)
+    resolved_entities = RESLVE_rankings_mgr.get_resolved_entities(site, True)
     
     # the total number of entities we have unanimous annotator judgments for
     total_evaluated = 0

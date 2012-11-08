@@ -75,7 +75,7 @@ def get_binned_entities(site):
     # Get the frequencies of each short text length
     freq_dist = defaultdict(list)
     num_observations = 0
-    resolved_entities = RESLVE_rankings_mgr.get_resolved_entities(site, False)
+    resolved_entities = RESLVE_rankings_mgr.get_resolved_entities(site, True)
     print str(len(resolved_entities))
     for resolved_entity in resolved_entities:
         shorttext_length = len(resolved_entity.ne_obj.shorttext_str)

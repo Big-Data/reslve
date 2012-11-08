@@ -14,23 +14,23 @@ __resolved_entities_output_str__ = "Candidate resources judged by Mechanical Tur
 def  __get_resolved_entities_cache_path__(site):
     return '/Users/elizabethmurnane/git/reslve/data/pickles/resolved_entities_cache_'+str(site.siteName)+'.pkl'
 
-def get_resolved_entities(site, test_mode):
-    if test_mode:
+def get_resolved_entities(site, use_cache):
+    if use_cache:
         # in test mode, so we want to re-run the ranking algorithms and return the results
-        return __run_all_algorithms__(site, test_mode)
+        return run_all_algorithms(site, use_cache)
        
     # try to read RESLVE system's results from cache; if cache
     # unavailable,  rerun the algorithms and write to cache
     resolved_entities = pkl_util.load_pickle(__resolved_entities_output_str__, 
                                              __get_resolved_entities_cache_path__(site))
     if resolved_entities is None:
-        return __run_all_algorithms__(site, test_mode)
+        return run_all_algorithms(site, use_cache)
     return resolved_entities
 
-def __run_all_algorithms__(site, test_mode):
-    ''' @param test_mode: True if still working on algorithms and boosting
+def run_all_algorithms(site, use_cache):
+    ''' @param cache_resolved_entities: False if still working on algorithms and boosting
     performance and therefore don't want to cache their rankings in a file yet;
-    False if ready to cache algorithms' rankings ''' 
+    True if ready to cache algorithms' rankings ''' 
     
     # Valid entities and their labels annotated by Mechanical Turk workers
     entities_to_evaluate = entity_dataset_mgr.get_valid_ne_candidates(site)
@@ -105,10 +105,12 @@ def __run_all_algorithms__(site, test_mode):
             
             resolved_entity.add_reslve_ranking(reslve_alg.alg_id, 
                                                reslve_ranking_user_match, reslve_ranking_user_nonmatch)
-        
         # cache intermittently in case we need to exit..    
-        pkl_util.write_pickle(__resolved_entities_output_str__, resolved_entities, __get_resolved_entities_cache_path__(site))
-
-    # Cache resolved entities
-    pkl_util.write_pickle(__resolved_entities_output_str__, resolved_entities, __get_resolved_entities_cache_path__(site))
+        save_resolved_entities(resolved_entities, site, use_cache)
+            
+    save_resolved_entities(resolved_entities, site, use_cache) # Cache resolved entities
     return resolved_entities
+
+def save_resolved_entities(resolved_entities, site, use_cache):
+    if use_cache:
+        pkl_util.write_pickle(__resolved_entities_output_str__, resolved_entities, __get_resolved_entities_cache_path__(site))
